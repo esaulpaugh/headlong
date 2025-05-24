@@ -85,7 +85,7 @@ final class CharSequenceView implements CharSequence {
         return source.subSequence(start, end).toString();
     }
 
-    public long getFourAscii(int index) {
+    public long getFourCharLong(int index) {
         final int off = start + index;
         return ((long)source.charAt(off) << 48) |
                 ((long)source.charAt(off + 1) << 32) |
@@ -93,7 +93,7 @@ final class CharSequenceView implements CharSequence {
                 source.charAt(off + 3);
     }
 
-    public static long toFourAscii(String s) {
+    public static long fourCharLong(String s) {
         return (long)s.charAt(0) << 48
                 | (long)s.charAt(1) << 32
                 | (long)s.charAt(2) << 16

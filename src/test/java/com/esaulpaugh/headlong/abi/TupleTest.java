@@ -294,6 +294,27 @@ public class TupleTest {
     }
 
     @Test
+    public void testNonAscii() throws Throwable {
+        final Random random = TestUtils.seededRandom();
+        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool" };
+        for (String type : types) {
+            final StringBuilder sb = new StringBuilder("(").append(type).append(')');
+            final int end = sb.length() - 1;
+            for (int x = 1; x < end; x++) {
+                final char ch = sb.charAt(x);
+                for (int n = 0; n < 10; n++) {
+                    final char r = (char) ((random.nextInt() << 8) | ch);
+                    if (r != ch) {
+                        sb.setCharAt(x, r);
+                        assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"", () -> TupleType.parse(sb.toString()));
+                        sb.setCharAt(x, ch);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void testStringFlags() {
         ArrayType<ByteType, Byte, String> none = TupleType.parse(ABIType.FLAGS_NONE, "(string)")
                                                             .<ArrayType<ByteType, Byte, String>>get(0)

@@ -189,10 +189,10 @@ public final class TypeFactory {
                 case '(': argEnd = nextTerminator(rawType, findSubtupleEnd(rawType, argStart + 1)); break;
 // ======================= OPTIONAL FAST PATHS FOR COMMON TYPES TO SKIP buildUnchecked =================================
                 case 'a': {
-                    long val = rawType.getFourAscii(argStart);
-                    if (val == CharSequenceView.toFourAscii("addr")) {
-                        val = rawType.getFourAscii(argStart + 4);
-                        if (val == CharSequenceView.toFourAscii("ess,") || val == CharSequenceView.toFourAscii("ess)")) {
+                    long val = rawType.getFourCharLong(argStart);
+                    if (val == CharSequenceView.fourCharLong("addr")) {
+                        val = rawType.getFourCharLong(argStart + 4);
+                        if (val == CharSequenceView.fourCharLong("ess,") || val == CharSequenceView.fourCharLong("ess)")) {
                             e = AddressType.INSTANCE;
                             argEnd = argStart + "address".length();
                             break;
@@ -202,8 +202,8 @@ public final class TypeFactory {
                     break;
                 }
                 case 'b': {
-                    final long val = rawType.getFourAscii(argStart + 1);
-                    if (val == CharSequenceView.toFourAscii("ytes")) {
+                    final long val = rawType.getFourCharLong(argStart + 1);
+                    if (val == CharSequenceView.fourCharLong("ytes")) {
                         final int nIdx = argStart + 5;
                         argEnd = nextTerminator(rawType, nIdx);
                         switch (argEnd - argStart) {
@@ -211,7 +211,7 @@ public final class TypeFactory {
                         case 6: if (rawType.charAt(nIdx) == '4') e = BYTES_4; break;
                         case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
                         }
-                    } else if (val == CharSequenceView.toFourAscii("ool,") || val == CharSequenceView.toFourAscii("ool)")) {
+                    } else if (val == CharSequenceView.fourCharLong("ool,") || val == CharSequenceView.fourCharLong("ool)")) {
                         e = BOOL;
                         argEnd = argStart + "bool".length();
                     } else {
@@ -223,7 +223,7 @@ public final class TypeFactory {
                     argEnd = nextTerminator(rawType, argStart + 1);
                     if (argEnd - argStart == "string".length()
                                     && rawType.charAt(argStart + 5) == 'g'
-                                    && rawType.getFourAscii(argStart + 1) == CharSequenceView.toFourAscii("trin")) {
+                                    && rawType.getFourCharLong(argStart + 1) == CharSequenceView.fourCharLong("trin")) {
                         e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_STRING : NONE_STRING;
                     }
                     break;
@@ -232,11 +232,11 @@ public final class TypeFactory {
                     final int asp1 = argStart + 1;
                     argEnd = nextTerminator(rawType, asp1);
                     final int argLen = argEnd - argStart;
-                    if (argLen == 7 && rawType.getFourAscii(asp1) == CharSequenceView.toFourAscii("int2")
+                    if (argLen == 7 && rawType.getFourCharLong(asp1) == CharSequenceView.fourCharLong("int2")
                                     && rawType.charAt(argStart + 5) == '5'
                                     && rawType.charAt(argStart + 6) == '6') {
                         e = UINT_256;
-                    } else if (rawType.getFourAscii(argStart) == CharSequenceView.toFourAscii("uint")) {
+                    } else if (rawType.getFourCharLong(argStart) == CharSequenceView.fourCharLong("uint")) {
                         switch (argLen) {
                         case 4: e = UINT_256; break; // "uint"
                         case 5: if (rawType.charAt(argStart + 4) == '8') e = UINT_8; break;
