@@ -262,7 +262,7 @@ public class TupleTest {
 
     @Test
     public void testArrayLens() throws Throwable {
-//        assertInstanceOf(ArrayType.class, TypeFactory.create("int[" + (Integer.MAX_VALUE + 14L) + "]"));
+        assertInstanceOf(ArrayType.class, TypeFactory.create("int[" + (Integer.MAX_VALUE - 14) + "]"));
         assertThrown(
                 IllegalArgumentException.class,
                 () -> TypeFactory.create("int[" + (Integer.MAX_VALUE - 13) + "]")
