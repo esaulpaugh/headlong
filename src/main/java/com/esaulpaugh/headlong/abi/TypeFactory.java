@@ -30,11 +30,14 @@ public final class TypeFactory {
 
     private static final int MAX_LENGTH_CHARS = 1_600;
     private static final int NESTING_LIMIT = 80;
-    private static final ABIType<?> NONE_STRING = UnitType.get("string");
-    private static final ABIType<?> LEGACY_STRING = UnitType.getLegacy(new CharSequenceView("string"));
+    private static final ABIType<?> STRING = UnitType.get("string");
     private static final ABIType<?> BYTES = UnitType.get("bytes");
-    private static final ABIType<?> BYTES_4 = UnitType.get("bytes4");
-    private static final ABIType<?> BYTES_32 = UnitType.get("bytes32");
+    private static final ABIType<?> BYTES4 = UnitType.get("bytes4");
+    private static final ABIType<?> BYTES32 = UnitType.get("bytes32");
+    private static final ABIType<?> LEGACY_STRING = UnitType.getLegacy("string");
+    private static final ABIType<?> LEGACY_BYTES = UnitType.getLegacy("bytes");
+    private static final ABIType<?> LEGACY_BYTES4 = UnitType.getLegacy("bytes4");
+    private static final ABIType<?> LEGACY_BYTES32 = UnitType.getLegacy("bytes32");
     private static final ABIType<?> BOOL = UnitType.get("bool");
     private static final ABIType<?> UINT_256 = UnitType.get("uint256");
     private static final ABIType<?> UINT_8 = UnitType.get("uint8");
@@ -207,9 +210,9 @@ public final class TypeFactory {
                         final int nIdx = argStart + 5;
                         argEnd = nextTerminator(rawType, nIdx);
                         switch (argEnd - argStart) {
-                        case 5: e = BYTES; break;
-                        case 6: if (rawType.charAt(nIdx) == '4') e = BYTES_4; break;
-                        case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
+                        case 5: e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES : BYTES; break;
+                        case 6: if (rawType.charAt(nIdx) == '4') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES4 : BYTES4; break;
+                        case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES32 : BYTES32; break;
                         }
                     } else if (val == CharSequenceView.fourCharLong("ool,") || val == CharSequenceView.fourCharLong("ool)")) {
                         e = BOOL;
@@ -224,7 +227,7 @@ public final class TypeFactory {
                     if (argEnd - argStart == "string".length()
                                     && rawType.charAt(argStart + 5) == 'g'
                                     && rawType.getFourCharLong(argStart + 1) == CharSequenceView.fourCharLong("trin")) {
-                        e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_STRING : NONE_STRING;
+                        e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_STRING : STRING;
                     }
                     break;
                 }

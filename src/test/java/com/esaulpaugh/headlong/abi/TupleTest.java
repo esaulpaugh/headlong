@@ -296,7 +296,7 @@ public class TupleTest {
     @Test
     public void testNonAscii() throws Throwable {
         final Random random = TestUtils.seededRandom();
-        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool" };
+        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool", "function" };
         for (String type : types) {
             final StringBuilder sb = new StringBuilder("(").append(type).append(')');
             final int end = sb.length() - 1;
@@ -315,18 +315,18 @@ public class TupleTest {
     }
 
     @Test
-    public void testStringFlags() {
-        ArrayType<ByteType, Byte, String> none = TupleType.parse(ABIType.FLAGS_NONE, "(string)")
-                                                            .<ArrayType<ByteType, Byte, String>>get(0)
-                                                            .asArrayType();
-        assertEquals(ABIType.FLAGS_NONE, none.getFlags());
-        assertEquals(TypeFactory.create(ABIType.FLAGS_NONE, "string"), none);
+    public void testFastPathFlags() {
+        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool", "function" };
+        for (final String type : types) {
+            final String tupleType = "(" + type + ")";
+            ABIType<?> none = TupleType.parse(ABIType.FLAGS_NONE, tupleType).get(0);
+            assertEquals(0, none.getFlags() & ABIType.FLAG_LEGACY_DECODE);
+            assertEquals(TypeFactory.create(ABIType.FLAGS_NONE, type), none);
 
-        ArrayType<ByteType, Byte, String> legacy = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, "(string)")
-                                                                .<ArrayType<ByteType, Byte, String>>get(0)
-                                                                .asArrayType();
-        assertEquals(ABIType.FLAG_LEGACY_DECODE, legacy.getFlags());
-        assertEquals(TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, "string"), legacy);
+            ABIType<?> legacy = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, tupleType).get(0);
+            assertEquals(legacy instanceof ArrayType ? 1 : 0, legacy.getFlags() & ABIType.FLAG_LEGACY_DECODE, "" + legacy);
+            assertEquals(TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, type), legacy);
+        }
     }
 
     @Test

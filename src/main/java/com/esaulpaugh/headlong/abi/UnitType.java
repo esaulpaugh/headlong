@@ -214,6 +214,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     /* called from TypeFactory */
+    static ABIType<?> getLegacy(String rawType) {
+        return getLegacy(new CharSequenceView(rawType));
+    }
+
+    /* called from TypeFactory */
     static ABIType<?> get(CharSequenceView view) {
         return BASE_TYPE_MAP.get(view);
     }
