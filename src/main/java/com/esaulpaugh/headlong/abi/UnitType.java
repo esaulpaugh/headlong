@@ -205,17 +205,27 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    private static final Map<String, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
-    private static final Map<String, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
+    private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
+    private static final Map<CharSequenceView, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
 
     /* called from TypeFactory */
     static ABIType<?> get(String rawType) {
-        return BASE_TYPE_MAP.get(rawType);
+        return get(new CharSequenceView(rawType));
     }
 
     /* called from TypeFactory */
     static ABIType<?> getLegacy(String rawType) {
-        return LEGACY_BASE_TYPE_MAP.get(rawType);
+        return getLegacy(new CharSequenceView(rawType));
+    }
+
+    /* called from TypeFactory */
+    static ABIType<?> get(CharSequenceView view) {
+        return BASE_TYPE_MAP.get(view);
+    }
+
+    /* called from TypeFactory */
+    static ABIType<?> getLegacy(CharSequenceView slice) {
+        return LEGACY_BASE_TYPE_MAP.get(slice);
     }
 
     private static final AtomicBoolean MAP_INITIALIZED = new AtomicBoolean(false);
@@ -227,41 +237,41 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 //            assert INSTANCE_COUNT.get() >= 0L; // the number of static instances in whichever subclass is initialized first
 //            assert INSTANCE_COUNT.get() <= 2L;
 
-            final Map<String, ABIType<?>> map = BASE_TYPE_MAP;
+            final Map<CharSequenceView, ABIType<?>> map = BASE_TYPE_MAP;
 
             // optimized insertion order
-            map.put("bool", BooleanType.INSTANCE);
-            map.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+            map.put(new CharSequenceView("bool"), BooleanType.INSTANCE);
+            map.put(new CharSequenceView("string"), new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
 
             for (int n = 1; n <= 32; n++) {
-                mapByteArray(map, "bytes" + n, n);
+                mapByteArray("bytes" + n, n);
             }
-            mapByteArray(map, "function", FUNCTION_BYTE_LEN);
-            mapByteArray(map, "bytes", DYNAMIC_LENGTH);
+            mapByteArray("function", FUNCTION_BYTE_LEN);
+            mapByteArray("bytes", DYNAMIC_LENGTH);
 
-            for (int n = 8; n <= 24; n += 8) mapInt(map, "uint" + n, n, true); // will trigger IntType initialization, which will init UINT21 and UINT31
-            for (int n = 32; n <= 56; n += 8) mapLong(map, "uint" + n, n, true);
-            for (int n = 64; n <= 256; n += 8) mapBigInteger(map, "uint" + n, n, true);
+            for (int n = 8; n <= 24; n += 8) mapInt("uint" + n, n, true); // will trigger IntType initialization, which will init UINT21 and UINT31
+            for (int n = 32; n <= 56; n += 8) mapLong("uint" + n, n, true);
+            for (int n = 64; n <= 256; n += 8) mapBigInteger("uint" + n, n, true);
 
-            map.put("uint", map.get("uint256"));
+            map.put(new CharSequenceView("uint"), map.get(new CharSequenceView("uint256")));
 
-            mapBigInteger(map, "int256", 256, false);
-            map.put("int", map.get("int256"));
+            mapBigInteger("int256", 256, false);
+            map.put(new CharSequenceView("int"), map.get(new CharSequenceView("int256")));
 
-            for (int n = 8; n <= 32; n += 8) mapInt(map, "int" + n, n, false);
-            for (int n = 40; n <= 64; n += 8) mapLong(map, "int" + n, n, false);
-            for (int n = 72; n < 256; n += 8) mapBigInteger(map, "int" + n, n, false);
+            for (int n = 8; n <= 32; n += 8) mapInt("int" + n, n, false);
+            for (int n = 40; n <= 64; n += 8) mapLong("int" + n, n, false);
+            for (int n = 72; n < 256; n += 8) mapBigInteger("int" + n, n, false);
 
-            map.put("address", AddressType.INSTANCE);
+            map.put(new CharSequenceView("address"), AddressType.INSTANCE);
 
-            map.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-            map.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+            map.put(new CharSequenceView("fixed128x18"), new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+            map.put(new CharSequenceView("ufixed128x18"), new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
 
-            map.put("decimal", map.get("int168"));
-            map.put("fixed", map.get("fixed128x18"));
-            map.put("ufixed", map.get("ufixed128x18"));
+            map.put(new CharSequenceView("decimal"), map.get(new CharSequenceView("int168")));
+            map.put(new CharSequenceView("fixed"), map.get(new CharSequenceView("fixed128x18")));
+            map.put(new CharSequenceView("ufixed"), map.get(new CharSequenceView("ufixed128x18")));
 
-            for (Map.Entry<String, ABIType<?>> e : map.entrySet()) {
+            for (Map.Entry<CharSequenceView, ABIType<?>> e : map.entrySet()) {
                 ABIType<?> value = e.getValue();
                 if (value instanceof ArrayType) {
                     final ArrayType<?, ?, ?> at = value.asArrayType();
@@ -276,19 +286,19 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         }
     }
 
-    private static void mapInt(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new IntType(type, bitLen, unsigned));
+    private static void mapInt(String type, int bitLen, boolean unsigned) {
+        BASE_TYPE_MAP.put(new CharSequenceView(type), new IntType(type, bitLen, unsigned));
     }
 
-    private static void mapLong(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new LongType(type, bitLen, unsigned));
+    private static void mapLong(String type, int bitLen, boolean unsigned) {
+        BASE_TYPE_MAP.put(new CharSequenceView(type), new LongType(type, bitLen, unsigned));
     }
 
-    private static void mapBigInteger(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new BigIntegerType(type, bitLen, unsigned));
+    private static void mapBigInteger(String type, int bitLen, boolean unsigned) {
+        BASE_TYPE_MAP.put(new CharSequenceView(type), new BigIntegerType(type, bitLen, unsigned));
     }
 
-    private static void mapByteArray(Map<String, ABIType<?>> map, String type, int arrayLen) {
-        map.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
+    private static void mapByteArray(String type, int arrayLen) {
+        BASE_TYPE_MAP.put(new CharSequenceView(type), new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 }

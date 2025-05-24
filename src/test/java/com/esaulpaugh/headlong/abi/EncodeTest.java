@@ -61,63 +61,57 @@ public class EncodeTest {
     private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("\\A\\((" + TYPE_PATTERN + ")?\\)\\Z");
 
     @Disabled("may take minutes to run")
-    @SuppressWarnings("deprecation")
     @Test
     public void fuzzSignatures() throws InterruptedException, ExecutionException, TimeoutException {
-
-        final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
+        final int parallelism = Runtime.getRuntime().availableProcessors() / 2 - 1;
+        final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]" // "34567890()[],ttttiiiinnnn1122abcdefglmorsuxy"
         final int alphabetLen = alphabet.length;
-        if (alphabetLen == 128) {
+        if (alphabetLen == 96) {
             for (int i = 0; i < alphabetLen; i++) {
-                alphabet[i] = (byte) i;
+                alphabet[i] = (byte) (32 + i);
             }
         }
 
-        final int[] iterations = new int[] {
-                128,
-                128,
-                128,
-                128,
-                8_192,
-                524_288,
-                950_000,
-                950_000,
-                950_000,
-                950_000,
-                950_000,
-                950_000,
-                950_000,
-                950_000,
-                950_000
-        };
-
         final String prefix = "ufixed";
         final int prefixLen = prefix.length();
+        final String suffix = "";
+        final int suffixLen = suffix.length();
 
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+        final int uniques = countUniques(alphabet);
         final IntConsumer runnable = (int id) -> {
+            final String idStr = "(" + id + ")";
             final Random rand = TestUtils.seededRandom();
             for (int len = 0; len <= 14; len++) {
-                System.out.println(len + "(" + Thread.currentThread().getId() + ")");
-                final byte[] temp = new byte[len];
+                System.out.println(len + idStr);
+                final char[] temp = new char[len];
                 final int last = len - 1;
                 if (len > 0) {
                     temp[0] = '(';
                     if (len > prefixLen) {
                         for (int i = 0; i < prefixLen; i++) {
-                            temp[i + 1] = (byte) prefix.charAt(i);
+                            temp[i + 1] = prefix.charAt(i);
+                        }
+                    }
+                    if (len > suffixLen) {
+                        for (int i = 0; i < suffixLen; i++) {
+                            temp[i + (last - suffixLen)] = suffix.charAt(i);
                         }
                     }
                     if (len > 1) {
                         temp[last] = ')';
                     }
                 }
-                final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
+
+                final int randomLen = len - 1 - suffixLen - prefixLen - 1;
+                final int num = calcIterations(randomLen, uniques, parallelism);
+                System.out.println(len + idStr + " " + num);
                 for (int j = 0; j < num; j++) {
-                    for (int i = 1 + prefixLen; i < last; i++) {
-                        temp[i] = alphabet[rand.nextInt(alphabetLen)];
+                    int end = last - suffixLen;
+                    for (int i = 1 + prefixLen; i < end; i++) {
+                        temp[i] = (char) alphabet[rand.nextInt(alphabetLen)];
                     }
-                    String sig = new String(temp, 0, 0, len);
+                    String sig = new String(temp);
                     try {
                         TupleType<?> tt = TupleType.parse(sig);
                         if (map.containsKey(sig)) continue;
@@ -136,6 +130,7 @@ public class EncodeTest {
                         }
                         map.put(sig, canon);
                     } catch (IllegalArgumentException ignored) {
+//                        if ((j & 0x3FFFF) == 0) System.err.println(sig);
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);
@@ -143,8 +138,9 @@ public class EncodeTest {
                     }
                 }
             }
+            System.out.println("DONE" + idStr);
         };
-        TestUtils.parallelRun(Runtime.getRuntime().availableProcessors(), 3600L, runnable)
+        TestUtils.parallelRun(parallelism, 3600L, runnable)
                 .run();
 
         final int size = map.size();
@@ -156,6 +152,34 @@ public class EncodeTest {
         keyList.forEach(System.out::println);
 
         assertEquals(2 + (32 * 80), size); // for prefix fixed or ufixed
+    }
+
+    private static int countUniques(byte[] alphabet) {
+        int u = 0;
+        byte[] _256 = new byte[256];
+        for (int idx : alphabet) {
+            _256[idx]++;
+            if (_256[idx] == 1) u++;
+        }
+        return u;
+    }
+
+    private static int calcIterations(int randomLen, int alphabetLen, int parallelism) {
+        if (randomLen <= 0) {
+            return  1;
+        } else {
+            final long permutations = (long) Math.pow(alphabetLen, randomLen);
+            final double targetFraction = 0.9999;
+            final double multiplier = -Math.log(1.0 - targetFraction); // Math.log(k) + 0.57721 + 4.605
+            final long iterations = (long) (permutations * multiplier / parallelism);
+            final int base = 50_000;
+            final int max = 250_000_000;
+            if (iterations > max) {
+                System.err.println("clamping " + iterations + " iterations to max of " + max);
+                return max;
+            }
+            return  base + (int) iterations;
+        }
     }
 
     private static final String ABI = "a71100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000005a0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000004a00000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000230c5748dd399896196f734a17ecf80b2178adc067b361d5ba994ae6400000000b95ffb49ee209c0d760c3350ecaae6d4ad4ff7b62af4d91ef3b5ae4e00000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001816e178e3509b80a6a66a8827c8d5e62be37692efe0e22e59f936b8b000000000000000000000000000000000000000000000000000000000000000000000001a48b4c097589c15784ef0b97c17aa6dbb752f61fd1a272618d87a535000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000033b6ae013f517ec3c2082aa77400d768168266af2c3c3680404075f300000000093ab24d3e36bb7194c68063c595ead7554b2e8ce3fa1e6498c0c1208000000009fd62e78a55909d9e882d50a8074384af470c9c13e618ccc761f09a700000000000000000000000000000000000000000000000000000000000000000000000182a731ded7c7b3dd45c528564df732e138a71dbccd14954c45b5c14e000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000010daf12dcf419efe89f949a26f943bd7236aafbb8d6c4749fd27ed36f000000000000000000000000000000000000000000000000000000000000000000000003e6501ff6bc4074725885f5e65cc263b9ab0f098c14bc7cce3c2e4d2900000000f351c27189ce03746ce7dab3c560fb2bb430551b55a77a18380f066100000000e9753f8a5bb5e0da442d7e11d38d1eaafe5b6df463fd2256be199e380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000d05d841062e000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000001b052db5529dc0433400000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013160000000000000000000000000000000000000000000000000000000000000001000000000051299437b715c73400c5e6e655c925eb10ee34669cf8f1ccf8febd";
@@ -305,12 +329,14 @@ public class EncodeTest {
 
     private static void testSIOOBE(String signature) throws Throwable {
         assertThrownWithAnySubstring(
-                StringIndexOutOfBoundsException.class,
+                IndexOutOfBoundsException.class,
                 Arrays.asList(
                         "begin 0, end -1, length " + signature.length(),
                         "String index out of range: -1",
                         "String index out of range: 0",
-                        "Range [0, -1) out of bounds for length " + signature.length() // JDK 18
+                        "Range [0, -1) out of bounds for length " + signature.length(), // JDK 18
+                        "Range [-1, 0) out of bounds for length " + signature.length(),
+                        "Range [-1, 1) out of bounds for length " + signature.length()
                 ),
                 () -> Function.parse(signature)
         );
