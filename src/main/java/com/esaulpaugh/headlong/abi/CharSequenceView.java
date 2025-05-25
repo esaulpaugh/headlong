@@ -51,7 +51,7 @@ final class CharSequenceView implements CharSequence {
     }
 
     int lastArrayOpen(int fromIdx) {
-        for (int i = start + fromIdx;  ; i--) {
+        for (int i = start + fromIdx; true; i--) {
             if (source.charAt(i) == '[') {
                 return i - start;
             }

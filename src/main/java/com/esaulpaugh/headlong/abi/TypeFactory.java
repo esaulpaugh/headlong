@@ -143,21 +143,18 @@ public final class TypeFactory {
 
     private static BigDecimalType tryParseFixed(final String rawType) {
         final int idx = rawType.indexOf("fixed");
-        boolean unsigned = false;
-        if (idx == 0 || (unsigned = (idx == 1 && rawType.charAt(0) == 'u'))) {
+        if (idx == 0 || (idx == 1 && rawType.charAt(0) == 'u')) {
             final int indexOfX = rawType.lastIndexOf('x');
-            try {
-                final String mStr = rawType.substring(idx + "fixed".length(), indexOfX);
-                final String nStr = rawType.substring(indexOfX + 1); // everything after x
-                if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) { // starts with a digit 1-9
-                    final int M = Integer.parseInt(mStr); // no parseUnsignedInt on older Android versions?
-                    final int N = Integer.parseInt(nStr);
+            if (leadDigitValid(rawType.charAt(idx + "fixed".length())) && leadDigitValid(rawType.charAt(indexOfX + 1))) { // starts with a digit 1-9
+                try {
+                    final int M = Integer.parseInt(rawType.substring(idx + "fixed".length(), indexOfX)); // no parseUnsignedInt on older Android versions?
+                    final int N = Integer.parseInt(rawType.substring(indexOfX + 1)); // everything after x
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
-                        return new BigDecimalType(rawType, M, N, unsigned);
+                        return new BigDecimalType(rawType, M, N, idx == 1);
                     }
+                } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
+                    /* fall through */
                 }
-            } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-                /* fall through */
             }
         }
         throw unrecognizedType(rawType);
