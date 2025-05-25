@@ -86,14 +86,11 @@ public final class TypeFactory {
     private static ABIType<?> buildUnchecked(final CharSequenceView rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
             final int len = rawType.length();
-            final int lastCharIdx = len - 1;
-            if (rawType.charAt(lastCharIdx) == ']') { // array
-                final int secondToLastCharIdx = lastCharIdx - 1;
-                final int arrayOpenIndex = rawType.lastArrayOpen(secondToLastCharIdx);
-
+            if (rawType.charAt(len - 1) == ']') { // array
+                final int arrayOpenIndex = rawType.lastArrayOpen(len - 2);
                 final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
                 final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, len).toString();
-                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, lastCharIdx);
+                final int length = arrayOpenIndex == len - 2 ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, len - 1);
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
             if (rawType.charAt(0) == '(') {
@@ -162,7 +159,7 @@ public final class TypeFactory {
 
     private static TupleType<?> parseTupleType(final CharSequenceView rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
-        if (len == 2 && rawType.charAt(0) == '(' && rawType.charAt(1) == ')') {
+        if (len == 2 && rawType.charAt(1) == ')') {
             return TupleType.empty(flags);
         }
         ABIType<?>[] elements = new ABIType[8];
