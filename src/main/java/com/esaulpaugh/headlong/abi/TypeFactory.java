@@ -122,30 +122,21 @@ public final class TypeFactory {
     }
 
     private static boolean leadDigitValid(char c) {
-        return (char)(c - '1') <= 8; // cast to wrap negative vals, 1-9 allowed
+        return (char)(c - '1') < 9; // cast to wrap negative vals, 1-9 allowed
     }
 
     private static int parseArrayLen(CharSequenceView rawType, int i, final int end) {
-        final char lead = rawType.charAt(i);
-        long len = lead - '0';
-        if (end - i == 1 && (char)len <= 9 /* cast to wrap negative vals */) {
-            return (int)len;
-        }
-        if (leadDigitValid(lead)) {
-            i++;
-            do {
-                final int d = rawType.charAt(i++) - '0';
-                if ((char)d > 9 /* cast to wrap negative vals */) {
-                    break; // not a digit
-                }
-                len = len * 10 + d;
-                if (len > Integer.MAX_VALUE) {
+        if (leadDigitValid(rawType.charAt(i)) || end - i == 1) {
+            long len = 0;
+            while (true) {
+                final int d = rawType.charAt(i) - '0';
+                if ((char)d > 9 || (len = len * 10 + d) > Integer.MAX_VALUE) {
                     break;
                 }
-                if (i >= end) {
+                if (++i == end) {
                     return (int)len;
                 }
-            } while (true);
+            }
         }
         throw new IllegalArgumentException("bad array length");
     }
