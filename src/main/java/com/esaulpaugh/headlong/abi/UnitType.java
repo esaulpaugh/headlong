@@ -200,11 +200,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return bi;
     }
 //======================================================================================================================
-    private static final int FIXED_BIT_LEN = 128;
-    private static final int FIXED_SCALE = 18;
-
-    private static final int FUNCTION_BYTE_LEN = 24;
-
     private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
     private static final Map<CharSequenceView, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
 
@@ -244,7 +239,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             for (int n = 1; n <= 32; n++) {
                 mapByteArray("bytes" + n, n);
             }
-            mapByteArray("function", FUNCTION_BYTE_LEN);
+            mapByteArray("function", 24);
             mapByteArray("bytes", DYNAMIC_LENGTH);
 
             for (int n = 8; n <= 24; n += 8) mapInt("uint" + n, n, true); // will trigger IntType initialization, which will init UINT21 and UINT31
@@ -262,8 +257,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
             map("address", AddressType.INSTANCE);
 
-            map("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-            map("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+            map("fixed128x18", new BigDecimalType("fixed128x18", 128, 18, false));
+            map("ufixed128x18", new BigDecimalType("ufixed128x18", 128, 18, true));
 
             map("decimal", get("int168"));
             map("fixed", get("fixed128x18"));
