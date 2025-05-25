@@ -89,7 +89,7 @@ public final class TypeFactory {
             final int lastCharIdx = len - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
                 final int secondToLastCharIdx = lastCharIdx - 1;
-                final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
+                final int arrayOpenIndex = rawType.lastArrayOpen(secondToLastCharIdx);
 
                 final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
                 final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, len).toString();
@@ -207,12 +207,11 @@ public final class TypeFactory {
                 case 'b': {
                     final long val = rawType.getFourCharLong(argStart + 1);
                     if (val == CharSequenceView.fourCharLong("ytes")) {
-                        final int nIdx = argStart + 5;
-                        argEnd = nextTerminator(rawType, nIdx);
+                        argEnd = nextTerminator(rawType, argStart + 5);
                         switch (argEnd - argStart) {
                         case 5: e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES : BYTES; break;
-                        case 6: if (rawType.charAt(nIdx) == '4') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES4 : BYTES4; break;
-                        case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES32 : BYTES32; break;
+                        case 6: if (rawType.charAt(argStart + 5) == '4') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES4 : BYTES4; break;
+                        case 7: if (rawType.charAt(argStart + 5) == '3' && rawType.charAt(argStart + 6) == '2') e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BYTES32 : BYTES32; break;
                         }
                     } else if (val == CharSequenceView.fourCharLong("ool,") || val == CharSequenceView.fourCharLong("ool)")) {
                         e = BOOL;
@@ -232,10 +231,9 @@ public final class TypeFactory {
                     break;
                 }
                 case 'u': {
-                    final int asp1 = argStart + 1;
-                    argEnd = nextTerminator(rawType, asp1);
+                    argEnd = nextTerminator(rawType, argStart + 1);
                     final int argLen = argEnd - argStart;
-                    if (argLen == 7 && rawType.getFourCharLong(asp1) == CharSequenceView.fourCharLong("int2")
+                    if (argLen == 7 && rawType.getFourCharLong(argStart + 1) == CharSequenceView.fourCharLong("int2")
                                     && rawType.charAt(argStart + 5) == '5'
                                     && rawType.charAt(argStart + 6) == '6') {
                         e = UINT_256;

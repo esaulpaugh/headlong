@@ -50,14 +50,12 @@ final class CharSequenceView implements CharSequence {
         return new CharSequenceView(source, this.start + start, this.start + end);
     }
 
-    int lastIndexOf(int ch, int fromIdx) {
-        int i = start + fromIdx;
-        do {
-            if (ch == source.charAt(i)) {
+    int lastArrayOpen(int fromIdx) {
+        for (int i = start + fromIdx;  ; i--) {
+            if (source.charAt(i) == '[') {
                 return i - start;
             }
-            i--;
-        } while (true);
+        }
     }
 
     @Override
@@ -86,17 +84,17 @@ final class CharSequenceView implements CharSequence {
     }
 
     public long getFourCharLong(int index) {
-        final int off = start + index;
-        return ((long)source.charAt(off) << 48) |
-                ((long)source.charAt(off + 1) << 32) |
-                ((long)source.charAt(off + 2) << 16) |
-                source.charAt(off + 3);
+        return fourCharLong(source, start + index);
     }
 
-    public static long fourCharLong(String s) {
-        return (long)s.charAt(0) << 48
-                | (long)s.charAt(1) << 32
-                | (long)s.charAt(2) << 16
-                | s.charAt(3);
+    public static long fourCharLong(CharSequence cs) {
+        return fourCharLong(cs, 0);
+    }
+
+    private static long fourCharLong(CharSequence cs, int offset) {
+        return (long)cs.charAt(offset) << 48
+                | (long)cs.charAt(offset + 1) << 32
+                | (long)cs.charAt(offset + 2) << 16
+                | cs.charAt(offset + 3);
     }
 }
