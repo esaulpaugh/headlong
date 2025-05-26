@@ -38,6 +38,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
 
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
+    private static final int MAX_LEN = Integer.MAX_VALUE - 14;
 
     public static final int DYNAMIC_LENGTH = -1;
 
@@ -50,6 +51,9 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     ArrayType(String canonicalType, Class<A> clazz, ET elementType, int length, Class<?> arrayClass, int flags) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
         this.elementType = elementType;
+        if (length < DYNAMIC_LENGTH || length > MAX_LEN) {
+            throw new IllegalArgumentException();
+        }
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();

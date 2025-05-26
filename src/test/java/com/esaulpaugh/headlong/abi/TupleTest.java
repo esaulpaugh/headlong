@@ -44,6 +44,7 @@ import static com.esaulpaugh.headlong.TestUtils.wildLong;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -257,6 +258,75 @@ public class TupleTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
                 () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
         );
+    }
+
+    @Test
+    public void testArrayLens() throws Throwable {
+        assertInstanceOf(ArrayType.class, TypeFactory.create("int[" + (Integer.MAX_VALUE - 14) + "]"));
+        assertThrown(
+                IllegalArgumentException.class,
+                () -> TypeFactory.create("int[" + (Integer.MAX_VALUE - 13) + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                () -> TypeFactory.create("int[" + Integer.MAX_VALUE+ "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + (Integer.MAX_VALUE + 1L) + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + Long.MAX_VALUE + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + ArrayType.DYNAMIC_LENGTH + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + -2 + "]")
+        );
+    }
+
+    @Test
+    public void testNonAscii() throws Throwable {
+        final Random random = TestUtils.seededRandom();
+        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool", "function" };
+        for (String type : types) {
+            final StringBuilder sb = new StringBuilder("(").append(type).append(')');
+            final int end = sb.length() - 1;
+            for (int x = 1; x < end; x++) {
+                final char ch = sb.charAt(x);
+                for (int n = 0; n < 10; n++) {
+                    final char r = (char) ((random.nextInt() << 8) | ch);
+                    if (r != ch) {
+                        sb.setCharAt(x, r);
+                        assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"", () -> TupleType.parse(sb.toString()));
+                        sb.setCharAt(x, ch);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFastPathFlags() {
+        final String[] types = { "address", "uint", "uint8", "uint32", "uint256", "string", "bytes", "bytes4", "bytes32", "bool", "function" };
+        for (final String type : types) {
+            final String tupleType = "(" + type + ")";
+            ABIType<?> none = TupleType.parse(ABIType.FLAGS_NONE, tupleType).get(0);
+            assertEquals(0, none.getFlags() & ABIType.FLAG_LEGACY_DECODE);
+            assertEquals(TypeFactory.create(ABIType.FLAGS_NONE, type), none);
+
+            ABIType<?> legacy = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, tupleType).get(0);
+            assertEquals(legacy instanceof ArrayType ? 1 : 0, legacy.getFlags() & ABIType.FLAG_LEGACY_DECODE, "" + legacy);
+            assertEquals(TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, type), legacy);
+        }
     }
 
     @Test
