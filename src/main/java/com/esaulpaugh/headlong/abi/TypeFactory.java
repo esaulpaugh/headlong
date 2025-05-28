@@ -119,7 +119,7 @@ public final class TypeFactory {
     }
 
     private static boolean leadDigitValid(char c) {
-        return (char)(c - '1') < 9; // cast to wrap negative vals, 1-9 allowed
+        return c >= '1' && c <= '9'; // (char)(c - '1') < 9
     }
 
     private static int parseArrayLen(CharSequenceView rawType, int i, final int end) {
@@ -127,7 +127,7 @@ public final class TypeFactory {
             long len = 0;
             while (true) {
                 final int d = rawType.charAt(i) - '0';
-                if ((char)d > 9 || (len = len * 10 + d) > Integer.MAX_VALUE) {
+                if (d < 0 || d > 9 || (len = len * 10 + d) > Integer.MAX_VALUE) { // (char)d > 9
                     break;
                 }
                 if (++i == end) {
