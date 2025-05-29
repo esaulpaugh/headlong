@@ -157,12 +157,13 @@ Alternatively:
 
 ## Benchmarks
 
-![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/temurin-1.8.0_442_ubuntu24.10_xeon_gold_6140.png)
+[//]: # (![Screenshot]&#40;https://github.com/esaulpaugh/headlong/blob/master/temurin-1.8.0_442_ubuntu24.10_xeon_gold_6140.png&#41;)
 
-temurin 1.8.0_442 on Intel Xeon Gold 6140, Ubuntu 24.10
+[//]: # ()
+[//]: # (temurin 1.8.0_442 on Intel Xeon Gold 6140, Ubuntu 24.10)
 
-![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.PNG)
-graalvm-jdk-23.0.2 (aarch64 JIT) on Apple M3 Max
+![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/m3_max_graalvm-jdk-24+36.1.png)
+graalvm-jdk-24 VM 24.2.0 (aarch64 JIT) on Apple M3 Max
 
 ## Command line interface
 
@@ -181,7 +182,7 @@ Also includes optimized implementations of:
 * Keccak
 * hexadecimal
 
-headlong depends on gson v2.1 or greater at runtime and v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~132 KiB. Java 8+.
+headlong depends on gson v2.1 or greater at runtime and v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~134 KiB. Java 8+.
 
 For better contract ABI JSON parsing performance, consider constructing an `ABIParser` with a `Set<TypeEnum>` by which to filter objects by type. For best performance, json should be compact and "type" should be the first key in functions, events, and errors. This can be done via `ABIJSON.optimize(String)`.
 
