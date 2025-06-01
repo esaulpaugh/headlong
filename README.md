@@ -182,7 +182,7 @@ Also includes optimized implementations of:
 * Keccak
 * hexadecimal
 
-headlong depends on gson v2.1 or greater at runtime and v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~134 KiB. Java 8+.
+headlong depends on gson v2.1 or greater at runtime and on v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~135 KiB. Java 8+.
 
 For better contract ABI JSON parsing performance, consider constructing an `ABIParser` with a `Set<TypeEnum>` by which to filter objects by type. For best performance, json should be compact and "type" should be the first key in functions, events, and errors. This can be done via `ABIJSON.optimize(String)`.
 
