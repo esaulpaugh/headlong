@@ -265,10 +265,12 @@ public class TupleTest {
         assertInstanceOf(ArrayType.class, TypeFactory.create("int[" + (Integer.MAX_VALUE - 14) + "]"));
         assertThrown(
                 IllegalArgumentException.class,
+                "bad array length",
                 () -> TypeFactory.create("int[" + (Integer.MAX_VALUE - 13) + "]")
         );
         assertThrown(
                 IllegalArgumentException.class,
+                "bad array length",
                 () -> TypeFactory.create("int[" + Integer.MAX_VALUE+ "]")
         );
         assertThrown(
