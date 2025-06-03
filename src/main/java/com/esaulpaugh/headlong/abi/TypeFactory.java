@@ -127,7 +127,7 @@ public final class TypeFactory {
             long len = 0;
             while (true) {
                 final int d = rawType.charAt(i) - '0';
-                if (d < 0 || d > 9 || (len = len * 10 + d) > Integer.MAX_VALUE) { // (char)d > 9
+                if (d < 0 || d > 9 || (len = len * 10 + d) > ArrayType.MAX_LEN) { // (char)d > 9
                     break;
                 }
                 if (++i == end) {
