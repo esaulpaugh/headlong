@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.util.Integers;
-
 /** Utility for reading and writing floating point numbers from and to RLP format. */
 public final class FloatingPoint {
 
