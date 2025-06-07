@@ -44,6 +44,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RLPStreamTest {
@@ -205,6 +206,9 @@ public class RLPStreamTest {
     public void testInterfaces() {
         try (Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(new ByteArrayInputStream(new byte[0])))) {
             stream.forEach(System.out::println);
+        }
+        for (RLPItem item : (Iterable<RLPItem>) () -> RLP_STRICT.sequenceIterator(new ByteArrayInputStream(new byte[3]))) {
+            assertNotNull(item);
         }
     }
 

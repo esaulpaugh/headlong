@@ -69,7 +69,8 @@ public final class RLPDecoder {
 
     /**
      * Returns an iterator over the sequence of RLPItems in the given {@link InputStream}. {@link Iterator#hasNext} indicates
-     * only whether items are immediately available.
+     * only whether items are immediately available. It is the responsibility of the caller to close the stream; the
+     * returned iterator does not itself ever call {@link InputStream#close()}.
      *
      * @param is    the stream of RLP data
      * @return  an iterator over the items in the stream
