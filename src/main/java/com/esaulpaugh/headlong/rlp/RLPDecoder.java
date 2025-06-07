@@ -18,8 +18,11 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -65,7 +68,8 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns an iterator over the sequence of RLPItems in the given {@link InputStream}.
+     * Returns an iterator over the sequence of RLPItems in the given {@link InputStream}. {@link Iterator#hasNext} indicates
+     * only whether items are immediately available.
      *
      * @param is    the stream of RLP data
      * @return  an iterator over the items in the stream
@@ -80,15 +84,20 @@ public final class RLPDecoder {
                 try {
                     final int available = is.available();
                     if (available > 0) {
-                        int keptBytes = buffer.length - index;
-                        byte[] newBuffer = new byte[keptBytes + available];
+                        final int keptBytes = buffer.length - index;
+                        final byte[] newBuffer = new byte[keptBytes + available];
                         System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
                         buffer = newBuffer;
                         index = 0;
-                        int read = is.read(buffer, keptBytes, available);
-                        if (read != available) {
-                            throw new IOException("read failed: " + read + " != " + available);
-                        }
+                        int totalRead = 0;
+                        do {
+                            final int read = is.read(buffer, keptBytes + totalRead, available - totalRead);
+                            if (read <= 0) {
+                                buffer = Arrays.copyOf(newBuffer, keptBytes + totalRead);
+                                break;
+                            }
+                            totalRead += read;
+                        } while (totalRead < available);
                     } else if (index >= buffer.length) {
                         return false;
                     }
@@ -97,7 +106,7 @@ public final class RLPDecoder {
                 } catch (ShortInputException e) {
                     return false;
                 } catch (IOException io) {
-                    throw new RuntimeException(io);
+                    throw new UncheckedIOException(io);
                 }
             }
         };
