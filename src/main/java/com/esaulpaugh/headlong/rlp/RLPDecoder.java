@@ -134,13 +134,8 @@ public final class RLPDecoder {
                 }
                 try {
                     while (true) {
-                        if (!bb.hasRemaining()) {
-                            final int keptBytes = bb.position() - index;
-                            final byte[] newBuffer = new byte[keptBytes + chunkSize];
-                            System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                            buffer = newBuffer;
-                            bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
-                            index = 0;
+                        if (!bb.hasRemaining() && buffer.length - index < chunkSize) {
+                            resize();
                         }
                         final int bytesRead = channel.read(bb);
                         final int end = bb.position();
@@ -156,13 +151,22 @@ public final class RLPDecoder {
                             }
                             if (sie.len > chunkSize) {
                                 chunkSize = (int) Math.min(sie.len, MAX_CHUNK_SIZE);
-                                bb.position(bb.limit()); // force a resize
+                                resize();
                             }
                         }
                     }
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
+            }
+
+            private void resize() {
+                final int keptBytes = bb.position() - index;
+                final byte[] newBuffer = new byte[keptBytes + chunkSize];
+                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                buffer = newBuffer;
+                bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
+                index = 0;
             }
         };
     }
