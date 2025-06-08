@@ -123,7 +123,9 @@ public final class RLPDecoder {
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel) {
         return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) {
-            private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
+            private static final int MAX_CHUNK_SIZE = 65536;
+            private int chunkSize = 8192;
+            private ByteBuffer bb = ByteBuffer.wrap(buffer);
 
             @Override
             public boolean hasNext() {
@@ -132,27 +134,27 @@ public final class RLPDecoder {
                 }
                 try {
                     while (true) {
-                        readBuffer.clear();
-                        final int bytesRead = channel.read(readBuffer);
-                        if (bytesRead > 0) {
-                            final int keptBytes = buffer.length - index;
-                            final byte[] newBuffer = new byte[keptBytes + bytesRead];
+                        if (!bb.hasRemaining()) {
+                            final int keptBytes = bb.position() - index;
+                            final byte[] newBuffer = new byte[keptBytes + chunkSize];
                             System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                            readBuffer.flip();
-                            readBuffer.get(newBuffer, keptBytes, bytesRead);
                             buffer = newBuffer;
+                            bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
                             index = 0;
-                        } else if (index >= buffer.length) {
+                            if (chunkSize < MAX_CHUNK_SIZE) {
+                                chunkSize <<= 1;
+                            }
+                        }
+                        final int bytesRead = channel.read(bb);
+                        final int end = bb.position();
+                        if (index >= end) {
                             return false;
                         }
                         try {
-                            next = decoder.wrap(buffer, index);
+                            next = decoder.wrap(buffer, index, end);
                             return true;
                         } catch (ShortInputException e) {
-                            final int capacity = readBuffer.capacity();
-                            if (bytesRead == capacity && capacity < 65_536) {
-                                this.readBuffer = ByteBuffer.allocate(readBuffer.capacity() << 1);
-                            } else if (bytesRead <= 0) {
+                            if (bytesRead <= 0) {
                                 return false;
                             }
                         }
@@ -275,8 +277,7 @@ public final class RLPDecoder {
 
     private static int requireInBounds(long val, int containerEnd, byte[] buffer, int index) {
         if (val > containerEnd) {
-            String msg = "element @ index " + index + " exceeds its container: " + val + " > " + containerEnd;
-            throw buffer.length == containerEnd ? new ShortInputException(msg) : new IllegalArgumentException(msg);
+            throw new ShortInputException("element @ index " + index + " exceeds its container: " + val + " > " + containerEnd);
         }
         return (int) val;
     }
