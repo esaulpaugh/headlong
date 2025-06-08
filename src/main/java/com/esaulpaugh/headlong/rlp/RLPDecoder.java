@@ -21,6 +21,8 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterators;
@@ -105,6 +107,56 @@ public final class RLPDecoder {
                     return true;
                 } catch (ShortInputException e) {
                     return false;
+                } catch (IOException io) {
+                    throw new UncheckedIOException(io);
+                }
+            }
+        };
+    }
+
+    /**
+     * {@link Iterator#hasNext()} may block while reading and may return false if additional bytes are needed to complete the
+     * current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
+     *
+     * @param channel   the channel of RLP data
+     * @return  an iterator over the items in the channel
+     */
+    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel) {
+        return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) {
+            private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
+
+            @Override
+            public boolean hasNext() {
+                if (next != null) {
+                    return true;
+                }
+                try {
+                    while (true) {
+                        readBuffer.clear();
+                        final int bytesRead = channel.read(readBuffer);
+                        if (bytesRead > 0) {
+                            final int keptBytes = buffer.length - index;
+                            final byte[] newBuffer = new byte[keptBytes + bytesRead];
+                            System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                            readBuffer.flip();
+                            readBuffer.get(newBuffer, keptBytes, bytesRead);
+                            buffer = newBuffer;
+                            index = 0;
+                        } else if (index >= buffer.length) {
+                            return false;
+                        }
+                        try {
+                            next = decoder.wrap(buffer, index);
+                            return true;
+                        } catch (ShortInputException e) {
+                            final int capacity = readBuffer.capacity();
+                            if (bytesRead == capacity && capacity < 65_536) {
+                                this.readBuffer = ByteBuffer.allocate(readBuffer.capacity() << 1);
+                            } else if (bytesRead <= 0) {
+                                return false;
+                            }
+                        }
+                    }
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
