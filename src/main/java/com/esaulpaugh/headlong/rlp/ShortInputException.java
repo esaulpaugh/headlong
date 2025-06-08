@@ -21,7 +21,10 @@ package com.esaulpaugh.headlong.rlp;
  */
 final class ShortInputException extends IllegalArgumentException {
 
-    ShortInputException(String msg) {
+    final long len;
+
+    ShortInputException(String msg, long len) {
         super(msg);
+        this.len = len;
     }
 }

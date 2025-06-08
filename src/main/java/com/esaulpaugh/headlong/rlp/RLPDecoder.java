@@ -123,7 +123,7 @@ public final class RLPDecoder {
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel) {
         return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) {
-            private static final int MAX_CHUNK_SIZE = 65536;
+            private static final int MAX_CHUNK_SIZE = 1 << 28;
             private int chunkSize = 8192;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
 
@@ -141,9 +141,6 @@ public final class RLPDecoder {
                             buffer = newBuffer;
                             bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
                             index = 0;
-                            if (chunkSize < MAX_CHUNK_SIZE) {
-                                chunkSize <<= 1;
-                            }
                         }
                         final int bytesRead = channel.read(bb);
                         final int end = bb.position();
@@ -153,9 +150,13 @@ public final class RLPDecoder {
                         try {
                             next = decoder.wrap(buffer, index, end);
                             return true;
-                        } catch (ShortInputException e) {
+                        } catch (ShortInputException sie) {
                             if (bytesRead <= 0) {
                                 return false;
+                            }
+                            if (sie.len > chunkSize) {
+                                chunkSize = (int) Math.min(sie.len, MAX_CHUNK_SIZE);
+                                bb.position(bb.limit()); // force a resize
                             }
                         }
                     }
@@ -277,7 +278,7 @@ public final class RLPDecoder {
 
     private static int requireInBounds(long val, int containerEnd, byte[] buffer, int index) {
         if (val > containerEnd) {
-            throw new ShortInputException("element @ index " + index + " exceeds its container: " + val + " > " + containerEnd);
+            throw new ShortInputException("element @ index " + index + " exceeds its container: " + val + " > " + containerEnd, val);
         }
         return (int) val;
     }
