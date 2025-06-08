@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -36,9 +35,9 @@ import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.NONNULL;
 import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
