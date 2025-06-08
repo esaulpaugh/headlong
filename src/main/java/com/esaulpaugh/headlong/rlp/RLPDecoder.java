@@ -92,7 +92,7 @@ public final class RLPDecoder {
                         index = 0;
                         int totalRead = 0;
                         do {
-                            final int read = is.read(buffer, keptBytes + totalRead, available - totalRead);
+                            final int read = is.read(newBuffer, keptBytes + totalRead, available - totalRead);
                             if (read <= 0) {
                                 buffer = Arrays.copyOf(newBuffer, keptBytes + totalRead);
                                 break;

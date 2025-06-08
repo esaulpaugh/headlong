@@ -112,11 +112,11 @@ public final class FastHex {
 
     private static int decodeByte(IntUnaryOperator extractor, int offset) {
         try {
-            int left_ = DECODE_TABLE[extractor.applyAsInt(offset)];
+            int left  = DECODE_TABLE[extractor.applyAsInt(offset)];
             int right = DECODE_TABLE[extractor.applyAsInt(++offset)];
-            int b = (left_ << BITS_PER_CHAR) + right;
+            int b = (left << BITS_PER_CHAR) + right;
             if (b < 0) {
-                throw new IllegalArgumentException("illegal hex val @ " + (left_ < 0 ? offset - 1 : offset));
+                throw new IllegalArgumentException("illegal hex val @ " + (left < 0 ? offset - 1 : offset));
             }
             return b;
         } catch (ArrayIndexOutOfBoundsException aioobe) {
