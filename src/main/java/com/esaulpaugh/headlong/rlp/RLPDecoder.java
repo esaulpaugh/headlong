@@ -127,7 +127,7 @@ public final class RLPDecoder {
         final int bufferSize = Math.max(expectedLenBytes, 8192);
         return new RLPSequenceIterator(RLPDecoder.this, new byte[bufferSize], 0) {
             private static final long MIN_DELAY_NANOS = 50_000L;
-            private static final int SHRINK_THRESHOLD = 16_384;
+            private static final int BUFFER_SIZE_RESET_THRESHOLD = 16_384;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
             long delayNanos = MIN_DELAY_NANOS;
 
@@ -137,7 +137,7 @@ public final class RLPDecoder {
                     try {
                         while (true) {
                             if (index == bb.capacity()) {
-                                resize(bb.capacity() < SHRINK_THRESHOLD ? bb.capacity() : bufferSize);
+                                resize(bb.capacity() < BUFFER_SIZE_RESET_THRESHOLD ? bb.capacity() : bufferSize);
                             }
                             final int bytesRead = channel.read(bb);
                             final int end = bb.position();
@@ -179,15 +179,14 @@ public final class RLPDecoder {
                 final int keptBytes = bb.position() - index;
                 if (len == bb.capacity() && keptBytes == 0) {
                     bb.rewind();
-                    index = 0;
-                    return;
+                } else {
+                    final byte[] newBuffer = new byte[len];
+                    if (keptBytes != 0) {
+                        System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                    }
+                    buffer = newBuffer;
+                    bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
                 }
-                final byte[] newBuffer = new byte[len];
-                if (keptBytes != 0) {
-                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                }
-                buffer = newBuffer;
-                bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
                 index = 0;
             }
         };
