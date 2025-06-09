@@ -114,6 +114,10 @@ public final class RLPDecoder {
         };
     }
 
+    public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
+        return sequenceIterator(channel, 0);
+    }
+
     /**
      * {@link Iterator#hasNext()} may block while reading and may return false if additional bytes are needed to complete the
      * current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
@@ -121,43 +125,43 @@ public final class RLPDecoder {
      * @param channel   the channel of RLP data
      * @return  an iterator over the items in the channel
      */
-    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel) {
-        return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) {
+    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, final int expectedLenBytes) {
+        return new RLPSequenceIterator(RLPDecoder.this, new byte[expectedLenBytes], 0) {
             private static final int MAX_CHUNK_SIZE = 1 << 28;
             private int chunkSize = 8192;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
 
             @Override
             public boolean hasNext() {
-                if (next != null) {
-                    return true;
-                }
-                try {
-                    while (true) {
-                        if (!bb.hasRemaining() && buffer.length - index < chunkSize) {
-                            resize();
-                        }
-                        final int bytesRead = channel.read(bb);
-                        final int end = bb.position();
-                        if (index >= end) {
-                            return false;
-                        }
-                        try {
-                            next = decoder.wrap(buffer, index, end);
-                            return true;
-                        } catch (ShortInputException sie) {
-                            if (bytesRead <= 0) {
-                                return false;
-                            }
-                            if (sie.len > chunkSize) {
-                                chunkSize = (int) Math.min(sie.len, MAX_CHUNK_SIZE);
+                if (next == null) {
+                    try {
+                        while (true) {
+                            if (!bb.hasRemaining() && buffer.length - index < chunkSize) {
                                 resize();
                             }
+                            final int bytesRead = channel.read(bb);
+                            final int end = bb.position();
+                            if (index >= end) {
+                                return false;
+                            }
+                            try {
+                                next = decoder.wrap(buffer, index, end);
+                                break;
+                            } catch (ShortInputException sie) {
+                                if (bytesRead <= 0) {
+                                    return false;
+                                }
+                                if (sie.len > chunkSize) {
+                                    chunkSize = (int) Math.min(sie.len, MAX_CHUNK_SIZE);
+                                    resize();
+                                }
+                            }
                         }
+                    } catch (IOException io) {
+                        throw new UncheckedIOException(io);
                     }
-                } catch (IOException io) {
-                    throw new UncheckedIOException(io);
                 }
+                return true;
             }
 
             private void resize() {
