@@ -122,14 +122,11 @@ public final class RLPDecoder {
     /**
      * {@link Iterator#hasNext()} may block while reading and may return false if additional bytes are needed to complete the
      * current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
-     *
-     * @param channel   the channel of RLP data
-     * @return  an iterator over the items in the channel
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, int expectedLenBytes, final int maxBufferResize, final long minDelayNanos, final long maxDelayNanos) {
-        return new RLPSequenceIterator(RLPDecoder.this, new byte[Math.max(expectedLenBytes, 8192)], 0) {
-            private static final int DEFAULT_BUFFER_SIZE = 8_192;
-            private static final int SHRINK_THRESHOLD = DEFAULT_BUFFER_SIZE * 2;
+        final int bufferSize = Math.max(expectedLenBytes, 8192);
+        return new RLPSequenceIterator(RLPDecoder.this, new byte[bufferSize], 0) {
+            private static final int SHRINK_THRESHOLD = 16_384;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
             long delayNanos = minDelayNanos;
 
@@ -139,7 +136,7 @@ public final class RLPDecoder {
                     try {
                         while (true) {
                             if (index == bb.capacity()) {
-                                resize(bb.capacity() < SHRINK_THRESHOLD ? bb.capacity() : DEFAULT_BUFFER_SIZE);
+                                resize(bb.capacity() < SHRINK_THRESHOLD ? bb.capacity() : bufferSize);
                             }
                             final int bytesRead = channel.read(bb);
                             final int end = bb.position();
@@ -150,21 +147,20 @@ public final class RLPDecoder {
                                 next = decoder.wrap(buffer, index, end);
                                 break;
                             } catch (ShortInputException sie) {
-                                if (bytesRead <= 0) {
-                                    if (bytesRead == 0 && delayNanos < maxDelayNanos) {
+                                if (bytesRead == -1) return false;
+                                if (bytesRead == 0) {
+                                    if (bb.hasRemaining()) {
+                                        if (delayNanos == maxDelayNanos) return false;
                                         LockSupport.parkNanos(delayNanos);
                                         delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
-                                    } else {
-                                        return false;
                                     }
-                                } else {
-                                    delayNanos = minDelayNanos;
                                 }
                                 if (sie.encodingLen > maxBufferResize) {
-                                    throw new IOException("item length exceeds limit: " + sie.encodingLen);
+                                    throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                                 }
                                 if (!bb.hasRemaining()) {
-                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                    resize(Math.max(bufferSize, (int) sie.encodingLen));
+                                    delayNanos = minDelayNanos;
                                 }
                             }
                         }
@@ -176,17 +172,18 @@ public final class RLPDecoder {
             }
 
             private void resize(int len) {
-                if (len == buffer.length) {
+                final int keptBytes = bb.position() - index;
+                if (len == bb.capacity() && keptBytes == 0) {
                     bb.rewind();
-                } else {
-                    final byte[] newBuffer = new byte[len];
-                    final int keptBytes = bb.position() - index;
-                    if (keptBytes != 0) {
-                        System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                    }
-                    buffer = newBuffer;
-                    bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
+                    index = 0;
+                    return;
                 }
+                final byte[] newBuffer = new byte[len];
+                if (keptBytes != 0) {
+                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                }
+                buffer = newBuffer;
+                bb = ByteBuffer.wrap(buffer, keptBytes, buffer.length - keptBytes);
                 index = 0;
             }
         };
