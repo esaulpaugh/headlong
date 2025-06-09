@@ -120,14 +120,21 @@ public final class RLPDecoder {
     }
 
     /**
-     * {@link Iterator#hasNext()} may block while reading and may return false if additional bytes are needed to complete the
-     * current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
+     * Returns an iterator over the sequence of RLPItems in the given channel. Note that iterator may block while
+     * reading and may return false if additional bytes are needed to complete the current item but
+     * {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
+     *
+     * @param channel   the input channel containing the RLP sequence data
+     * @param expectedLenBytes  the size of the initial read buffer
+     * @param maxBufferResize   iterator throws if a partial item exceeds this length in bytes
+     * @param maxDelayNanos maximum delay before the final read attempt before hasNext stops waiting and returns false
+     * @return  an iterator over the items in the stream
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, int expectedLenBytes, final int maxBufferResize, final long maxDelayNanos) {
-        final int bufferSize = Math.max(expectedLenBytes, 8192);
-        return new RLPSequenceIterator(RLPDecoder.this, new byte[bufferSize], 0) {
+        return new RLPSequenceIterator(RLPDecoder.this, new byte[expectedLenBytes], 0) {
             private static final long MIN_DELAY_NANOS = 50_000L;
-            private static final int BUFFER_SIZE_RESET_THRESHOLD = 16_384;
+            private static final int DEFAULT_BUFFER_SIZE = 8192;
+            private static final int BUFFER_SIZE_RESET_THRESHOLD = DEFAULT_BUFFER_SIZE * 2;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
             long delayNanos = MIN_DELAY_NANOS;
 
@@ -137,7 +144,7 @@ public final class RLPDecoder {
                     try {
                         while (true) {
                             if (index == bb.capacity()) {
-                                resize(bb.capacity() < BUFFER_SIZE_RESET_THRESHOLD ? bb.capacity() : bufferSize);
+                                resize(bb.capacity() < BUFFER_SIZE_RESET_THRESHOLD ? bb.capacity() : DEFAULT_BUFFER_SIZE);
                             }
                             final int bytesRead = channel.read(bb);
                             final int end = bb.position();
@@ -164,7 +171,7 @@ public final class RLPDecoder {
                                     delayNanos = MIN_DELAY_NANOS;
                                 }
                                 if (!bb.hasRemaining()) {
-                                    resize(Math.max(bufferSize, (int) sie.encodingLen));
+                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
                                 }
                             }
                         }
