@@ -116,7 +116,7 @@ public final class RLPDecoder {
     }
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, 0, 65536, 6_400_000);
+        return sequenceIterator(channel, 0, 65536, 640_000L);
     }
 
     /**
@@ -132,11 +132,11 @@ public final class RLPDecoder {
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, int expectedLenBytes, final int maxBufferResize, final long maxDelayNanos) {
         return new RLPSequenceIterator(RLPDecoder.this, new byte[expectedLenBytes], 0) {
-            private static final long MIN_DELAY_NANOS = 50_000L;
+            private static final long INITIAL_DELAY_NANOS = 5_000L;
             private static final int DEFAULT_BUFFER_SIZE = 8192;
             private static final int BUFFER_SIZE_RESET_THRESHOLD = DEFAULT_BUFFER_SIZE * 2;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
-            long delayNanos = MIN_DELAY_NANOS;
+            long delayNanos = INITIAL_DELAY_NANOS;
 
             @Override
             public boolean hasNext() {
@@ -160,14 +160,13 @@ public final class RLPDecoder {
                                     throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                                 }
                                 if (bytesRead <= 0) {
-                                    if (bytesRead == -1) return false;
-                                    if (delayNanos >= maxDelayNanos) {
+                                    if (bytesRead == -1 || delayNanos > maxDelayNanos) {
                                         return false;
                                     }
+                                    delayNanos = Math.min(delayNanos << 1, maxDelayNanos + 1);
                                     LockSupport.parkNanos(delayNanos);
-                                    delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
                                 } else {
-                                    delayNanos = MIN_DELAY_NANOS;
+                                    delayNanos = INITIAL_DELAY_NANOS;
                                 }
                                 if (!bb.hasRemaining()) {
                                     resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
