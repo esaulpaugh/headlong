@@ -147,20 +147,23 @@ public final class RLPDecoder {
                                 next = decoder.wrap(buffer, index, end);
                                 break;
                             } catch (ShortInputException sie) {
-                                if (bytesRead == -1) return false;
-                                if (bytesRead == 0) {
-                                    if (bb.hasRemaining()) {
-                                        if (delayNanos == maxDelayNanos) return false;
-                                        LockSupport.parkNanos(delayNanos);
-                                        delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
-                                    }
-                                }
                                 if (sie.encodingLen > maxBufferResize) {
                                     throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                                 }
+                                if (bytesRead == -1) return false;
+                                if (bytesRead == 0) {
+                                    if (bb.hasRemaining()) {
+                                        if (delayNanos == maxDelayNanos) {
+                                            return false;
+                                        }
+                                        LockSupport.parkNanos(delayNanos);
+                                        delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
+                                    }
+                                } else {
+                                    delayNanos = minDelayNanos;
+                                }
                                 if (!bb.hasRemaining()) {
                                     resize(Math.max(bufferSize, (int) sie.encodingLen));
-                                    delayNanos = minDelayNanos;
                                 }
                             }
                         }
