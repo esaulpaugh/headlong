@@ -26,6 +26,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterators;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -115,7 +116,7 @@ public final class RLPDecoder {
     }
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, 0);
+        return sequenceIterator(channel, 0, 500_000L, 64_000_000);
     }
 
     /**
@@ -125,11 +126,12 @@ public final class RLPDecoder {
      * @param channel   the channel of RLP data
      * @return  an iterator over the items in the channel
      */
-    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, final int expectedLenBytes) {
+    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, int expectedLenBytes, final long minDelayNanos, final long maxDelayNanos) {
         return new RLPSequenceIterator(RLPDecoder.this, new byte[expectedLenBytes], 0) {
             private static final int MAX_CHUNK_SIZE = 1 << 28;
             private int chunkSize = 8192;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
+            long delayNanos = minDelayNanos;
 
             @Override
             public boolean hasNext() {
@@ -149,7 +151,14 @@ public final class RLPDecoder {
                                 break;
                             } catch (ShortInputException sie) {
                                 if (bytesRead <= 0) {
-                                    return false;
+                                    if (bytesRead == 0 && delayNanos < maxDelayNanos) {
+                                        LockSupport.parkNanos(delayNanos);
+                                        delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    delayNanos = minDelayNanos;
                                 }
                                 if (sie.len > chunkSize) {
                                     chunkSize = (int) Math.min(sie.len, MAX_CHUNK_SIZE);
