@@ -143,9 +143,8 @@ public final class RLPDecoder {
                 if (next == null) {
                     try {
                         while (true) {
-                            final int capacity = bb.capacity();
-                            if (index == capacity) {
-                                resize(capacity > DEFAULT_BUFFER_SIZE && capacity < BUFFER_SIZE_RESET_THRESHOLD ? capacity : DEFAULT_BUFFER_SIZE);
+                            if (!bb.hasRemaining()) {
+                                resize(bb.capacity() > DEFAULT_BUFFER_SIZE && bb.capacity() < BUFFER_SIZE_RESET_THRESHOLD ? bb.capacity() : DEFAULT_BUFFER_SIZE);
                             }
                             final int bytesRead = channel.read(bb);
                             final int end = bb.position();
@@ -159,15 +158,13 @@ public final class RLPDecoder {
                                 if (sie.encodingLen > maxBufferResize) {
                                     throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                                 }
-                                if (bytesRead == -1) return false;
-                                if (bytesRead == 0) {
-                                    if (bb.hasRemaining()) {
-                                        if (delayNanos >= maxDelayNanos) {
-                                            return false;
-                                        }
-                                        LockSupport.parkNanos(delayNanos);
-                                        delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
+                                if (bytesRead <= 0) {
+                                    if (bytesRead == -1) return false;
+                                    if (delayNanos >= maxDelayNanos) {
+                                        return false;
                                     }
+                                    LockSupport.parkNanos(delayNanos);
+                                    delayNanos = Math.min(delayNanos << 1, maxDelayNanos);
                                 } else {
                                     delayNanos = MIN_DELAY_NANOS;
                                 }
