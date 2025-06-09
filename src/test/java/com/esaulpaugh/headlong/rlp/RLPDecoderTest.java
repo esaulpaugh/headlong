@@ -846,14 +846,14 @@ public class RLPDecoderTest {
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
         };
         assertThrown(
-                ShortInputException.class,
-                "element @ index 0 exceeds its container: 9223372036854775807 > 9",
+                IllegalArgumentException.class,
+                "length is too great: 9223372036854775807",
                 () -> RLP_STRICT.wrap(bytes)
         );
         bytes[0] = (byte) 0xff;
         assertThrown(
-                ShortInputException.class,
-                "element @ index 0 exceeds its container: 9223372036854775807 > 9",
+                IllegalArgumentException.class,
+                "length is too great: 9223372036854775807",
                 () -> RLP_STRICT.wrap(bytes)
         );
     }
