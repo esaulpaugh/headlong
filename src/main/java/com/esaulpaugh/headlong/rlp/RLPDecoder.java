@@ -164,7 +164,9 @@ public final class RLPDecoder {
                                 if (sie.encodingLen > maxBufferResize) {
                                     throw new IOException("item length exceeds limit: " + sie.encodingLen);
                                 }
-                                resize(Math.max(DEFAULT_BUFFER_SIZE, (int)sie.encodingLen));
+                                if (!bb.hasRemaining()) {
+                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                }
                             }
                         }
                     } catch (IOException io) {
