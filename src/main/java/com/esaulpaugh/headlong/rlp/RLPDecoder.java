@@ -138,9 +138,8 @@ public final class RLPDecoder {
                 if (next == null) {
                     try {
                         while (true) {
-                            final int cap = bb.capacity();
-                            if (index > cap - 200) {
-                                resize(cap < SHRINK_THRESHOLD ? cap : DEFAULT_BUFFER_SIZE);
+                            if (index == bb.capacity()) {
+                                resize(bb.capacity() < SHRINK_THRESHOLD ? bb.capacity() : DEFAULT_BUFFER_SIZE);
                             }
                             final int bytesRead = channel.read(bb);
                             final int end = bb.position();
