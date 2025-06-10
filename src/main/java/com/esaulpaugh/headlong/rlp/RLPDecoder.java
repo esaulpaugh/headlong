@@ -140,45 +140,45 @@ public final class RLPDecoder {
 
             @Override
             public boolean hasNext() {
-                if (next == null) {
-                    try {
-                        while (true) {
-                            final int capacity = bb.capacity();
-                            if (index == capacity) {
-                                resize(capacity > DEFAULT_BUFFER_SIZE && capacity < DEFAULT_BUFFER_SIZE * 6 ? capacity : DEFAULT_BUFFER_SIZE);
+                if (next != null) {
+                    return true;
+                }
+                try {
+                    while (true) {
+                        final int capacity = bb.capacity();
+                        if (index == capacity) {
+                            resize(capacity > DEFAULT_BUFFER_SIZE && capacity < DEFAULT_BUFFER_SIZE * 6 ? capacity : DEFAULT_BUFFER_SIZE);
+                        }
+                        final int bytesRead = bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
+                        final int end = bb.position();
+                        if (index >= end) {
+                            return false;
+                        }
+                        try {
+                            next = decoder.wrap(buffer, index, end);
+                            delayNanos = INITIAL_DELAY_NANOS;
+                            return true;
+                        } catch (ShortInputException sie) {
+                            if (sie.encodingLen > maxBufferResize) {
+                                throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                             }
-                            final int bytesRead = bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
-                            final int end = bb.position();
-                            if (index >= end) {
+                            if (bytesRead > 0) {
+                                delayNanos = INITIAL_DELAY_NANOS;
+                                if (bytesRead == Integer.MAX_VALUE) {
+                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                }
+                                continue;
+                            }
+                            if (bytesRead == -1 || delayNanos > maxDelayNanos) {
                                 return false;
                             }
-                            try {
-                                next = decoder.wrap(buffer, index, end);
-                                delayNanos = INITIAL_DELAY_NANOS;
-                                break;
-                            } catch (ShortInputException sie) {
-                                if (sie.encodingLen > maxBufferResize) {
-                                    throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
-                                }
-                                if (bytesRead > 0) {
-                                    delayNanos = INITIAL_DELAY_NANOS;
-                                    if (bytesRead == Integer.MAX_VALUE) {
-                                        resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
-                                    }
-                                    continue;
-                                }
-                                if (bytesRead == -1 || delayNanos > maxDelayNanos) {
-                                    return false;
-                                }
-                                delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
-                                LockSupport.parkNanos(delayNanos);
-                            }
+                            delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
+                            LockSupport.parkNanos(delayNanos);
                         }
-                    } catch (IOException io) {
-                        throw new UncheckedIOException(io);
                     }
+                } catch (IOException io) {
+                    throw new UncheckedIOException(io);
                 }
-                return true;
             }
 
             private void resize(int len) {
