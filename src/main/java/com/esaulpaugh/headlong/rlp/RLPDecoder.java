@@ -168,9 +168,9 @@ public final class RLPDecoder {
                                     LockSupport.parkNanos(delayNanos);
                                 } else {
                                     delayNanos = INITIAL_DELAY_NANOS;
-                                }
-                                if (!bb.hasRemaining()) {
-                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                    if (!bb.hasRemaining()) {
+                                        resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                    }
                                 }
                             }
                         }
