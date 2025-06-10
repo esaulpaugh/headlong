@@ -122,7 +122,8 @@ public final class RLPDecoder {
     /**
      * Returns an iterator over the sequence of RLPItems in the given channel. Note that iterator may block while
      * reading and may return false if additional bytes are needed to complete the current item but
-     * {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1.
+     * {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the responsibility of the caller to close the stream;
+     * the returned iterator does not itself ever call {@link InputStream#close()}.
      *
      * @param channel   the input channel containing the RLP sequence data
      * @param expectedLenBytes  the size of the initial read buffer
@@ -147,7 +148,7 @@ public final class RLPDecoder {
                             if (index == capacity) {
                                 resize(capacity > DEFAULT_BUFFER_SIZE && capacity < BUFFER_SIZE_RESET_THRESHOLD ? capacity : DEFAULT_BUFFER_SIZE);
                             }
-                            final int bytesRead = bb.hasRemaining() ? channel.read(bb) : 0;
+                            final int bytesRead = bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
                             final int end = bb.position();
                             if (index >= end) {
                                 return false;
