@@ -183,12 +183,13 @@ public final class RLPDecoder {
 
             private void resize(int len) {
                 final int keptBytes = bb.position() - index;
-                if (len != bb.capacity() || keptBytes != 0) {
+                if (len == bb.capacity()) {
+                    System.arraycopy(buffer, index, buffer, 0, keptBytes);
+                    bb.position(keptBytes);
+                } else {
                     bb = ByteBuffer.allocate(len);
                     bb.put(buffer, index, keptBytes);
                     buffer = bb.array();
-                } else {
-                    bb.rewind();
                 }
                 index = 0;
             }
