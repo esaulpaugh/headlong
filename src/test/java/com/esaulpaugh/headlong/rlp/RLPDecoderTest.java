@@ -21,8 +21,13 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -877,5 +882,215 @@ public class RLPDecoderTest {
     public void testIteratorRemove() throws Throwable {
         assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.sequenceIterator(new byte[1]).remove());
         assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.listIterator(Strings.decode("c0")).remove());
+    }
+
+    @Test
+    public void testPartialThenCompleteRLP() {
+        CustomChannel channel = new CustomChannel();
+
+        channel.setAvailableBytes(new byte[] { (byte)0x82 });
+        Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(channel);
+        assertFalse(iterator.hasNext());
+        assertFalse(iterator.hasNext());
+
+        channel.addMoreBytes(new byte[2]);
+        channel.setShouldReturnZero(true);
+        assertFalse(iterator.hasNext());
+        channel.setShouldReturnZero(false);
+        assertTrue(iterator.hasNext());
+        channel.close();
+        assertTrue(iterator.hasNext());
+        assertEquals(RLP_STRICT.wrapBits(0x820000), iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testNonBlockingBehavior() {
+        CustomChannel channel = new CustomChannel();
+        Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(channel);
+        assertFalse(iterator.hasNext());
+
+        channel.setAvailableBytes(new byte[0]);
+        assertFalse(iterator.hasNext());
+
+        channel.setAvailableBytes(new byte[] { (byte)0xc1 });
+
+        channel.addMoreBytes(new byte[] { (byte)0xff });
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+
+        assertEquals(RLP_STRICT.wrapBits(0xc1ff), iterator.next());
+
+        assertFalse(iterator.hasNext());
+        channel.close();
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testSizeLimit() throws Throwable {
+        final Random r = TestUtils.seededRandom();
+        CustomChannel mrbc = new CustomChannel();
+        for (int i = 0; i < 3; i++) {
+            final byte[] string = RLPEncoder.string(new byte[8192 + r.nextInt(10_000)]);
+            final int maxResize = r.nextInt(string.length);
+            mrbc.setAvailableBytes(string);
+            Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(mrbc, 0, maxResize, 200_000L);
+            final String msg = "item length exceeds specified limit: " + string.length + " > " + maxResize;
+            assertThrown(UncheckedIOException.class, msg, iter::hasNext);
+            assertThrown(UncheckedIOException.class, msg, iter::next);
+        }
+    }
+
+    private static byte[] rlpList(Random r) {
+        int n = r.nextInt(24);
+        byte[][] items = new byte[n][];
+        for (int i = 0; i < n; i++) {
+            items[i] = rlpString(320, r);
+        }
+        return RLPEncoder.list((Object[])items);
+    }
+
+    private static byte[] rlpString(int maxLen, Random r) {
+        byte[] raw = new byte[2 + r.nextInt(maxLen - 1)];
+        r.nextBytes(raw);
+        return RLPEncoder.string(raw);
+    }
+
+    @Test
+    public void testPartialReads() {
+        final Random r = TestUtils.seededRandom();
+        final int n = 320;
+        final ByteBuffer bb = ByteBuffer.allocate(100 * 16384);
+        for (int z = 0; z < 3; z++) {
+            for (int i = 0; i < n; i++) {
+                final byte[] item = r.nextBoolean()
+                        ? rlpList(r)
+                        : rlpString(9000, r);
+                bb.put(item);
+            }
+
+            byte[] copy = new byte[bb.position()];
+            bb.rewind();
+            bb.get(copy);
+            bb.rewind();
+
+            CustomChannel channel = new CustomChannel(128 + r.nextInt(10_000));
+            channel.setAvailableBytes(copy);
+
+            Iterator<RLPItem> a = RLP_STRICT.sequenceIterator(Arrays.copyOf(copy, copy.length));
+            Iterator<RLPItem> b = RLP_STRICT.sequenceIterator(new ByteArrayInputStream(Arrays.copyOf(copy, copy.length)));
+
+            Iterator<RLPItem> channelIter = RLP_STRICT.sequenceIterator(channel); // Channels.newChannel(new ByteArrayInputStream(copy))
+            int count = 0;
+            for (RLPItem item : (Iterable<? extends RLPItem>) () -> channelIter) {
+                assertEquals(a.next(), item);
+                assertEquals(b.next(), item);
+                count++;
+                if (count == n / 2) break;
+            }
+            final int extra = r.nextInt(50);
+            channel.addMoreBytes(new byte[extra]);
+            int remainder = n - n / 2;
+            for (int i = 0; i < remainder; i++) {
+                RLPItem item = channelIter.next();
+                assertEquals(a.next(), item);
+                assertEquals(b.next(), item);
+                count++;
+            }
+            assertEquals(n, count);
+
+            for (int i = 0; i < extra; i++) {
+                assertEquals('\0', channelIter.next().asChar(true));
+            }
+            assertFalse(channelIter.hasNext());
+            channel.shouldReturnZero = true;
+            assertFalse(channelIter.hasNext());
+        }
+    }
+
+    @Test
+    public void testEmptyChannel() {
+        Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(new CustomChannel());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testChannelFromInputStream() {
+        byte[] rlpData = rlpString(50, TestUtils.seededRandom());
+
+        Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(Channels.newChannel(new ByteArrayInputStream(rlpData)));
+        assertTrue(iterator.hasNext());
+        assertEquals(rlpData.length, iterator.next().encodingLength());
+        assertFalse(iterator.hasNext());
+    }
+
+    static class CustomChannel implements ReadableByteChannel {
+
+        private final List<byte[]> data = new ArrayList<>();
+        private final int maxRead;
+        private int pos = 0;
+
+        public CustomChannel() {
+            this.maxRead = Integer.MAX_VALUE;
+        }
+
+        public CustomChannel(int maxRead) {
+            this.maxRead = maxRead;
+        }
+
+        private boolean open = true;
+        private boolean shouldReturnZero = false; // Simulate no data available
+
+        public void setAvailableBytes(byte[] bytes) {
+            data.clear();
+            data.add(bytes);
+            pos = 0;
+        }
+
+        public void addMoreBytes(byte[] bytes) {
+            data.add(bytes);
+        }
+
+        public void setShouldReturnZero(boolean shouldReturnZero) {
+            this.shouldReturnZero = shouldReturnZero;
+        }
+
+        @Override
+        public int read(ByteBuffer dst) throws IOException {
+            if (!open) return -1;
+            if (shouldReturnZero || data.isEmpty()) return 0;
+
+            int lenSum = -pos;
+            for (byte[] e : data) {
+                lenSum += e.length;
+            }
+
+            int bytesToRead = Math.min(Math.min(dst.remaining(), lenSum), maxRead);
+            lenSum = bytesToRead;
+
+            for (int j = 0; bytesToRead > 0; j++) {
+                byte[] e = data.get(j);
+                if (e.length == 0) continue;
+                final int effectiveLen = e.length - pos;
+                if (bytesToRead < effectiveLen) {
+                    dst.put(e, pos, bytesToRead);
+                    pos += bytesToRead;
+                    bytesToRead = 0;
+                    break;
+                }
+                dst.put(e, pos, effectiveLen);
+                bytesToRead -= effectiveLen;
+                data.set(j, Strings.EMPTY_BYTE_ARRAY);
+                pos = 0;
+            }
+
+            return lenSum - bytesToRead;
+        }
+
+        @Override
+        public boolean isOpen() { return open; }
+
+        @Override
+        public void close() { open = false; }
     }
 }
