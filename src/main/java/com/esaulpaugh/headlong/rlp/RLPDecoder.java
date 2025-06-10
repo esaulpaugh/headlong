@@ -168,7 +168,7 @@ public final class RLPDecoder {
                                     LockSupport.parkNanos(delayNanos);
                                 } else {
                                     delayNanos = INITIAL_DELAY_NANOS;
-                                    if (!bb.hasRemaining()) {
+                                    if (bytesRead == Integer.MAX_VALUE) {
                                         resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
                                     }
                                 }
@@ -182,7 +182,7 @@ public final class RLPDecoder {
             }
 
             private void resize(int len) {
-                final int keptBytes = bb.position() - index;
+                final int keptBytes = bb.position() - index; // pos == limit, pos == capacity
                 if (len == bb.capacity()) {
                     System.arraycopy(buffer, index, buffer, 0, keptBytes);
                     bb.position(keptBytes);
