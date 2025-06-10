@@ -121,9 +121,10 @@ public final class RLPDecoder {
 
     /**
      * Returns an iterator over the sequence of RLPItems in the given channel. Note that iterator may block while
-     * reading and may return false if additional bytes are needed to complete the current item but
-     * {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the responsibility of the caller to close the
-     * channel; the returned iterator does not itself ever call {@link java.nio.channels.Channel#close()}.
+     * waiting for data; consider using inside of a virtual thread. hasNext() may return false if additional bytes are
+     * needed to complete the current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
+     * responsibility of the caller to close the channel; the returned iterator does not itself ever call
+     * {@link java.nio.channels.Channel#close()}.
      *
      * @param channel   input channel containing the RLP sequence data
      * @param expectedLenBytes  size of the initial read buffer
