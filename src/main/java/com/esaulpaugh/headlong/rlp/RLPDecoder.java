@@ -74,7 +74,9 @@ public final class RLPDecoder {
      * InputStreams always report zero bytes available and thus cannot be read this way. {@link Iterator#hasNext} indicates only
      * whether a complete item is immediately available. It is the responsibility of the caller to close the stream; the
      * returned iterator does not itself ever call {@link InputStream#close()}.
-     *
+     * <p>
+     *     For blocking iteration, use {@code sequenceIterator(Channels.newChannel(inputStream))}.
+     * </p>
      * @param is    the stream of RLP data
      * @return  an iterator over the items in the stream
      */
@@ -124,7 +126,7 @@ public final class RLPDecoder {
      * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may return false if additional bytes are
      * needed to complete the current item when {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
      * responsibility of the caller to close the channel; the returned iterator itself never calls {@link java.nio.channels.Channel#close()}.
-     * Consider iterating within a virtual thread to avoid blocking an OS thread.
+     * Consider iterating within a virtual thread to avoid blocking a platform thread.
      *
      * @param channel   input channel containing the RLP sequence data
      * @param expectedLenBytes  initial buffer size
