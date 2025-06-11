@@ -293,10 +293,9 @@ public final class RLPDecoder {
     @SuppressWarnings("unchecked")
     private static <T extends RLPItem> T newLongItem(byte lead, byte offset, boolean isString, byte[] buffer, int index, int containerEnd, boolean lenient) {
         final int lengthOfLength = lead - offset;
-        final int lengthIndex = index + 1;
-        final long dataIndexLong = (long) lengthIndex + lengthOfLength;
+        final long dataIndexLong = index + 1L + lengthOfLength;
         requireInBounds(dataIndexLong, containerEnd, index, dataIndexLong + MIN_LONG_DATA_LEN);
-        final long dataLengthLong = Integers.getLong(buffer, lengthIndex, lengthOfLength, lenient);
+        final long dataLengthLong = Integers.getLong(buffer, index + 1, lengthOfLength, lenient);
         if (dataLengthLong < MIN_LONG_DATA_LEN) {
             throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLengthLong + " for element @ " + index);

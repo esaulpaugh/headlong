@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import java.util.Objects;
 /** A JSON-like notation for RLP items. Call {@link #parse()} get back the raw object hierarchy. */
 public final class Notation {
 
-    private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
+    private static final RLPDecoder DECODER = RLPDecoder.RLP_LENIENT; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
 
     private static final String BEGIN_NOTATION = "(";
     private static final String END_NOTATION = "\n)";
@@ -79,40 +78,9 @@ public final class Notation {
         return forEncoding(RLPEncoder.sequence(objects));
     }
 
-    private static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd) {
-        return new IllegalArgumentException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
-    }
-
-    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) {
-        final int end = elementDataIndex + elementDataLen;
-        if (end <= containerEnd) {
-            return end;
-        }
-        throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
-    }
-
-    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) {
-        if (dataIndex <= containerEnd) {
-            final int lengthIndex = leadByteIndex + 1;
-            final int lengthLen = dataIndex - lengthIndex;
-            final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen, LENIENT);
-            final long end = lengthIndex + lengthLen + dataLenLong;
-            if (end > containerEnd) {
-                throw exceedsContainer(leadByteIndex, end, containerEnd);
-            }
-            final int dataLen = (int) dataLenLong;
-            if (dataLen >= DataType.MIN_LONG_DATA_LEN) {
-                return (int) end;
-            }
-            throw new IllegalArgumentException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
-                    + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
-        }
-        throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
-    }
-
     private static int buildString(StringBuilder sb, byte[] data, int from, int to, boolean addSpace) {
         final int len = to - from;
-        if (!LENIENT && len == 1 && DataType.isSingleByte(data[from])) { // same as (data[from] & 0xFF) < 0x80
+        if (!DECODER.lenient && len == 1 && DataType.isSingleByte(data[from])) { // same as (data[from] & 0xFF) < 0x80
             throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
@@ -157,9 +125,7 @@ public final class Notation {
                 }
                 final int diff = lead - type.offset;
                 final int elementDataIdx = i + 1 + /* lengthOfLength */ (type.isLong ? diff : 0);
-                final int elementEnd = type.isLong
-                        ? getLongElementEnd(data, i, elementDataIdx, end)
-                        : getShortElementEnd(elementDataIdx, diff, end);
+                final int elementEnd = DECODER.wrap(data, i, end).endIndex;
                 i = type.isString
                         ? buildString(sb, data, elementDataIdx, elementEnd, shortList)
                         : type.isLong
