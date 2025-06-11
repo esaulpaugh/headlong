@@ -154,30 +154,29 @@ public final class RLPDecoder {
                         }
                         final int bytesRead = bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
                         final int end = bb.position();
-                        if (index >= end) {
+                        if (index < end) {
+                            try {
+                                next = decoder.wrap(buffer, index, end);
+                                delayNanos = INITIAL_DELAY_NANOS;
+                                return true;
+                            } catch (ShortInputException sie) {
+                                if (sie.encodingLen > maxBufferResize) {
+                                    throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
+                                }
+                                if (bytesRead > 0) {
+                                    delayNanos = INITIAL_DELAY_NANOS;
+                                    if (bytesRead == Integer.MAX_VALUE) {
+                                        resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                        if (bytesRead == -1 || delayNanos > maxDelayNanos) {
                             return false;
                         }
-                        try {
-                            next = decoder.wrap(buffer, index, end);
-                            delayNanos = INITIAL_DELAY_NANOS;
-                            return true;
-                        } catch (ShortInputException sie) {
-                            if (sie.encodingLen > maxBufferResize) {
-                                throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
-                            }
-                            if (bytesRead > 0) {
-                                delayNanos = INITIAL_DELAY_NANOS;
-                                if (bytesRead == Integer.MAX_VALUE) {
-                                    resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
-                                }
-                                continue;
-                            }
-                            if (bytesRead == -1 || delayNanos > maxDelayNanos) {
-                                return false;
-                            }
-                            delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
-                            LockSupport.parkNanos(delayNanos);
-                        }
+                        delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
+                        LockSupport.parkNanos(delayNanos);
                     }
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
