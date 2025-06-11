@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -35,7 +37,7 @@ public final class RLPOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        writeOut(RLPEncoder.string(b));
+        writeOut(b == 0 ? RLPDecoder.RLP_ZERO_BYTE : RLPEncoder.string(Integers.toBytes(b)));
     }
 
     @Override

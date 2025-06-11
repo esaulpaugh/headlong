@@ -496,8 +496,9 @@ public class RLPDecoderTest {
     @Test
     public void chars() {
         byte[][] burma17 = new byte[256][];
-        for (int i = 0; i < burma17.length; i++) {
-            burma17[i] = RLPEncoder.string(i);
+        burma17[0] = RLPDecoder.RLP_ZERO_BYTE;
+        for (int i = 1; i < burma17.length; i++) {
+            burma17[i] = RLPEncoder.string(Integers.toBytes(i));
         }
 
         HashSet<Character> chars = new HashSet<>(512);

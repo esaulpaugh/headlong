@@ -218,8 +218,10 @@ public final class RLPDecoder {
         return wrapList(buffer, index).iterator(this);
     }
 
+    static final byte[] RLP_ZERO_BYTE = new byte[1];
+
     public <T extends RLPItem> T wrapBits(long bits) {
-        return wrap(RLPEncoder.bitsToBytes(bits), 0);
+        return wrap(bits == 0L ? RLP_ZERO_BYTE : Integers.toBytes(bits), 0);
     }
 
     public RLPString wrapString(byte[] buffer) {
