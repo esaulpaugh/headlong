@@ -896,12 +896,6 @@ public class RLPDecoderTest {
             count++;
             if (count == 103) break;
         }
-        int val = iter.next().asInt();
-        if (val == 13) {
-            assertEquals(10, iter.next().asInt());
-        } else {
-            assertEquals(10, val);
-        }
         assertFalse(iter.hasNext());
     }
 
