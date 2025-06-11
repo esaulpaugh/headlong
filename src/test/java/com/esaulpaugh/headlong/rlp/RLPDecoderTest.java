@@ -890,7 +890,18 @@ public class RLPDecoderTest {
         FileChannel fileChannel = TestUtils.getFileResourceChannel("tests/headlong/tests/abi.json");
 
         Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(fileChannel);
-        assertEquals(104, RLPDecoder.stream(iter).count());
+        int count = 0;
+        for (RLPItem it : (Iterable<? extends RLPItem>) () -> iter) {
+            assertEquals(1, it.encodingLength());
+            count++;
+            if (count == 103) break;
+        }
+        int val = iter.next().asInt();
+        if (val == 13) {
+            assertEquals(10, iter.next().asInt());
+        } else {
+            assertEquals(10, val);
+        }
         assertFalse(iter.hasNext());
     }
 
