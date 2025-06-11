@@ -27,6 +27,7 @@ import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -882,6 +883,15 @@ public class RLPDecoderTest {
     public void testIteratorRemove() throws Throwable {
         assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.sequenceIterator(new byte[1]).remove());
         assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.listIterator(Strings.decode("c0")).remove());
+    }
+
+    @Test
+    public void testFileChannel() {
+        FileChannel fileChannel = TestUtils.getFileResourceChannel("tests/headlong/tests/abi.json");
+
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(fileChannel);
+        assertEquals(104, RLPDecoder.stream(iter).count());
+        assertFalse(iter.hasNext());
     }
 
     @Test

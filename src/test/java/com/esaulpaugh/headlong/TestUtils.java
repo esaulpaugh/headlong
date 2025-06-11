@@ -32,8 +32,10 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -257,11 +259,26 @@ public final class TestUtils {
     }
 
     public static InputStream getFileResource(ClassLoader classLoader, String resourceName) throws IOException {
+        return getFileResourceURL(classLoader, resourceName).openStream();
+    }
+
+    public static FileChannel getFileResourceChannel(String resourceName) {
+        try {
+            URL url = getFileResourceURL(Thread.currentThread().getContextClassLoader(), resourceName);
+            return "file".equals(url.getProtocol())
+                    ? FileChannel.open(Paths.get(url.toURI()), StandardOpenOption.READ)
+                    : null;
+        } catch (IOException | URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static URL getFileResourceURL(ClassLoader classLoader, String resourceName) throws IOException {
         URL url = classLoader.getResource(resourceName);
         if (url == null) {
             throw new IOException("resource not found");
         }
-        return url.openStream();
+        return url;
     }
 
     public static byte[] parsePrimitiveToBytes(JsonElement in) {
