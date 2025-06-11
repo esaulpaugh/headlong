@@ -70,8 +70,9 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns an iterator over the sequence of RLPItems in the given {@link InputStream}. {@link Iterator#hasNext} indicates
-     * only whether items are immediately available. It is the responsibility of the caller to close the stream; the
+     * Returns a non-blocking iterator which relies on {@link InputStream#available()} and buffers available bytes eagerly. Some
+     * InputStreams always report zero bytes available and thus cannot be read this way. {@link Iterator#hasNext} indicates only
+     * whether a complete item is immediately available. It is the responsibility of the caller to close the stream; the
      * returned iterator does not itself ever call {@link InputStream#close()}.
      *
      * @param is    the stream of RLP data
@@ -120,14 +121,13 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns an iterator over the sequence of RLPItems in the given channel. Note that iterator may block while
-     * waiting for data; consider using inside of a virtual thread. hasNext() may return false if additional bytes are
-     * needed to complete the current item but {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
-     * responsibility of the caller to close the channel; the returned iterator does not itself ever call
-     * {@link java.nio.channels.Channel#close()}.
+     * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may return false if additional bytes are
+     * needed to complete the current item when {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
+     * responsibility of the caller to close the channel; the returned iterator itself never calls {@link java.nio.channels.Channel#close()}.
+     * Consider iterating within a virtual thread to avoid blocking an OS thread.
      *
      * @param channel   input channel containing the RLP sequence data
-     * @param expectedLenBytes  size of the initial read buffer
+     * @param expectedLenBytes  initial buffer size
      * @param maxBufferResize   iterator throws if a partial item would exceed this length in bytes
      * @param maxDelayNanos highest delay interval before hasNext ends read retries and returns false
      * @return  an iterator over the items in the stream

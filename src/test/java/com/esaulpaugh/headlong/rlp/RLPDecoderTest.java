@@ -50,6 +50,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RLPDecoderTest {
@@ -887,15 +888,24 @@ public class RLPDecoderTest {
 
     @Test
     public void testFileChannel() {
-        FileChannel fileChannel = TestUtils.getFileResourceChannel("tests/headlong/tests/abi.json");
+        final String resource = "tests/headlong/tests/abi.json";
+        FileChannel fileChannel = TestUtils.getFileResourceChannel(resource);
+        assertNotNull(fileChannel);
+        read103(fileChannel);
 
-        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(fileChannel);
+        fileChannel = TestUtils.getFileResourceChannel(resource);
+        assertNotNull(fileChannel);
+        read103(Channels.newChannel(Channels.newInputStream(fileChannel)));
+    }
+
+    private static void read103(ReadableByteChannel channel) {
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel);
         int count = 0;
         for (RLPItem it : (Iterable<? extends RLPItem>) () -> iter) {
             assertEquals(1, it.encodingLength());
             count++;
-            if (count == 103) break;
         }
+        assertEquals(103, count);
         assertFalse(iter.hasNext());
     }
 
