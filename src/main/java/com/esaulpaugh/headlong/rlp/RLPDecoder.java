@@ -60,7 +60,7 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns an iterator over the sequence of RLP items starting at {@code index}.
+     * Returns an iterator over the sequence of RLP items starting at {@code index}. Not thread-safe.
      *
      * @param buffer the array containing the sequence
      * @param index  the index of the sequence
@@ -74,7 +74,7 @@ public final class RLPDecoder {
      * Returns a non-blocking iterator which relies on {@link InputStream#available()} and buffers available bytes eagerly. Some
      * InputStreams always report zero bytes available and thus cannot be read this way. {@link Iterator#hasNext} indicates only
      * whether a complete item is immediately available. It is the responsibility of the caller to close the stream; the
-     * returned iterator does not itself ever call {@link InputStream#close()}.
+     * returned iterator does not itself ever call {@link InputStream#close()}. Not thread-safe.
      * <p>
      *     For blocking iteration, use {@code sequenceIterator(Channels.newChannel(inputStream))}.
      * </p>
@@ -120,28 +120,30 @@ public final class RLPDecoder {
     }
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, 0, 65536, 640_000L);
+        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, 65536, 640_000L);
     }
+
+    private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     /**
      * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may return false if additional bytes are
-     * needed to complete the current item when {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
-     * responsibility of the caller to close the channel; the returned iterator itself never calls {@link java.nio.channels.Channel#close()}.
-     * {@link ClosedChannelException}s cause hasNext to return false. Consider iterating within a virtual thread to avoid
-     * blocking a platform thread.
+     * needed to complete the current item when {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1 or if the channel
+     * has been closed. It is the responsibility of the caller to close the channel; the returned iterator itself never
+     * calls {@link java.nio.channels.Channel#close()}. Consider iterating within a virtual thread to avoid
+     * blocking a platform thread. Not thread-safe.
      *
      * @param channel   input channel containing the RLP sequence data
-     * @param expectedLenBytes  initial buffer size
+     * @param initialBuffer  initial buffer to use; if null, a default-sized buffer is allocated
      * @param maxBufferResize   iterator throws if a partial item would exceed this length in bytes
      * @param maxDelayNanos highest delay interval before hasNext ends read retries and returns false
      * @return  an iterator over the items in the stream
      */
-    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, int expectedLenBytes, final int maxBufferResize, final long maxDelayNanos) {
-        return new RLPSequenceIterator(RLPDecoder.this, new byte[expectedLenBytes], 0) {
+    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos) {
+        return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_BUFFER_SIZE] : initialBuffer, 0) {
             private static final long INITIAL_DELAY_NANOS = 5_000L;
-            private static final int DEFAULT_BUFFER_SIZE = 8192;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
             private long delayNanos = INITIAL_DELAY_NANOS;
+            private boolean channelClosed = false;
 
             @Override
             public boolean hasNext() {
@@ -154,7 +156,7 @@ public final class RLPDecoder {
                         if (index == capacity) {
                             resize(capacity > DEFAULT_BUFFER_SIZE && capacity < DEFAULT_BUFFER_SIZE * 6 ? capacity : DEFAULT_BUFFER_SIZE);
                         }
-                        final int bytesRead = bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
+                        final int bytesRead = !channelClosed && bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
                         final int end = bb.position();
                         if (index < end) {
                             try {
@@ -162,6 +164,9 @@ public final class RLPDecoder {
                                 delayNanos = INITIAL_DELAY_NANOS;
                                 return true;
                             } catch (ShortInputException sie) {
+                                if (channelClosed) {
+                                    return false;
+                                }
                                 if (sie.encodingLen > maxBufferResize) {
                                     throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
                                 }
@@ -174,14 +179,16 @@ public final class RLPDecoder {
                                 }
                             }
                         }
-                        if (bytesRead == -1 || delayNanos > maxDelayNanos) {
+                        if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
                             break;
                         }
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
                 } catch (ClosedChannelException ignored) {
-                    /* fall through */
+                    channelClosed = true;
+                    // don't immediately return false, try to parse a buffered item
+                    return hasNext(); // recurse once
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
