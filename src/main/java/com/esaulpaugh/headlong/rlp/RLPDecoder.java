@@ -276,19 +276,19 @@ public final class RLPDecoder {
     }
 
     private static RLPString newStringShort(byte[] buffer, int index, byte lead, int containerEnd, boolean lenient) {
-        final int dataIndex = index + 1;
         final int dataLength = lead - STRING_SHORT_OFFSET;
-        final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, index, 0L);
-        if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
+        final long dataIndexLong = index + 1L;
+        final int endIndex = requireInBounds(dataIndexLong + dataLength, containerEnd, index, 0L); // implicitly validates dataIndexLong since dataLength is in [0,55]
+        if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[(int)dataIndexLong])) {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
-        return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
+        return new RLPString(buffer, index, (int)dataIndexLong, dataLength, endIndex);
     }
 
     private static RLPList newListShort(byte[] buffer, int index, byte lead, int containerEnd) {
-        final int dataIndex = index + 1;
         final int dataLength = lead - LIST_SHORT_OFFSET;
-        return new RLPList(buffer, index, dataIndex, dataLength, requireInBounds((long) dataIndex + dataLength, containerEnd, index, 0L));
+        final long dataIndex = index + 1L;
+        return new RLPList(buffer, index, (int)dataIndex, dataLength, requireInBounds(dataIndex + dataLength, containerEnd, index, 0L));
     }
 
     @SuppressWarnings("unchecked")
