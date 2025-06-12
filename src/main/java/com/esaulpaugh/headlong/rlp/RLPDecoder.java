@@ -127,7 +127,8 @@ public final class RLPDecoder {
      * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may return false if additional bytes are
      * needed to complete the current item when {@link ReadableByteChannel#read(ByteBuffer)} returns 0 or -1. It is the
      * responsibility of the caller to close the channel; the returned iterator itself never calls {@link java.nio.channels.Channel#close()}.
-     * Consider iterating within a virtual thread to avoid blocking a platform thread.
+     * {@link ClosedChannelException}s cause hasNext to return false. Consider iterating within a virtual thread to avoid
+     * blocking a platform thread.
      *
      * @param channel   input channel containing the RLP sequence data
      * @param expectedLenBytes  initial buffer size
@@ -174,16 +175,17 @@ public final class RLPDecoder {
                             }
                         }
                         if (bytesRead == -1 || delayNanos > maxDelayNanos) {
-                            return false;
+                            break;
                         }
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
-                } catch (ClosedChannelException cce) {
-                    return false;
+                } catch (ClosedChannelException ignored) {
+                    /* fall through */
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
+                return false;
             }
 
             private void resize(int len) {
