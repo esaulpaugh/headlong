@@ -165,7 +165,7 @@ public final class RLPDecoder {
                                 return true;
                             } catch (ShortInputException sie) {
                                 if (channelClosed) {
-                                    return false;
+                                    break;
                                 }
                                 if (sie.encodingLen > maxBufferResize) {
                                     throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
