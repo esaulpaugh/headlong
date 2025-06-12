@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -178,6 +179,8 @@ public final class RLPDecoder {
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
+                } catch (ClosedChannelException cce) {
+                    return false;
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
