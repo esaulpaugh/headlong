@@ -156,7 +156,7 @@ public final class RLPDecoder {
                         if (index == capacity) {
                             resize(capacity > DEFAULT_BUFFER_SIZE && capacity < DEFAULT_BUFFER_SIZE * 6 ? capacity : DEFAULT_BUFFER_SIZE);
                         }
-                        final int bytesRead = !channelClosed && bb.hasRemaining() ? channel.read(bb) : Integer.MAX_VALUE;
+                        final int bytesRead = channelClosed || !bb.hasRemaining() ? Integer.MAX_VALUE : channel.read(bb);
                         final int end = bb.position();
                         if (index < end) {
                             try {
@@ -164,15 +164,12 @@ public final class RLPDecoder {
                                 delayNanos = INITIAL_DELAY_NANOS;
                                 return true;
                             } catch (ShortInputException sie) {
-                                if (channelClosed) {
-                                    break;
-                                }
-                                if (sie.encodingLen > maxBufferResize) {
-                                    throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
-                                }
-                                if (bytesRead > 0) {
+                                if (!channelClosed && bytesRead > 0) {
                                     delayNanos = INITIAL_DELAY_NANOS;
                                     if (bytesRead == Integer.MAX_VALUE) {
+                                        if (sie.encodingLen > maxBufferResize) {
+                                            throw new IOException("item length exceeds specified limit: " + sie.encodingLen + " > " + maxBufferResize);
+                                        }
                                         resize(Math.max(DEFAULT_BUFFER_SIZE, (int) sie.encodingLen));
                                     }
                                     continue;
