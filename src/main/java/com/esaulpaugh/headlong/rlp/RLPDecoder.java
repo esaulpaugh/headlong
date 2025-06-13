@@ -167,11 +167,14 @@ public final class RLPDecoder {
                                 if (!channelClosed && bytesRead > 0) {
                                     delayNanos = INITIAL_DELAY_NANOS;
                                     if (bytesRead == Integer.MAX_VALUE) {
-                                        final long resize = Math.max(DEFAULT_BUFFER_SIZE, sie.encodingLen);
-                                        if (resize > maxBufferResize) {
-                                            throw new IOException("resize would exceed limit: " + resize + " > " + maxBufferResize);
+                                        final long preferredSize = Math.max(DEFAULT_BUFFER_SIZE, sie.encodingLen);
+                                        if (maxBufferResize >= preferredSize) {
+                                            resize((int) preferredSize);
+                                        } else if (maxBufferResize >= sie.encodingLen) {
+                                            resize(maxBufferResize);
+                                        } else {
+                                            throw new IOException("resize would exceed limit: " + sie.encodingLen + " > " + maxBufferResize);
                                         }
-                                        resize((int) resize);
                                     }
                                     continue;
                                 }
@@ -323,7 +326,7 @@ public final class RLPDecoder {
 
     private static int requireInBounds(long val, int containerEnd, int index, long encodingLen) {
         if (val > containerEnd) {
-            throw new ShortInputException("element @ index " + index + " exceeds its container: " + val + " > " + containerEnd, encodingLen);
+            throw new ShortInputException("element @ index " + index + " exceeds its container: " + val + " > " + containerEnd, encodingLen != 0L ? encodingLen : val);
         }
         return (int) val;
     }
