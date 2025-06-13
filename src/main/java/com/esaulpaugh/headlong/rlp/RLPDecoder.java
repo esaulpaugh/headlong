@@ -119,11 +119,11 @@ public final class RLPDecoder {
         };
     }
 
-    public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, 65536, 640_000L);
-    }
-
     private static final int DEFAULT_BUFFER_SIZE = 8192;
+
+    public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
+        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_BUFFER_SIZE << 3, 640_000L);
+    }
 
     /**
      * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may return false if additional bytes are
@@ -154,7 +154,7 @@ public final class RLPDecoder {
                     while (true) {
                         final int capacity = bb.capacity();
                         if (index == capacity) {
-                            resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity >= DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
+                            resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
                         }
                         final int bytesRead = channelClosed || !bb.hasRemaining() ? Integer.MAX_VALUE : channel.read(bb);
                         final int end = bb.position();
