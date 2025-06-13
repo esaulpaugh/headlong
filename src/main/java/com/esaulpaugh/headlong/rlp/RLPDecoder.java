@@ -154,7 +154,7 @@ public final class RLPDecoder {
                     while (true) {
                         final int capacity = bb.capacity();
                         if (index == capacity) {
-                            resize(capacity > DEFAULT_BUFFER_SIZE && capacity < DEFAULT_BUFFER_SIZE * 6 ? capacity : DEFAULT_BUFFER_SIZE);
+                            resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity >= DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
                         }
                         final int bytesRead = channelClosed || !bb.hasRemaining() ? Integer.MAX_VALUE : channel.read(bb);
                         final int end = bb.position();
@@ -167,11 +167,7 @@ public final class RLPDecoder {
                                 if (!channelClosed && bytesRead > 0) {
                                     delayNanos = INITIAL_DELAY_NANOS;
                                     if (bytesRead == Integer.MAX_VALUE) {
-                                        long resize = Math.min(maxBufferResize, DEFAULT_BUFFER_SIZE);
-                                        if (resize < sie.encodingLen && (resize = sie.encodingLen) > maxBufferResize) {
-                                            throw new IOException("resize would exceed limit: " + resize + " > " + maxBufferResize);
-                                        }
-                                        resize((int)resize);
+                                        resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), bb.position() - index); // pos == limit, pos == capacity
                                     }
                                     continue;
                                 }
@@ -193,8 +189,15 @@ public final class RLPDecoder {
                 return false;
             }
 
-            private void resize(int len) {
-                final int keptBytes = bb.position() - index; // pos == limit, pos == capacity
+            private int calculateResize(long encodingLen, int defaultSize) throws IOException {
+                long resize = Math.min(maxBufferResize, defaultSize);
+                if (resize < encodingLen && (resize = encodingLen) > maxBufferResize) {
+                    throw new IOException("resize would exceed limit: " + resize + " > " + maxBufferResize);
+                }
+                return (int)resize;
+            }
+
+            private void resize(int len, int keptBytes) {
                 if (len == bb.capacity()) {
                     System.arraycopy(buffer, index, buffer, 0, keptBytes);
                     bb.position(keptBytes);
