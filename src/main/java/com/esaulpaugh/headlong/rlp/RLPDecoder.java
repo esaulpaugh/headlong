@@ -156,7 +156,7 @@ public final class RLPDecoder {
                         if (index == capacity) {
                             resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
                         }
-                        final int bytesRead = channelClosed || !bb.hasRemaining() ? Integer.MAX_VALUE : channel.read(bb);
+                        final int bytesRead = (channelClosed || !bb.hasRemaining()) ? Integer.MAX_VALUE : channel.read(bb);
                         final int end = bb.position();
                         if (index < end) {
                             try {
@@ -181,8 +181,7 @@ public final class RLPDecoder {
                     }
                 } catch (ClosedChannelException ignored) {
                     channelClosed = true;
-                    // don't immediately return false, try to parse a buffered item
-                    return hasNext(); // recurse once
+                    return hasNext(); // recurse once to try to decode an already-buffered item
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
