@@ -167,8 +167,8 @@ public final class RLPDecoder {
                                 if (!channelClosed && bytesRead > 0) {
                                     delayNanos = INITIAL_DELAY_NANOS;
                                     if (bytesRead == Integer.MAX_VALUE) {
-                                        long resize = Math.max(DEFAULT_BUFFER_SIZE, sie.encodingLen);
-                                        if (resize > maxBufferResize && (resize = maxBufferResize) < sie.encodingLen) {
+                                        long resize = Math.min(DEFAULT_BUFFER_SIZE, maxBufferResize);
+                                        if (resize < sie.encodingLen && (resize = sie.encodingLen) > maxBufferResize) {
                                             throw new IOException("resize would exceed limit: " + sie.encodingLen + " > " + maxBufferResize);
                                         }
                                         resize((int)resize);
