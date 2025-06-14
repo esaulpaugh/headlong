@@ -1,268 +1,166 @@
 <?xml version="1.0" encoding="US-ASCII"?>
-<project name="headlong" default="all">
+<project name="headlong" default="all" basedir=".">
 
-  <property name="gson.version" value="2.13.1" />
-  <property name="gson_path" value=".m2/repository/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
+  <!-- Project Properties -->
   <property name="project.name" value="headlong" />
   <property name="project.version" value="13.3.0-SNAPSHOT" />
 
+  <tstamp>
+    <format property="TODAY" pattern="MMMM dd yyyy" />
+  </tstamp>
+
+  <!-- Directory Structure -->
+  <property name="src.main.dir" value="${basedir}/src/main/java" />
+  <property name="src.test.dir" value="${basedir}/src/test/java" />
+  <property name="src.test.resources.dir" value="${basedir}/src/test/resources" />
+  <property name="build.dir" value="${basedir}/build" />
+  <property name="build.main.dir" value="${build.dir}/classes/java/main" />
+  <property name="build.test.dir" value="${build.dir}/classes/java/test" />
+  <property name="build.lib.dir" value="${build.dir}/lib" />
+
+  <!-- Compiler Settings -->
+  <property name="java.source.version" value="1.8" /><!--release 8 -source 8 -target 8 -->
+  <property name="java.target.version" value="1.8" />
+  <property name="compiler.encoding" value="US-ASCII" />
+  <property name="compiler.debug" value="true" />
+  <property name="compiler.deprecation" value="false" />
+  <property name="compiler.max.memory" value="700m" />
+
+  <!-- Dependency Versions -->
+  <property name="gson.version" value="2.13.1" />
   <property name="junit.jupiter.version" value="5.11.4" />
-  <property name="junit.jupiter.api.path" value=".m2/repository/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
-  <property name="junit.jupiter.engine.path" value=".m2/repository/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
-  <property name="junit.platform.commons.path" value=".m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar" />
-  <property name="junit.platform.engine.path" value=".m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar" />
-  <property name="junit.platform.launcher.path" value=".m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar" />
-  <property name="opentest4j.path" value=".m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" />
-  <property name="bcprov.jdk14.path" value=".m2/repository/org/bouncycastle/bcprov-jdk14/1.80/bcprov-jdk14-1.80.jar" />
+  <property name="junit.platform.version" value="1.11.4" />
+  <property name="opentest4j.version" value="1.3.0" />
+  <property name="bcprov.version" value="1.80" />
 
-  <property name="compiler.debug" value="on"/>
-  <property name="compiler.generate.no.warnings" value="off"/>
-  <property name="compiler.args" value=""/><!--release 8 -source 8 -target 8 -->
-  <property name="compiler.max.memory" value="700m"/>
-  <patternset id="ignored.files">
-    <exclude name="**/*.hprof/**"/>
-    <exclude name="**/*.pyc/**"/>
-    <exclude name="**/*.pyo/**"/>
-    <exclude name="**/*.rbc/**"/>
-    <exclude name="**/*.yarb/**"/>
-    <exclude name="**/*~/**"/>
-    <exclude name="**/.DS_Store/**"/>
-    <exclude name="**/.git/**"/>
-    <exclude name="**/.hg/**"/>
-    <exclude name="**/.svn/**"/>
-    <exclude name="**/CVS/**"/>
-    <exclude name="**/__pycache__/**"/>
-    <exclude name="**/_svn/**"/>
-    <exclude name="**/vssver.scc/**"/>
-    <exclude name="**/vssver2.scc/**"/>
-  </patternset>
-  <patternset id="library.patterns">
-    <include name="*.war"/>
-    <include name="*.swc"/>
-    <include name="*.apk"/>
-    <include name="*.zip"/>
-    <include name="*.egg"/>
-    <include name="*.ear"/>
-    <include name="*.ane"/>
-    <include name="*.jar"/>
-    <include name="*.klib"/>
-  </patternset>
+  <!-- Maven Repository Paths -->
+  <property name="maven.repo" value="${user.home}/.m2/repository" />
+
+  <!-- Library Paths -->
+  <property name="gson.path" value=".m2/repository/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
+  <property name="junit.api.jar" value="${maven.repo}/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
+  <property name="junit.engine.jar" value="${maven.repo}/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
+  <property name="junit.platform.commons.jar" value="${maven.repo}/org/junit/platform/junit-platform-commons/${junit.platform.version}/junit-platform-commons-${junit.platform.version}.jar" />
+  <property name="junit.platform.engine.jar" value="${maven.repo}/org/junit/platform/junit-platform-engine/${junit.platform.version}/junit-platform-engine-${junit.platform.version}.jar" />
+  <property name="junit.platform.launcher.jar" value="${maven.repo}/org/junit/platform/junit-platform-launcher/${junit.platform.version}/junit-platform-launcher-${junit.platform.version}.jar" />
+  <property name="opentest4j.jar" value="${maven.repo}/org/opentest4j/opentest4j/${opentest4j.version}/opentest4j-${opentest4j.version}.jar" />
+  <property name="bcprov.jar" value="${maven.repo}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="junit.console.jar" value="${basedir}/lib/junit-platform-console-standalone-${junit.platform.version}.jar" />
+
+  <!-- Classpaths -->
+  <path id="compile.classpath">
+    <pathelement location="${user.home}/${gson.path}" />
+  </path>
+
+  <path id="test.classpath">
+    <pathelement location="${build.main.dir}" />
+    <pathelement location="${user.home}/${gson.path}" />
+    <pathelement location="${junit.api.jar}" />
+    <pathelement location="${junit.engine.jar}" />
+    <pathelement location="${junit.platform.commons.jar}" />
+    <pathelement location="${junit.platform.engine.jar}" />
+    <pathelement location="${junit.platform.launcher.jar}" />
+    <pathelement location="${opentest4j.jar}" />
+    <pathelement location="${bcprov.jar}" />
+  </path>
+
+  <path id="test.runtime.classpath">
+    <path refid="test.classpath" />
+    <pathelement location="${build.test.dir}" />
+    <pathelement location="${junit.console.jar}" />
+  </path>
+
+  <!-- Pattern Sets -->
   <patternset id="compiler.resources">
-    <exclude name="**/?*.java"/>
-    <exclude name="**/?*.form"/>
-    <exclude name="**/?*.class"/>
-    <exclude name="**/?*.groovy"/>
-    <exclude name="**/?*.scala"/>
-    <exclude name="**/?*.flex"/>
-    <exclude name="**/?*.kt"/>
-    <exclude name="**/?*.clj"/>
-    <exclude name="**/?*.aj"/>
+    <exclude name="**/*.java" />
+    <exclude name="**/*.class" />
   </patternset>
-  
-  <!-- JDK definitions -->
-
-  <property name="project.jdk.classpath" value="jdk.classpath"/>
-
-  <!-- Project Libraries -->
-  
-  <path id="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath">
-    <pathelement location="${user.home}/${gson_path}"/>
-  </path>
-
-  <path id="junit.classpath">
-    <pathelement location="${user.home}/${junit.jupiter.api.path}"/>
-    <pathelement location="${user.home}/${junit.jupiter.engine.path}"/>
-    <pathelement location="${user.home}/${junit.platform.commons.path}"/>
-    <pathelement location="${user.home}/${junit.platform.engine.path}"/>
-    <pathelement location="${user.home}/${junit.platform.launcher.path}"/>
-    <pathelement location="${user.home}/${opentest4j.path}"/>
-    <pathelement location="${user.home}/${bcprov.jdk14.path}"/>
-    <!-- add more if needed -->
-  </path>
-
-  <!-- Modules -->
-
-  <!-- Module headlong -->
-  
-  <dirname property="module.headlong.basedir" file="${ant.file}"/>
-  
-
-  <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
-  
-  <property name="compiler.args.headlong" value="-encoding US-ASCII ${compiler.args}"/>
-  
-  <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
-  <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
-
-  <path id="headlong.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="headlong.runtime.production.module.classpath">
-    <pathelement location="${headlong.output.dir}"/>
-  </path>
-  
-  <path id="headlong.module.classpath">
-    <pathelement location="${headlong.output.dir}"/>
-  </path>
-  
-  <path id="headlong.runtime.module.classpath">
-    <pathelement location="${headlong.testoutput.dir}"/>
-    <pathelement location="${headlong.output.dir}"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.headlong">
-    <patternset refid="ignored.files"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.hprof" />
+    <exclude name="**/*~" />
+    <exclude name="**/.DS_Store" />
+    <exclude name="**/.git/**" />
+    <exclude name="**/.hg/**" />
+    <exclude name="**/.svn/**" />
+    <exclude name="**/CVS/**" />
+    <exclude name="**/_svn/**" />
+    <exclude name="**/vssver.scc/**" />
+    <exclude name="**/vssver2.scc/**" />
   </patternset>
-  
-  <patternset id="excluded.from.compilation.headlong">
-    <patternset refid="excluded.from.module.headlong"/>
-  </patternset>
-  
-  
-  <target name="compile.module.headlong" depends="" description="Compile module headlong"/>
 
-  <target name="compile.module.headlong.tests" depends="" description="compile module headlong; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.headlong" description="cleanup module">
-    <delete dir="${headlong.output.dir}"/>
-    <delete dir="${headlong.testoutput.dir}"/>
-    <delete dir="${basedir}/build/lib"/>
-    <delete dir="${basedir}/build/classes"/>
+  <!-- Targets -->
+  <target name="clean" description="Clean all build artifacts">
+    <delete dir="${build.dir}" />
   </target>
-  
-  
-  <!-- Module headlong.main -->
-  
-  <dirname property="headlong.basedir" file="${ant.file}"/>
-  
 
-  <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
-  
-  <property name="compiler.args.headlong.main" value="-encoding US-ASCII ${compiler.args}"/>
-  
-  <property name="headlong.main.output.dir" value="${headlong.basedir}/build/classes/java/main"/>
-  <property name="headlong.main.testoutput.dir" value="${headlong.basedir}/build/classes/java/test"/>
-  
-  <path id="headlong.main.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="headlong.main.module.production.classpath">
-    <path refid="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath"/>
-  </path>
-  
-  <path id="headlong.main.runtime.production.module.classpath">
-    <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath"/>
-  </path>
-  
-  <path id="headlong.main.module.classpath">
-    <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath"/>
-  </path>
-  
-  <path id="headlong.main.runtime.module.classpath">
-    <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.headlong">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.headlong.main">
-    <patternset refid="excluded.from.headlong"/>
-  </patternset>
-  
-  <path id="headlong.main.module.sourcepath">
-    <dirset dir="${headlong.basedir}/src/main">
-      <include name="java"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.main" depends="compile.headlong.production" description="Compile module headlong.main"/>
-  
-  <target name="compile.headlong.production" description="Compile module headlong.main; production classes">
-    <mkdir dir="${headlong.main.output.dir}"/>
-    <javac includeantruntime="false" destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" source="1.8" target="1.8">
-      <compilerarg line="${compiler.args.headlong.main}"/>
-      <bootclasspath refid="headlong.main.module.bootclasspath"/>
-      <classpath refid="headlong.main.module.production.classpath"/>
-      <src refid="headlong.main.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.headlong.main"/>
+  <target name="init" depends="clean" description="Initialize build directories">
+    <mkdir dir="${build.main.dir}" />
+    <mkdir dir="${build.test.dir}" />
+    <mkdir dir="${build.lib.dir}" />
+  </target>
+
+  <target name="compile" depends="init" description="Compile main source code">
+    <javac srcdir="${src.main.dir}"
+           destdir="${build.main.dir}"
+           includeantruntime="false"
+           debug="${compiler.debug}"
+           deprecation="${compiler.deprecation}"
+           encoding="${compiler.encoding}"
+           source="${java.source.version}"
+           target="${java.target.version}"
+           memorymaximumsize="${compiler.max.memory}"
+           fork="true">
+      <classpath refid="compile.classpath" />
     </javac>
-    
-    <copy todir="${headlong.main.output.dir}">
-      <fileset dir="${headlong.basedir}/src/main/java">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
+
+    <copy todir="${build.main.dir}">
+      <fileset dir="${src.main.dir}">
+        <patternset refid="ignored.files" />
+        <patternset refid="compiler.resources" />
       </fileset>
     </copy>
   </target>
 
-  <target name="compile.tests" depends="compile.headlong.production" description="compile module headlong.main; test classes" unless="skip.tests">
-    <mkdir dir="${headlong.main.testoutput.dir}"/>
-    <javac includeantruntime="false"
-           srcdir="${headlong.basedir}/src/test/java"
-           destdir="${headlong.main.testoutput.dir}"
+  <target name="compile-tests" depends="compile" description="Compile test source code" unless="skip.tests">
+    <javac srcdir="${src.test.dir}"
+           destdir="${build.test.dir}"
+           includeantruntime="false"
            debug="${compiler.debug}"
-           nowarn="${compiler.generate.no.warnings}"
+           deprecation="${compiler.deprecation}"
+           encoding="${compiler.encoding}"
+           source="${java.source.version}"
+           target="${java.target.version}"
            memorymaximumsize="${compiler.max.memory}"
-           fork="true"
-           source="1.8"
-           target="1.8">
-      <classpath>
-        <path refid="headlong.main.module.classpath"/>
-        <path refid="junit.classpath"/>
-      </classpath>
+           fork="true">
+      <classpath refid="test.classpath" />
     </javac>
-    <copy todir="${headlong.main.testoutput.dir}">
-      <fileset dir="${headlong.basedir}/src/test/resources"/>
+
+    <copy todir="${build.test.dir}">
+      <fileset dir="${src.test.resources.dir}" >
+        <patternset refid="ignored.files" />
+      </fileset>
     </copy>
   </target>
-  
-  <target name="clean.headlong" description="cleanup module">
-    <delete dir="${headlong.main.output.dir}"/>
-    <delete dir="${headlong.main.testoutput.dir}"/>
-  </target>
 
-  <target name="test">
+  <target name="test" depends="compile-tests" description="Run unit tests" unless="skip.tests">
     <java classname="org.junit.platform.console.ConsoleLauncher" fork="true" failonerror="true">
-      <classpath>
-        <path refid="headlong.main.module.classpath"/>
-        <path refid="junit.classpath"/>
-        <pathelement path="build/classes/java/main"/>
-        <pathelement path="build/classes/java/test"/>
-        <pathelement location="lib/junit-platform-console-standalone-1.11.4.jar"/>
-      </classpath>
-      <arg value="--scan-classpath"/>
-      <arg value="--disable-banner"/>
+      <classpath refid="test.runtime.classpath" />
+      <arg value="--scan-classpath" />
+      <arg value="--disable-banner" />
     </java>
   </target>
 
-  <target name = "build-jar">
-    <jar destfile = "${basedir}/build/lib/headlong-${project.version}.jar"
-         basedir = "${basedir}/build/classes/java/main">
+  <target name="jar" depends="compile" description="Create JAR file">
+    <jar destfile="${build.lib.dir}/headlong-${project.version}.jar" basedir="${build.main.dir}">
       <manifest>
-        <attribute name = "Implementation-Title" value = "${project.name}"/>
-        <attribute name = "Implementation-Version" value = "${project.version}"/>
-        <attribute name= "Automatic-Module-Name" value="com.esaulpaugh.headlong"/>
-        <attribute name= "Created-By" value="Apache Ant"/>
+        <attribute name="Implementation-Title" value="${project.name}" />
+        <attribute name="Implementation-Version" value="${project.version}" />
+        <attribute name="Automatic-Module-Name" value="com.esaulpaugh.headlong" />
+        <attribute name="Build-Date" value="${TODAY}" />
       </manifest>
     </jar>
   </target>
-  
-  <target name="init" description="Build initialization">
-    <!-- Perform any build initialization in this target -->
-  </target>
-  
-  <target name="clean" depends="clean.module.headlong, clean.headlong" description="cleanup all"/>
-  
-  <target name="build.modules" depends="init, clean, compile.module.headlong, compile.main" description="build all modules"/>
-  
-  <target name="all" depends="build.modules" description="build all"/>
+
+  <target name="all" depends="compile, test, jar" description="Complete build with tests and JAR creation" />
+
 </project>
