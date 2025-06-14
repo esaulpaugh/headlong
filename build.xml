@@ -184,7 +184,7 @@
   </path>
   
   
-  <target name="compile.main" depends="compile.headlong.production,compile.tests" description="Compile module headlong.main"/>
+  <target name="compile.main" depends="compile.headlong.production" description="Compile module headlong.main"/>
   
   <target name="compile.headlong.production" description="Compile module headlong.main; production classes">
     <mkdir dir="${headlong.main.output.dir}"/>
