@@ -239,9 +239,7 @@
         <path refid="junit.classpath"/>
         <pathelement path="build/classes/java/main"/>
         <pathelement path="build/classes/java/test"/>
-        <fileset dir="lib">
-          <include name="**/*.jar"/>
-        </fileset>
+        <pathelement location="lib/junit-platform-console-standalone-1.11.4.jar"/>
       </classpath>
       <arg value="--scan-classpath"/>
     </java>
