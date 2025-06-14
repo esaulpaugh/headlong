@@ -6,6 +6,15 @@
   <property name="project.name" value="headlong" />
   <property name="project.version" value="13.3.0-SNAPSHOT" />
 
+  <property name="junit.jupiter.version" value="5.11.4" />
+  <property name="junit.jupiter.api.path" value=".m2/repository/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
+  <property name="junit.jupiter.engine.path" value=".m2/repository/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
+  <property name="junit.platform.commons.path" value=".m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar" />
+  <property name="junit.platform.engine.path" value=".m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar" />
+  <property name="junit.platform.launcher.path" value=".m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar" />
+  <property name="opentest4j.path" value=".m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" />
+  <property name="bcprov.jdk14.path" value=".m2/repository/org/bouncycastle/bcprov-jdk14/1.80/bcprov-jdk14-1.80.jar" />
+
   <property name="compiler.debug" value="on"/>
   <property name="compiler.generate.no.warnings" value="off"/>
   <property name="compiler.args" value=""/><!--release 8 -source 8 -target 8 -->
@@ -60,6 +69,17 @@
     <pathelement location="${user.home}/${gson_path}"/>
   </path>
 
+  <path id="junit.classpath">
+    <pathelement location="${user.home}/${junit.jupiter.api.path}"/>
+    <pathelement location="${user.home}/${junit.jupiter.engine.path}"/>
+    <pathelement location="${user.home}/${junit.platform.commons.path}"/>
+    <pathelement location="${user.home}/${junit.platform.engine.path}"/>
+    <pathelement location="${user.home}/${junit.platform.launcher.path}"/>
+    <pathelement location="${user.home}/${opentest4j.path}"/>
+    <pathelement location="${user.home}/${bcprov.jdk14.path}"/>
+    <!-- add more if needed -->
+  </path>
+
   <!-- Modules -->
 
   <!-- Module headlong -->
@@ -73,7 +93,7 @@
   
   <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
   <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
-  
+
   <path id="headlong.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
@@ -104,7 +124,7 @@
   <target name="compile.module.headlong" depends="compile.module.headlong.production,compile.module.headlong.tests" description="Compile module headlong"/>
   
   <target name="compile.module.headlong.production" description="Compile module headlong; production classes"/>
-  
+
   <target name="compile.module.headlong.tests" depends="compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
   
   <target name="clean.module.headlong" description="cleanup module">
@@ -117,15 +137,15 @@
   
   <!-- Module headlong.main -->
   
-  <dirname property="module.headlong.main.basedir" file="${ant.file}"/>
+  <dirname property="headlong.basedir" file="${ant.file}"/>
   
 
   <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.headlong.main" value="-encoding US-ASCII ${compiler.args}"/>
   
-  <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
-  <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+  <property name="headlong.main.output.dir" value="${headlong.basedir}/build/classes/java/main"/>
+  <property name="headlong.main.testoutput.dir" value="${headlong.basedir}/build/classes/java/test"/>
   
   <path id="headlong.main.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
@@ -151,24 +171,24 @@
   </path>
   
   
-  <patternset id="excluded.from.module.headlong.main">
+  <patternset id="excluded.from.headlong">
     <patternset refid="ignored.files"/>
   </patternset>
   
   <patternset id="excluded.from.compilation.headlong.main">
-    <patternset refid="excluded.from.module.headlong.main"/>
+    <patternset refid="excluded.from.headlong"/>
   </patternset>
   
   <path id="headlong.main.module.sourcepath">
-    <dirset dir="${module.headlong.main.basedir}/src/main">
+    <dirset dir="${headlong.basedir}/src/main">
       <include name="java"/>
     </dirset>
   </path>
   
   
-  <target name="compile.module.headlong.main" depends="compile.module.headlong.main.production,compile.module.headlong.main.tests" description="Compile module headlong.main"/>
+  <target name="compile.main" depends="compile.headlong.production,compile.tests" description="Compile module headlong.main"/>
   
-  <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
+  <target name="compile.headlong.production" description="Compile module headlong.main; production classes">
     <mkdir dir="${headlong.main.output.dir}"/>
     <javac includeantruntime="false" destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" source="1.8" target="1.8">
       <compilerarg line="${compiler.args.headlong.main}"/>
@@ -179,18 +199,52 @@
     </javac>
     
     <copy todir="${headlong.main.output.dir}">
-      <fileset dir="${module.headlong.main.basedir}/src/main/java">
+      <fileset dir="${headlong.basedir}/src/main/java">
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
     </copy>
   </target>
+
+  <target name="compile.tests" depends="compile.headlong.production" description="compile module headlong.main; test classes" unless="skip.tests">
+    <mkdir dir="${headlong.main.testoutput.dir}"/>
+    <javac includeantruntime="false"
+           srcdir="${headlong.basedir}/src/test/java"
+           destdir="${headlong.main.testoutput.dir}"
+           debug="${compiler.debug}"
+           nowarn="${compiler.generate.no.warnings}"
+           memorymaximumsize="${compiler.max.memory}"
+           fork="true"
+           source="1.8"
+           target="1.8">
+      <classpath>
+        <path refid="headlong.main.module.classpath"/>
+        <path refid="junit.classpath"/>
+      </classpath>
+    </javac>
+    <copy todir="${headlong.main.testoutput.dir}">
+      <fileset dir="${headlong.basedir}/src/test/resources"/>
+    </copy>
+  </target>
   
-  <target name="compile.module.headlong.main.tests" depends="compile.module.headlong.main.production" description="compile module headlong.main; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.headlong.main" description="cleanup module">
+  <target name="clean.headlong" description="cleanup module">
     <delete dir="${headlong.main.output.dir}"/>
     <delete dir="${headlong.main.testoutput.dir}"/>
+  </target>
+
+  <target name="test">
+    <java classname="org.junit.platform.console.ConsoleLauncher" fork="true">
+      <classpath>
+        <path refid="headlong.main.module.classpath"/>
+        <path refid="junit.classpath"/>
+        <pathelement path="build/classes/java/main"/>
+        <pathelement path="build/classes/java/test"/>
+        <fileset dir="lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+      <arg value="--scan-classpath"/>
+    </java>
   </target>
 
   <target name = "build-jar">
@@ -209,9 +263,9 @@
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.headlong, clean.module.headlong.main" description="cleanup all"/>
+  <target name="clean" depends="clean.module.headlong, clean.headlong" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.headlong, compile.module.headlong.main" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.headlong, compile.main" description="build all modules"/>
   
   <target name="all" depends="build.modules" description="build all"/>
 </project>
