@@ -231,7 +231,7 @@
   </target>
 
   <target name="test">
-    <java classname="org.junit.platform.console.ConsoleLauncher" fork="true">
+    <java classname="org.junit.platform.console.ConsoleLauncher" fork="true" failonerror="true">
       <classpath>
         <path refid="headlong.main.module.classpath"/>
         <path refid="junit.classpath"/>
