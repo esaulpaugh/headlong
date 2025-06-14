@@ -242,6 +242,7 @@
         <pathelement location="lib/junit-platform-console-standalone-1.11.4.jar"/>
       </classpath>
       <arg value="--scan-classpath"/>
+      <arg value="--disable-banner"/>
     </java>
   </target>
 
