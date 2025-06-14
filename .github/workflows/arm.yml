@@ -30,8 +30,7 @@ jobs:
           java -version
           chmod +x ./gradlew
           ./gradlew build --no-daemon
-          ant \
-          -noinput -buildfile build.xml \
+          ant -noinput -buildfile build.xml \
           -Dgson.path=".gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.1/853ce06c11316b33a8eae5e9095da096a9528b8f/gson-2.13.1.jar" \
           -Djunit.api=".gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.11.4/308315b28e667db4091b2ba1f7aa220d1ddadb97/junit-jupiter-api-5.11.4.jar" \
           -Djunit.engine=".gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.11.4/dc10ec209623986a68ea07f67cdc7d2a65a60355/junit-jupiter-engine-5.11.4.jar" \
