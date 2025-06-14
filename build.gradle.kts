@@ -88,6 +88,7 @@
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+//    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
 //    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
 //
 //    jmhImplementation("commons-codec:commons-codec:1.18.0")
