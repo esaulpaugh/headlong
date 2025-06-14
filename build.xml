@@ -121,11 +121,9 @@
   </patternset>
   
   
-  <target name="compile.module.headlong" depends="compile.module.headlong.production,compile.module.headlong.tests" description="Compile module headlong"/>
-  
-  <target name="compile.module.headlong.production" description="Compile module headlong; production classes"/>
+  <target name="compile.module.headlong" depends="" description="Compile module headlong"/>
 
-  <target name="compile.module.headlong.tests" depends="compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
+  <target name="compile.module.headlong.tests" depends="" description="compile module headlong; test classes" unless="skip.tests"/>
   
   <target name="clean.module.headlong" description="cleanup module">
     <delete dir="${headlong.output.dir}"/>
