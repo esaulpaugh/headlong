@@ -37,29 +37,30 @@
   <property name="maven.repo" value="${user.home}/.m2/repository" />
 
   <!-- Library Paths -->
-  <property name="gson.path" value=".m2/repository/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
-  <property name="junit.api" value=".m2/repository/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
-  <property name="junit.engine" value=".m2/repository/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
-  <property name="junit.platform.commons" value=".m2/repository/org/junit/platform/junit-platform-commons/${junit.platform.version}/junit-platform-commons-${junit.platform.version}.jar" />
-  <property name="junit.platform.engine" value=".m2/repository/org/junit/platform/junit-platform-engine/${junit.platform.version}/junit-platform-engine-${junit.platform.version}.jar" />
-  <property name="junit.platform.launcher" value=".m2/repository/org/junit/platform/junit-platform-launcher/${junit.platform.version}/junit-platform-launcher-${junit.platform.version}.jar" />
+  <property name="gson-path" value=".m2/repository/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
+  <property name="junit-api" value=".m2/repository/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
+  <property name="junit-engine" value=".m2/repository/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
+  <property name="junit-platform-commons" value=".m2/repository/org/junit/platform/junit-platform-commons/${junit.platform.version}/junit-platform-commons-${junit.platform.version}.jar" />
+  <property name="junit-platform-engine" value=".m2/repository/org/junit/platform/junit-platform-engine/${junit.platform.version}/junit-platform-engine-${junit.platform.version}.jar" />
+  <property name="junit-platform-launcher" value=".m2/repository/org/junit/platform/junit-platform-launcher/${junit.platform.version}/junit-platform-launcher-${junit.platform.version}.jar" />
   <property name="opentest4j" value=".m2/repository/org/opentest4j/opentest4j/${opentest4j.version}/opentest4j-${opentest4j.version}.jar" />
   <property name="bcprov" value=".m2/repository/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
+
   <property name="junit.console" value="${basedir}/lib/junit-platform-console-standalone-${junit.platform.version}.jar" />
 
   <!-- Classpaths -->
   <path id="compile.classpath">
-    <pathelement location="${user.home}/${gson.path}" />
+    <pathelement location="${user.home}/${gson-path}" />
   </path>
 
   <path id="test.classpath">
     <pathelement location="${build.main.dir}" />
-    <pathelement location="${user.home}/${gson.path}" />
-    <pathelement location="${user.home}/${junit.api}" />
-    <pathelement location="${user.home}/${junit.engine}" />
-    <pathelement location="${user.home}/${junit.platform.commons}" />
-    <pathelement location="${user.home}/${junit.platform.engine}" />
-    <pathelement location="${user.home}/${junit.platform.launcher}" />
+    <pathelement location="${user.home}/${gson-path}" />
+    <pathelement location="${user.home}/${junit-api}" />
+    <pathelement location="${user.home}/${junit-engine}" />
+    <pathelement location="${user.home}/${junit-platform-commons}" />
+    <pathelement location="${user.home}/${junit-platform-engine}" />
+    <pathelement location="${user.home}/${junit-platform-launcher}" />
     <pathelement location="${user.home}/${opentest4j}" />
     <pathelement location="${user.home}/${bcprov}" />
   </path>
