@@ -68,45 +68,37 @@
   <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/5dbb73dc285fc3f53a43784ac9d319cee9c3db69/bcprov-jdk14-${bcprov.version}.jar" />
 
   <!-- Conditionally use Gradle if -Dgradle-cache=true -->
-  <condition property="gson" value="${gradle.gson}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="gson" value="${gradle.gson}" else="${maven.gson}">
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="gson" value="${maven.gson}" />
 
-  <condition property="junit-api" value="${gradle.junit-api}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="junit-api" value="${gradle.junit-api}" else="${maven.junit-api}">
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="junit-api" value="${maven.junit-api}" />
 
-  <condition property="junit-engine" value="${gradle.junit-engine}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="junit-engine" value="${gradle.junit-engine}" else="${maven.junit-engine}">
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="junit-engine" value="${maven.junit-engine}" />
 
-  <condition property="junit-platform-commons" value="${gradle.junit-platform-commons}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="junit-platform-commons" value="${gradle.junit-platform-commons}" else="${maven.junit-platform-commons}" >
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="junit-platform-commons" value="${maven.junit-platform-commons}" />
 
-  <condition property="junit-platform-engine" value="${gradle.junit-platform-engine}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="junit-platform-engine" value="${gradle.junit-platform-engine}" else="${maven.junit-platform-engine}" >
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="junit-platform-engine" value="${maven.junit-platform-engine}" />
 
-  <condition property="junit-platform-launcher" value="${gradle.junit-platform-launcher}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="junit-platform-launcher" value="${gradle.junit-platform-launcher}" else="${maven.junit-platform-launcher}" >
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="junit-platform-launcher" value="${maven.junit-platform-launcher}" />
 
-  <condition property="opentest4j" value="${gradle.opentest4j}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="opentest4j" value="${gradle.opentest4j}" else="${maven.opentest4j}" >
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="opentest4j" value="${maven.opentest4j}" />
 
-  <condition property="bcprov" value="${gradle.bcprov}">
-    <equals arg1="${gradle-cache}" arg2="true" />
+  <condition property="bcprov" value="${gradle.bcprov}" else="${maven.bcprov}" >
+    <istrue value="${gradle-cache}" />
   </condition>
-  <property name="bcprov" value="${maven.bcprov}" />
 
   <property name="junit.console" value="${basedir}/lib/junit-platform-console-standalone-${junit.platform.version}.jar" />
 
