@@ -34,38 +34,38 @@
   <property name="bcprov.version" value="1.80" />
 
   <!-- Maven Repository Paths -->
-  <property name="m2" value=".m2/repository" />
-  <property name="maven.repo" value="${user.home}/${m2}" />
+  <property name="maven.repo" value="${user.home}/.m2/repository" />
+  <property name="gradle.repo" value="${user.home}/.gradle/caches/modules-2/files-2.1" />
   <property name="gradle-cache" value="false" />
 
   <!-- Library Paths -->
   <!-- Gson -->
-  <property name="maven.gson" value="${m2}/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
-  <property name="gradle.gson" value=".gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/${gson.version}/853ce06c11316b33a8eae5e9095da096a9528b8f/gson-${gson.version}.jar" />
+  <property name="maven.gson" value="${maven.repo}/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
+  <property name="gradle.gson" value="${gradle.repo}/com.google.code.gson/gson/${gson.version}/853ce06c11316b33a8eae5e9095da096a9528b8f/gson-${gson.version}.jar" />
 
   <!-- JUnit -->
-  <property name="maven.junit-api" value="${m2}/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
-  <property name="gradle.junit-api" value=".gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/${junit.jupiter.version}/308315b28e667db4091b2ba1f7aa220d1ddadb97/junit-jupiter-api-${junit.jupiter.version}.jar" />
+  <property name="maven.junit-api" value="${maven.repo}/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
+  <property name="gradle.junit-api" value="${gradle.repo}/org.junit.jupiter/junit-jupiter-api/${junit.jupiter.version}/308315b28e667db4091b2ba1f7aa220d1ddadb97/junit-jupiter-api-${junit.jupiter.version}.jar" />
 
-  <property name="maven.junit-engine" value="${m2}/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
-  <property name="gradle.junit-engine" value=".gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/${junit.jupiter.version}/dc10ec209623986a68ea07f67cdc7d2a65a60355/junit-jupiter-engine-${junit.jupiter.version}.jar" />
+  <property name="maven.junit-engine" value="${maven.repo}/org/junit/jupiter/junit-jupiter-engine/${junit.jupiter.version}/junit-jupiter-engine-${junit.jupiter.version}.jar" />
+  <property name="gradle.junit-engine" value="${gradle.repo}/org.junit.jupiter/junit-jupiter-engine/${junit.jupiter.version}/dc10ec209623986a68ea07f67cdc7d2a65a60355/junit-jupiter-engine-${junit.jupiter.version}.jar" />
 
-  <property name="maven.junit-platform-commons" value="${m2}/org/junit/platform/junit-platform-commons/${junit.platform.version}/junit-platform-commons-${junit.platform.version}.jar" />
-  <property name="gradle.junit-platform-commons" value=".gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/${junit.platform.version}/8898eea3ed0da2641548d602c3e308804f166303/junit-platform-commons-${junit.platform.version}.jar" />
+  <property name="maven.junit-platform-commons" value="${maven.repo}/org/junit/platform/junit-platform-commons/${junit.platform.version}/junit-platform-commons-${junit.platform.version}.jar" />
+  <property name="gradle.junit-platform-commons" value="${gradle.repo}/org.junit.platform/junit-platform-commons/${junit.platform.version}/8898eea3ed0da2641548d602c3e308804f166303/junit-platform-commons-${junit.platform.version}.jar" />
 
-  <property name="maven.junit-platform-engine" value="${m2}/org/junit/platform/junit-platform-engine/${junit.platform.version}/junit-platform-engine-${junit.platform.version}.jar" />
-  <property name="gradle.junit-platform-engine" value=".gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/${junit.platform.version}/21f61b123ad6ac8f7e73971bff3a096c8d8e1cd0/junit-platform-engine-${junit.platform.version}.jar" />
+  <property name="maven.junit-platform-engine" value="${maven.repo}/org/junit/platform/junit-platform-engine/${junit.platform.version}/junit-platform-engine-${junit.platform.version}.jar" />
+  <property name="gradle.junit-platform-engine" value="${gradle.repo}/org.junit.platform/junit-platform-engine/${junit.platform.version}/21f61b123ad6ac8f7e73971bff3a096c8d8e1cd0/junit-platform-engine-${junit.platform.version}.jar" />
 
-  <property name="maven.junit-platform-launcher" value="${m2}/org/junit/platform/junit-platform-launcher/${junit.platform.version}/junit-platform-launcher-${junit.platform.version}.jar" />
-  <property name="gradle.junit-platform-launcher" value=".gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/${junit.platform.version}/3d83c201899d8c5e74e1a5d628eab900342a0e48/junit-platform-launcher-${junit.platform.version}.jar" />
+  <property name="maven.junit-platform-launcher" value="${maven.repo}/org/junit/platform/junit-platform-launcher/${junit.platform.version}/junit-platform-launcher-${junit.platform.version}.jar" />
+  <property name="gradle.junit-platform-launcher" value="${gradle.repo}/org.junit.platform/junit-platform-launcher/${junit.platform.version}/3d83c201899d8c5e74e1a5d628eab900342a0e48/junit-platform-launcher-${junit.platform.version}.jar" />
 
   <!-- opentest4j -->
-  <property name="maven.opentest4j" value="${m2}/org/opentest4j/opentest4j/${opentest4j.version}/opentest4j-${opentest4j.version}.jar" />
-  <property name="gradle.opentest4j" value=".gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/${opentest4j.version}/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-${opentest4j.version}.jar" />
+  <property name="maven.opentest4j" value="${maven.repo}/org/opentest4j/opentest4j/${opentest4j.version}/opentest4j-${opentest4j.version}.jar" />
+  <property name="gradle.opentest4j" value="${gradle.repo}/org.opentest4j/opentest4j/${opentest4j.version}/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-${opentest4j.version}.jar" />
 
   <!-- Bouncy Castle -->
-  <property name="maven.bcprov" value="${m2}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
-  <property name="gradle.bcprov" value=".gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk14/${bcprov.version}/5dbb73dc285fc3f53a43784ac9d319cee9c3db69/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="maven.bcprov" value="${maven.repo}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/5dbb73dc285fc3f53a43784ac9d319cee9c3db69/bcprov-jdk14-${bcprov.version}.jar" />
 
   <!-- Conditionally use Gradle if -Dgradle-cache=true -->
   <condition property="gson" value="${gradle.gson}">
@@ -112,19 +112,19 @@
 
   <!-- Classpaths -->
   <path id="compile.classpath">
-    <pathelement location="${user.home}/${gson}" />
+    <pathelement location="${gson}" />
   </path>
 
   <path id="test.classpath">
     <pathelement location="${build.main.dir}" />
-    <pathelement location="${user.home}/${gson}" />
-    <pathelement location="${user.home}/${junit-api}" />
-    <pathelement location="${user.home}/${junit-engine}" />
-    <pathelement location="${user.home}/${junit-platform-commons}" />
-    <pathelement location="${user.home}/${junit-platform-engine}" />
-    <pathelement location="${user.home}/${junit-platform-launcher}" />
-    <pathelement location="${user.home}/${opentest4j}" />
-    <pathelement location="${user.home}/${bcprov}" />
+    <pathelement location="${gson}" />
+    <pathelement location="${junit-api}" />
+    <pathelement location="${junit-engine}" />
+    <pathelement location="${junit-platform-commons}" />
+    <pathelement location="${junit-platform-engine}" />
+    <pathelement location="${junit-platform-launcher}" />
+    <pathelement location="${opentest4j}" />
+    <pathelement location="${bcprov}" />
   </path>
 
   <path id="test.runtime.classpath">
