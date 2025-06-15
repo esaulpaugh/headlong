@@ -4,6 +4,7 @@
   <!-- Project Properties -->
   <property name="project.name" value="headlong" />
   <property name="project.version" value="13.3.0-SNAPSHOT" />
+  <property name="artifact.name" value="${project.name}-${project.version}" />
 
   <tstamp>
     <format property="TODAY" pattern="MMMM dd yyyy" />
@@ -206,7 +207,7 @@
   </target>
 
   <target name="jar" depends="compile" description="Create JAR file">
-    <jar destfile="${build.lib.dir}/headlong-${project.version}.jar" basedir="${build.main.dir}">
+    <jar destfile="${build.lib.dir}/${artifact.name}.jar" basedir="${build.main.dir}">
       <manifest>
         <attribute name="Implementation-Title" value="${project.name}" />
         <attribute name="Implementation-Version" value="${project.version}" />
@@ -216,6 +217,20 @@
     </jar>
   </target>
 
-  <target name="all" depends="compile, test, jar" description="Complete build with tests and JAR creation" />
+  <target name="sources-jar">
+    <jar destfile="${build.lib.dir}/${artifact.name}-sources.jar" basedir="src/main/java"/>
+  </target>
+
+  <target name="javadoc" depends="compile">
+    <javadoc sourcepath="src/main/java" destdir="${build.lib.dir}/docs/api" failonerror="true">
+      <classpath refid="compile.classpath" />
+    </javadoc>
+  </target>
+
+  <target name="javadoc-jar" depends="javadoc">
+    <jar destfile="${build.lib.dir}/${artifact.name}-javadoc.jar" basedir="${build.lib.dir}/docs/api"/>
+  </target>
+
+  <target name="all" depends="compile, test, jar, sources-jar, javadoc-jar" description="Complete build with tests and JAR creation" />
 
 </project>
