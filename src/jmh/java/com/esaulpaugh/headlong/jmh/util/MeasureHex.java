@@ -59,16 +59,6 @@ public class MeasureHex {
     }
 
     @Benchmark
-    public void largeHexBC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Hex.toHexString(LARGE));
-    }
-
-    @Benchmark
-    public void largeHexCommons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Hex.encodeHexString(LARGE));
-    }
-
-    @Benchmark
     public void largeHexFast(Blackhole blackhole) {
         blackhole.consume(FastHex.encodeToString(LARGE));
     }
@@ -76,16 +66,6 @@ public class MeasureHex {
     @Benchmark
     public void largeHexSlow(Blackhole blackhole) {
         blackhole.consume(slowHex(LARGE));
-    }
-
-    @Benchmark
-    public void smallHexBC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Hex.toHexString(SMALL));
-    }
-
-    @Benchmark
-    public void smallHexCommons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Hex.encodeHexString(SMALL));
     }
 
     @Benchmark
