@@ -51,9 +51,6 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     ArrayType(String canonicalType, Class<A> clazz, ET elementType, int length, Class<?> arrayClass, int flags) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
         this.elementType = elementType;
-        if (length < DYNAMIC_LENGTH || length > MAX_LEN) {
-            throw new AssertionError("" + length);
-        }
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
