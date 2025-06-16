@@ -233,4 +233,60 @@
 
   <target name="all" depends="compile, test, jar, sources-jar, javadoc-jar" description="Complete build with tests and JAR creation" />
 
+  <property name="jmh.version" value="1.37"/>
+
+  <property name="jmh.core" value="${maven.repo}/org/openjdk/jmh/jmh-core/${jmh.version}/jmh-core-${jmh.version}.jar"/>
+  <property name="jmh.ann" value="${maven.repo}/org/openjdk/jmh/jmh-generator-annprocess/${jmh.version}/jmh-generator-annprocess-${jmh.version}.jar"/>
+  <property name="main.class" value="org.openjdk.jmh.Main"/>
+
+  <property name="jopt.version" value="5.0.4"/>
+  <property name="jopt" value="${maven.repo}/net/sf/jopt-simple/jopt-simple/${jopt.version}/jopt-simple-${jopt.version}.jar"/>
+
+  <property name="commons.math3.version" value="3.6.1"/>
+  <property name="commons.math3" value="${maven.repo}/org/apache/commons/commons-math3/${commons.math3.version}/commons-math3-${commons.math3.version}.jar"/>
+
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="generated.dir" value="${build.dir}/generated-sources"/>
+
+  <mkdir dir="${classes.dir}"/>
+  <mkdir dir="${generated.dir}"/>
+
+  <target name="compile-jmh">
+    <javac destdir="${classes.dir}" includeantruntime="false" debug="true">
+      <src path="src/main/java"/>
+      <src path="src/jmh/java"/>
+      <classpath>
+        <pathelement location="${gson}" />
+        <pathelement path="${jmh.core}"/>
+        <pathelement path="${jmh.ann}"/>
+        <pathelement path="${jopt}"/>
+      </classpath>
+      <compilerarg value="-processor"/>
+      <compilerarg value="org.openjdk.jmh.generators.BenchmarkProcessor"/>
+      <compilerarg value="-s"/>
+      <compilerarg value="${generated.dir}"/>
+    </javac>
+  </target>
+
+  <target name="compile-generated" depends="compile-jmh">
+    <javac srcdir="${generated.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true">
+      <classpath>
+        <pathelement path="${classes.dir}"/>
+        <pathelement path="${jmh.core}"/>
+        <pathelement path="${jopt}"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jmh" depends="compile-generated">
+    <java classname="${main.class}" fork="true">
+      <classpath>
+        <pathelement path="${classes.dir}"/>
+        <pathelement path="${jmh.core}"/>
+        <pathelement path="${jopt}"/>
+        <pathelement path="${commons.math3}"/>
+      </classpath>
+    </java>
+  </target>
+
 </project>
