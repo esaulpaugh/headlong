@@ -49,7 +49,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 static String todayUTC() {
-    SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
+    SimpleDateFormat sdf = new SimpleDateFormat("MMMM d yyyy")
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     return sdf.format(new Date())
 }

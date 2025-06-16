@@ -7,7 +7,7 @@
   <property name="artifact.name" value="${project.name}-${project.version}" />
 
   <tstamp>
-    <format property="TODAY" pattern="MMMM dd yyyy" />
+    <format property="TODAY" pattern="MMMM d yyyy" />
   </tstamp>
 
   <!-- Directory Structure -->
