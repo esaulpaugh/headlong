@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.jmh;
 
 import com.esaulpaugh.headlong.jmh.abi.MeasureFunction;
 import com.esaulpaugh.headlong.jmh.abi.MeasurePadding;
-import com.esaulpaugh.headlong.jmh.rlp.MeasureKeyValuePairSort;
 import com.esaulpaugh.headlong.jmh.util.MeasureHex;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -32,7 +31,6 @@ public class Main {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(MeasureFunction.class.getSimpleName())
-                .include(MeasureKeyValuePairSort.class.getSimpleName())
                 .include(MeasurePadding.class.getSimpleName())
                 .include(MeasureHex.class.getSimpleName())
                 .warmupForks(1)
