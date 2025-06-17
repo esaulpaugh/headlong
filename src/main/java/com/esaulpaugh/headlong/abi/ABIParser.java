@@ -43,9 +43,6 @@ public final class ABIParser {
         this(ABIType.FLAGS_NONE, null);
     }
 
-    /**
-     * @param flags flags with which to initialize the parsed {@link ABIObject}s. {@link ABIType#FLAGS_NONE} or {@link ABIType#FLAG_LEGACY_DECODE}
-     */
     public ABIParser(int flags) {
         this(flags, null);
     }
