@@ -86,6 +86,7 @@
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }
 //
+//    testImplementation("org.bouncycastle:bcprov-jdk14:${bcVersion}")
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 //    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
