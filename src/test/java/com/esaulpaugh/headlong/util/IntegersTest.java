@@ -92,11 +92,11 @@ public class IntegersTest {
     @Test
     public void putGetLong() {
         Random rand = TestUtils.seededRandom();
-        byte[] eight = new byte[8];
+        byte[] eight = new byte[9];
         for (long i = 0; i < 20_000; i++) {
             long lo = TestUtils.wildLong(rand);
-            int n = Integers.putLong(lo, eight, 0);
-            long r = Integers.getLong(eight, 0, n, false);
+            int n = Integers.putLong(lo, eight, 1);
+            long r = Integers.getLong(eight, 1, n, false);
             if(lo != r) {
                 throw new AssertionError(lo + "!= " + r);
             }

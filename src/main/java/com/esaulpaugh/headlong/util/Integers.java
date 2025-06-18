@@ -157,7 +157,8 @@ public final class Integers {
         return putLong(val, len(val), o);
     }
 
-    public static int putLong(long val, int len, byte[] o, int i) {
+    public static int putLong(long val, int len, byte[] o, final int index) {
+        int i = index;
         switch (len) { /* cases 8 through 1 fall through */
         case 8: o[i++] = (byte) (val >>> 56);
         case 7: o[i++] = (byte) (val >>> 48);
@@ -167,7 +168,7 @@ public final class Integers {
         case 3: o[i++] = (byte) (val >>> 16);
         case 2: o[i++] = (byte) (val >>> 8);
         case 1: o[i++] = (byte) val;
-        case 0: return i;
+        case 0: return i - index;
         default: throw outOfRangeException(len);
         }
     }
