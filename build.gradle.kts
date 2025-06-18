@@ -39,7 +39,7 @@
 //val javadocJar by tasks.registering(Jar::class) {
 //    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
 //    archiveClassifier.set("javadoc")
-//    from(sourceSets["main"].allSource)
+//    from(tasks.javadoc.get().destinationDir)
 //}
 //
 //artifacts {
