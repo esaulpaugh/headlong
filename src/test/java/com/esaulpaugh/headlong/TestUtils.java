@@ -78,7 +78,8 @@ public final class TestUtils {
      * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
      * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
-    public static long getSeed(final long protoseed) {
+    public static long getSeed(long protoseed) {
+        protoseed ^= 0x3636363636363636L;
         final Runtime runtime = Runtime.getRuntime();
         final Thread t = Thread.currentThread();
         final ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -90,7 +91,7 @@ public final class TestUtils {
                 runtime.totalMemory(),      t.getId(),                  t.getThreadGroup().activeCount(),
                 t.getPriority(),            runtime.availableProcessors()
         };
-        long c = 0x9e3779b97f4a7c15L * rand.nextLong() + System.identityHashCode(vals);
+        long c = 0x9e3779b97f4a7c15L * (rand.nextLong() ^ 0x5C5C5C5C5C5C5C5CL) + System.identityHashCode(vals);
         for (final long v : vals) {
             c = 31L * c + v;
             c ^= c >> 32;
