@@ -92,7 +92,7 @@ public final class TestUtils {
                 System.nanoTime(),          protoseed,                  Double.doubleToLongBits(rand.nextDouble()),
                 System.currentTimeMillis(), rand.nextLong(),            Double.doubleToLongBits(Math.random()),
                 new Object().hashCode(),    runtime.freeMemory(),       System.identityHashCode(new String()),
-                t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt()),
+                t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt() >> 22),
                 runtime.totalMemory(),      t.getId(),                  t.getThreadGroup().activeCount(),
                 t.getPriority(),            rand.hashCode(),            runtime.availableProcessors()
         };
