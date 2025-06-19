@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
@@ -349,10 +350,11 @@ public class TupleTest {
     @Test
     public void fuzzNulls() throws Throwable {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = new Random(TestUtils.getSeed(31 * System.nanoTime() ^ 0x3636363636363636L));
+        final SplittableRandom split = new SplittableRandom(TestUtils.getSeed(31 * System.nanoTime()));
+        final Random r = new Random(split.nextLong());
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
+            MonteCarloTestCase mctc = new MonteCarloTestCase(split.nextLong(), limits, r, k);
             Tuple args = mctc.argsTuple;
             if (args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
@@ -367,7 +369,7 @@ public class TupleTest {
         if(element instanceof Object[]) {
             Object[] eArr = (Object[]) element;
             if(eArr.length > 0) {
-                Object inner = parent[index];
+                Object inner = eArr[eArr.length - 1];
                 if(inner instanceof Object[]) {
                     Object[] innerArr = (Object[]) inner;
                     if(innerArr.length > 0) {

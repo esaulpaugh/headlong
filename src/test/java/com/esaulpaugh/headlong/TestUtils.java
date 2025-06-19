@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -85,13 +86,13 @@ public final class TestUtils {
         final ThreadLocalRandom rand = ThreadLocalRandom.current();
         final long[] vals = new long[] {
                 System.nanoTime(),          protoseed,                  Double.doubleToLongBits(rand.nextDouble()),
-                System.currentTimeMillis(), rand.hashCode(),            Double.doubleToLongBits(Math.random()),
+                System.currentTimeMillis(), rand.nextLong(),            Double.doubleToLongBits(Math.random()),
                 new Object().hashCode(),    runtime.freeMemory(),       System.identityHashCode(new String()),
                 t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt()),
                 runtime.totalMemory(),      t.getId(),                  t.getThreadGroup().activeCount(),
-                t.getPriority(),            runtime.availableProcessors()
+                t.getPriority(),            rand.hashCode(),            runtime.availableProcessors()
         };
-        long c = 0x9e3779b97f4a7c15L * (rand.nextLong() ^ 0x5C5C5C5C5C5C5C5CL) + System.identityHashCode(vals);
+        long c = 0x9e3779b97f4a7c15L * (new SplittableRandom().nextLong() ^ 0x5C5C5C5C5C5C5C5CL) + System.identityHashCode(vals);
         for (final long v : vals) {
             c = 31L * c + v;
             c ^= c >> 32;
