@@ -317,7 +317,7 @@ public final class Integers {
      * integer zero always has zero length.
      *
      * @param val the integer
-     * @return the byte length
+     * @return the length in bytes of the argument's encoding
      */
     public static int len(byte val) {
         return val != 0 ? 1 : 0;
@@ -328,7 +328,7 @@ public final class Integers {
      * integer zero always has zero length.
      *
      * @param val the integer
-     * @return the byte length
+     * @return the length in bytes of the argument's encoding
      */
     public static int len(short val) {
         if (val != 0)
@@ -343,10 +343,10 @@ public final class Integers {
      * integer zero always has zero length.
      *
      * @param val the integer
-     * @return the byte length
+     * @return the length in bytes of the argument's encoding
      */
     public static int len(int val) {
-        return (Integer.SIZE - Integer.numberOfLeadingZeros(val) + 7) / 8;
+        return Integer.SIZE - Integer.numberOfLeadingZeros(val) + 7 >> 3;
     }
 
     /**
@@ -354,14 +354,14 @@ public final class Integers {
      * integer zero always has zero length.
      *
      * @param val the integer
-     * @return the byte length
+     * @return the length in bytes of the argument's encoding
      */
     public static int len(long val) {
-        return (bitLen(val) + 7) / 8;
+        return bitLen(val) + 7 >> 3;
     }
 
     public static int len(BigInteger val) {
-        return (val.bitLength() + 7) / 8; // roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
+        return val.bitLength() + 7 >> 3; // roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
     }
 
     /**

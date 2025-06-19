@@ -93,57 +93,11 @@ public final class BizarroInts {
     }
 
     public static int putLong(long val, byte[] o, int i) {
-        if (val != -1) {
-            byte h = (byte) val;
-            if ((val >>= Byte.SIZE) != -1) {
-                byte g = (byte) val;
-                if ((val >>= Byte.SIZE) != -1) {
-                    byte f = (byte) val;
-                    if ((val >>= Byte.SIZE) != -1) {
-                        byte e = (byte) val;
-                        if ((val >>= Byte.SIZE) != -1) {
-                            byte d = (byte) val;
-                            if ((val >>= Byte.SIZE) != -1) {
-                                byte c = (byte) val;
-                                if ((val >>= Byte.SIZE) != -1) {
-                                    byte b = (byte) val;
-                                    if ((val >>= Byte.SIZE) != -1) {
-                                        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
-                                    } else o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
-                                } else o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
-                            } else o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
-                        } else o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
-                    } else o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
-                } else o[i]=g; o[i+1]=h; return 2;
-            } else o[i]=h; return 1;
-        } else return 0;
+        return Integers.putLong(val, len(val), o, i);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        if (val != -1) {
-            byte h = (byte) val;
-            if ((val >>= Byte.SIZE) != -1) {
-                byte g = (byte) val;
-                if ((val >>= Byte.SIZE) != -1) {
-                    byte f = (byte) val;
-                    if ((val >>= Byte.SIZE) != -1) {
-                        byte e = (byte) val;
-                        if ((val >>= Byte.SIZE) != -1) {
-                            byte d = (byte) val;
-                            if ((val >>= Byte.SIZE) != -1) {
-                                byte c = (byte) val;
-                                if ((val >>= Byte.SIZE) != -1) {
-                                    byte b = (byte) val;
-                                    if ((val >>= Byte.SIZE) != -1) {
-                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 8;
-                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 7;
-                                } else o.put(c).put(d).put(e).put(f).put(g).put(h); return 6;
-                            } else o.put(d).put(e).put(f).put(g).put(h); return 5;
-                        } else o.put(e).put(f).put(g).put(h); return 4;
-                    } else o.put(f).put(g).put(h); return 3;
-                } else o.put(g).put(h); return 2;
-            } else o.put(h); return 1;
-        } else return 0;
+        return Integers.putLong(val, len(val), o);
     }
     // ********* PRIVATE, INTERNAL -- NO RANGE CHECK **********
     private static int _getShortInt(byte[] buffer, int i) {
@@ -252,24 +206,14 @@ public final class BizarroInts {
         return 0;
     }
 
+    /**
+     * Returns the byte length of the argument.
+     *
+     * @param val   the integer
+     * @return the length of its encoding in bytes
+     */
     public static int len(long val) {
-        if (val != -1)
-            if ((val >>= Byte.SIZE) != -1)
-                if ((val >>= Byte.SIZE) != -1)
-                    if ((val >>= Byte.SIZE) != -1)
-                        if ((val >>= Byte.SIZE) != -1)
-                            if ((val >>= Byte.SIZE) != -1)
-                                if ((val >>= Byte.SIZE) != -1)
-                                    if (val >> Byte.SIZE != -1)
-                                        return 8;
-                                    else return 7;
-                                else return 6;
-                            else return 5;
-                        else return 4;
-                    else return 3;
-                else return 2;
-            else return 1;
-        return 0;
+        return bitLen(val) + 7 >> 3;
     }
 
     /**
