@@ -61,8 +61,8 @@ public final class TestUtils {
 
     private TestUtils() {}
 
-    private static final class SecureRandomHolder {
-        static final SecureRandom SR = new SecureRandom();
+    private static final class RandomHolder {
+        static final SplittableRandom SHARED = new SplittableRandom(new SecureRandom().nextLong());
     }
 
     public static Random seededRandom() {
@@ -70,14 +70,18 @@ public final class TestUtils {
     }
 
     public static long getSeed() {
-        return SecureRandomHolder.SR.nextLong();
+        return RandomHolder.SHARED.nextLong();
+    }
+
+    public static SplittableRandom splittableRandom() {
+        return RandomHolder.SHARED.split();
     }
 
     /**
      * Use {@link java.security.SecureRandom} instead.
      *
      * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
-     * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
+     * @return  a short (64-bit), low-quality, non-deterministic seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
     public static long getSeed(long protoseed) {
         protoseed ^= 0x3636363636363636L;
