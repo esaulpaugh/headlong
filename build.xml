@@ -103,6 +103,12 @@
 
   <property name="junit.console" value="${basedir}/lib/junit-platform-console-standalone-${junit.platform.version}.jar" />
 
+  <checksum file="${junit.console}" property="junit.jar.hash" algorithm="SHA-256"/>
+  <condition property="junit.jar.valid">
+    <equals arg1="${junit.jar.hash}" arg2="b016ef6b1c3454d6d7c2c88ce081dabf289699686af6622d6e4e2e1b54b4a2fc"/>
+  </condition>
+  <fail message="JUnit platform JAR checksum mismatch!" unless="junit.jar.valid"/>
+
   <!-- Classpaths -->
   <path id="compile.classpath">
     <pathelement location="${gson}" />
