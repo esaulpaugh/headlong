@@ -463,12 +463,14 @@ public final class TestUtils {
         }
 
         protected void doWork() {
-            byte[] four = new byte[4];
+            byte[] twelve = new byte[12];
             final long end = this.end;
             for (long lo = this.start; lo <= end; lo++) {
                 int i = (int) lo;
-                int len = Integers.putInt(i, four, 0);
-                int r = Integers.getInt(four, 0, len, false);
+                final int offset = i & 7;
+                int len = Integers.putInt(i, twelve, offset);
+                if (len != Integers.len(i)) throw new AssertionError(len);
+                int r = Integers.getInt(twelve, offset, len, false);
                 if (i != r) {
                     throw new AssertionError(i + " !=" + r);
                 }

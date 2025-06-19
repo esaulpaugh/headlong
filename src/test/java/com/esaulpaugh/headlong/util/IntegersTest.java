@@ -85,21 +85,21 @@ public class IntegersTest {
         try {
             pool.invoke(new TestUtils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
         } finally {
-            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(pool, 10L));
+            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(pool, 14L));
         }
     }
 
     @Test
     public void putGetLong() {
-        Random rand = TestUtils.seededRandom();
-        byte[] eight = new byte[9];
-        for (long i = 0; i < 20_000; i++) {
-            long lo = TestUtils.wildLong(rand);
-            int n = Integers.putLong(lo, eight, 1);
-            long r = Integers.getLong(eight, 1, n, false);
-            if(lo != r) {
-                throw new AssertionError(lo + "!= " + r);
-            }
+        final Random rand = TestUtils.seededRandom();
+        final byte[] sixteen = new byte[16];
+        for (long i = 0; i < 10_000; i++) {
+            final int offset = rand.nextInt() & 7;
+            final long orig = TestUtils.wildLong(rand);
+            final int n = Integers.putLong(orig, sixteen, offset);
+            assertEquals(Integers.len(orig), n);
+            final long decoded = Integers.getLong(sixteen, offset, n, false);
+            assertEquals(orig, decoded);
         }
     }
 
