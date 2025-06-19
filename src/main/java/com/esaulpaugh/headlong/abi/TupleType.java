@@ -280,7 +280,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     /**
-     * Decode-with-indices. Decodes only the elements at the specified index values.
+     * Decode-with-indices. Decodes only the elements at the specified index values. NOTE: This method does not advance
+     * the {@link ByteBuffer}'s {@code position}.
      *
      * @param bb    the buffer containing the encoding
      * @param indices   the positions of the elements to decode
