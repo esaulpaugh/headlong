@@ -396,11 +396,10 @@ public final class TestUtils {
     }
 
     public static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
-        Objects.requireNonNull(substr);
         try {
             r.run();
         } catch (Throwable t) {
-            if (clazz.isInstance(t) && t.getMessage() != null && t.getMessage().contains(substr)) {
+            if (clazz.isInstance(t) && substringMatch(t.getMessage(), substr)) {
                 return;
             }
             throw t;
@@ -416,7 +415,7 @@ public final class TestUtils {
             if (clazz.isInstance(t)) {
                 final String msg = t.getMessage();
                 for (String substr : substrings) {
-                    if (msg.contains(substr)) {
+                    if (substringMatch(msg, substr)) {
                         return;
                     }
                 }
@@ -424,6 +423,12 @@ public final class TestUtils {
             throw t;
         }
         throw new AssertionError("no " + clazz.getName() + " thrown");
+    }
+
+    private static boolean substringMatch(String msg, String substring) {
+        return msg != null
+                ? msg.contains(substring)
+                : substring == null;
     }
 
     public static class IntTask extends RecursiveAction {
