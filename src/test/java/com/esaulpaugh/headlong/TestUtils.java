@@ -95,9 +95,9 @@ public final class TestUtils {
         long c = 0x9e3779b97f4a7c15L * (new SplittableRandom().nextLong() ^ 0x5C5C5C5C5C5C5C5CL) + System.identityHashCode(vals);
         for (final long v : vals) {
             c = 31L * c + v;
-            c ^= c >> 32;
+            c ^= c >>> 33;
         }
-        return c ^ (c << 33);
+        return c;
     }
 
     public static long getEnvHash() {
