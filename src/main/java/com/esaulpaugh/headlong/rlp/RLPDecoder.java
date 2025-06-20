@@ -106,16 +106,16 @@ public final class RLPDecoder {
                             totalRead += read;
                         } while (totalRead < available);
                     }
-                    if (index >= buffer.length) {
-                        return false;
+                    if (index < buffer.length) {
+                        next = decoder.wrap(buffer, index);
+                        return true;
                     }
-                    next = decoder.wrap(buffer, index);
-                    return true;
-                } catch (ShortInputException e) {
-                    return false;
+                } catch (ShortInputException ignored) {
+                    /* fall through */
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
+                return false;
             }
         };
     }
