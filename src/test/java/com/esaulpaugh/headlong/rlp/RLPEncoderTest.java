@@ -95,11 +95,12 @@ public class RLPEncoderTest {
 
     @Test
     public void testLongList() {
-        final byte[] utf8 = "« Dans le compte final, jamais n’aurais été la vache, » pensa-t-il. « Jamais ne serais la vache. » Ni miette, ni fête, ni boisson maléfique ne l’enlèveraient de ses travaux.".getBytes(StandardCharsets.UTF_8);
+        final byte[] fr = "« Dans le compte final, jamais n’aurais été la vache, » pensa-t-il. « Jamais ne serais la vache. » Pas miette, ni fête, point boisson maléfique ne l’enlèveraient de ses travaux.".getBytes(StandardCharsets.UTF_8);
+        final byte[] en = "\"In the final reckoning, I would never have been the cow,\" he thought. \"I would never be the cow.\" Not dearth, not mirth, no cursed drink would part him from his work.".getBytes(StandardCharsets.UTF_8);
         final String note = "(\n" +
                 "  [\n" +
                 "    [ [ '', '00', 'ff', '90', 'b6', '0a' ] ],\n" +
-                "    '" + Strings.encode(utf8) + "',\n" +
+                "    '" + Strings.encode(fr) + "',\n" +
                 "    [\n" +
                 "      '00',\n" +
                 "      '00',\n" +
@@ -162,6 +163,7 @@ public class RLPEncoderTest {
                 "    '646f6773',\n" +
                 "    [ '5c0d0a0c', '096f6773' ],\n" +
                 "    '22416c6d696768747920616e64206d6f7374206d6572636966756c204661746865722c2077652068756d626c79206265736565636820546865652c206f662054687920677265617420676f6f646e6573732c20746f20726573747261696e20746865736520696d6d6f646572617465207261696e73207769746820776869636820776520686176652068616420746f20636f6e74656e642e204772616e742075732066616972207765617468657220666f7220426174746c652e2047726163696f75736c7920686561726b656e20746f20757320617320736f6c64696572732077686f2063616c6c205468656520746861742c2061726d656420776974682054687920706f7765722c207765206d617920616476616e63652066726f6d20766963746f727920746f20766963746f72792c20616e6420637275736820746865206f707072657373696f6e20616e64207769636b65646e657373206f66206f757220656e656d6965732c20616e642065737461626c69736820546879206a75737469636520616d6f6e67206d656e20616e64206e6174696f6e732e20416d656e2e22'\n" +
+                "    " + Strings.encode(en) + "\n" +
                 "  ]\n" +
                 ")";
 
