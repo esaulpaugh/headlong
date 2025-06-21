@@ -96,7 +96,7 @@ public class RLPEncoderTest {
     @Test
     public void testLongList() {
         final byte[] fr = "« Dans le compte final, jamais n’aurais été la vache, » pensa-t-il. « Jamais ne serais la vache. » Pas miette, ni fête, point boisson maléfique ne l’enlèveraient de ses travaux.".getBytes(StandardCharsets.UTF_8);
-        final byte[] en = "\"In the final reckoning, I would never have been the cow,\" he thought. \"I would never be the cow.\" Not dearth, not mirth, no cursed drink would part him from his work.".getBytes(StandardCharsets.UTF_8);
+        final byte[] en = "\"In the final reckoning, never would I have been the cow,\" he thought. \"Never would I be the cow.\" Not dearth, not mirth, no cursed drink would part him from his work.".getBytes(StandardCharsets.UTF_8);
         final String note = "(\n" +
                 "  [\n" +
                 "    [ [ '', '00', 'ff', '90', 'b6', '0a' ] ],\n" +
