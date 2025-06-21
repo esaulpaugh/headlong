@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,10 +95,11 @@ public class RLPEncoderTest {
 
     @Test
     public void testLongList() {
+        final byte[] utf8 = "« Dans le compte final, jamais n’aurais été la vache, » pensa-t-il. « Jamais ne serais la vache. » Ni miette, ni fête, ni boisson maléfique ne l’enlèveraient de ses travaux.".getBytes(StandardCharsets.UTF_8);
         final String note = "(\n" +
                 "  [\n" +
                 "    [ [ '', '00', 'ff', '90', 'b6', '0a' ] ],\n" +
-                "    '0980ff00000000000000244a00000000000000000000000000000000000000000000000000000000000000000000000000000000fdfe0000',\n" +
+                "    '" + Strings.encode(utf8) + "',\n" +
                 "    [\n" +
                 "      '00',\n" +
                 "      '00',\n" +
