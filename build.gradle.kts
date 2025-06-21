@@ -22,7 +22,6 @@
 //        println("setting release 8")
 //        options.release.set(8)
 //    }
-//    options.encoding = "US-ASCII"
 //}
 //
 //tasks.withType<Test> {

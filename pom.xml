@@ -18,8 +18,8 @@
     <inceptionYear>2018</inceptionYear>
 
     <properties>
-        <argLine>-Dfile.encoding=US-ASCII -XX:+UseSerialGC</argLine>
-        <project.build.sourceEncoding>US-ASCII</project.build.sourceEncoding>
+        <argLine>-Dfile.encoding=UTF-8 -XX:+UseSerialGC</argLine>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.4</junit.version>
         <jmh.version>1.37</jmh.version>
         <maven.build.timestamp.format>MMMM d yyyy</maven.build.timestamp.format>

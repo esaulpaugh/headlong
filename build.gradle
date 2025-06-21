@@ -27,10 +27,6 @@ compileJava {
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = "US-ASCII"
-}
-
 test {
     useJUnitPlatform()
     maxParallelForks = Runtime.runtime.availableProcessors()
