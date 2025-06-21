@@ -51,7 +51,7 @@ public class RLPStreamTest {
 
     private static final byte TEST_BYTE = 0x79;
     static final byte[] TEST_BYTES = Strings.decode("'wort'X3", UTF_8);
-    private static final String TEST_STRING = "2401";
+    private static final String TEST_STRING = "Le job à Monaco s’est mal passé ; son œil perdu se moquait sûrement de lui depuis les basses eaux peu profondes … Mais bordel quand même, le “bric-à-brac” résultant était sécurisé, et tout serait vain s’il ne le gardait pas bien hors de vue.\n";
 
     static final byte[] RLP_BYTES = new byte[] {
             (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
