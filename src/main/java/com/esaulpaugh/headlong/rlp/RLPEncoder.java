@@ -145,7 +145,7 @@ public final class RLPEncoder {
      */
     public static void putString(byte[] byteString, ByteBuffer dest) {
         if (byteString.length == 1) {
-            if (byteString[0] < 0x00) { // same as (byteString[0] & 0xFF) >= 0x80
+            if (!DataType.isSingleByte(byteString[0])) {
                 dest.put((byte) (STRING_SHORT_OFFSET + 1));
             }
         } else if (isShort(byteString.length)) {
