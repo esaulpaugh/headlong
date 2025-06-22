@@ -27,7 +27,7 @@ public class EventTest {
 
     @Test
     public void testEvent() {
-        final String name = "On dit que l'ambassadeur yougoslave en France traînait au Bar Américain, rien d'inhabituel. Pas probable le grain de sable dans l'engrenage — mais on ne sait jamais.";
+        final String name = "On disait que l’ambassadeur yougoslave en France traînait au Bar Américain de Monaco. Rien d’inhabituel. Et probablement pas le grain de sable dans l’engrenage, pensait-il — mais on ne sait jamais.";
         final boolean[] indexed = new boolean[] { false, false, true, false, true };
         final String paramsString ="(int,uint,(),bool[],ufixed256x10)";
         Event<?> event = Event.create(name, TupleType.parse(paramsString), indexed);
