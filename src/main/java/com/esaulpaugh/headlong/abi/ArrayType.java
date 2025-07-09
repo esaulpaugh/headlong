@@ -408,7 +408,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private static boolean[] decodeBooleans(int len, ByteBuffer bb, byte[] unitBuffer) {
-        final boolean[] booleans = new boolean[len]; // elements are false by default
+        final boolean[] booleans = new boolean[len];
         int i = 0;
         try {
             for ( ; i < len; i++) {
@@ -477,7 +477,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                     elements[i] = elementType.decode(bb, unitBuffer);
                 }
             } else {
-                final int start = bb.position(); // save this value before offsets are decoded
+                final int start = bb.position(); // save the base value — element offsets are relative to this pos
                 int saved = start;
                 for ( ; i < elements.length; i++) {
                     bb.position(saved);
