@@ -140,7 +140,7 @@ public final class Event<J extends Tuple> implements ABIObject {
     }
 
     /**
-     * Decodes Event arguments.
+     * Decodes {@link Event} arguments.
      *
      * @param topics indexed parameters to decode. If the event is anonymous, the first element is a Keccak hash of the
      *               canonical signature of the event (see <a href="https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events">https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events</a>)

@@ -244,7 +244,7 @@ public class Tuple implements Iterable<Object> {
                 final boolean[] booleans = (boolean[]) e;
                 return Arrays.copyOf(booleans, booleans.length);
             }
-            throw new IllegalArgumentException(); // float, double, char, short
+            throw new IllegalArgumentException(); // float[], double[], char[], short[]
         }
         return e instanceof Tuple ? ((Tuple) e).deepCopy() : e;
     }
