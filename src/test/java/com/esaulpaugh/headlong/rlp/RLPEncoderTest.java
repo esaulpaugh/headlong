@@ -182,6 +182,10 @@ public class RLPEncoderTest {
     @Test
     public void testDatatypes() {
 
+        final BigInteger _128 = BigInteger.valueOf(128L);
+        assertArrayEquals(new byte[] { (byte)128 }, Integers.toBytesUnsigned(_128));
+        assertArrayEquals(new byte[] { 0, (byte)128 }, _128.toByteArray());
+
         assertArrayEquals(new byte[] { -2 }, Integers.toBytesUnsigned(BigInteger.valueOf(-2L)));
 //        assertThrown(IllegalArgumentException.class, "signed value given for unsigned encoding", () -> Integers.toBytesUnsigned(BigInteger.valueOf(-2L)));
 
