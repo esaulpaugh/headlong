@@ -164,7 +164,7 @@ public final class RLPEncoder {
 //----------------------------------------------------------------------------------------------------------------------
     /**
      * Returns the concatenation of the encodings of the given objects in the given order. The {@link Iterable} containing
-     * the objects is not itself encoded.
+     * the objects is not itself an item.
      *
      * @param objects the raw objects to be encoded
      * @return the encoded sequence
@@ -177,7 +177,7 @@ public final class RLPEncoder {
 
     /**
      * Inserts into the destination array at the given index the concatenation of the encodings of the given objects in the given order.
-     * The {@link Iterable} containing the objects is not itself encoded.
+     * The {@link Iterable} containing the objects is not itself an item.
      *
      * @param objects   the raw objects to be encoded
      * @param dest      the destination for the sequence of RLP encodings
@@ -192,7 +192,7 @@ public final class RLPEncoder {
 
     /**
      * Puts into the destination buffer at its current position the concatenation of the encodings of the given objects
-     * in the given order. The {@link Iterable} containing the objects is not itself encoded.
+     * in the given order. The {@link Iterable} containing the objects is not itself an item.
      *
      * @param objects the raw objects to be encoded
      * @param dest    the destination for the sequence of RLP encodings
