@@ -258,20 +258,22 @@ public class RLPEncoderTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type. expected instanceof byte[], Iterable, or Object[]", () -> RLPEncoder.sequence(new Object[]{new ArrayList<>(), "00"}));
     }
 
+    private static final ByteBuffer EMPTY = ByteBuffer.allocate(0).asReadOnlyBuffer();
+
     @Test
     public void testEncodeToByteBuffer() throws Throwable {
-        RLPEncoder.putSequence(new HashSet<>(), ByteBuffer.allocate(0));
-        RLPEncoder.putSequence(new ArrayList<>(), ByteBuffer.allocate(0));
-        RLPEncoder.putSequence(Collections.emptyList(), ByteBuffer.allocate(0));
+        RLPEncoder.putSequence(new HashSet<>(), EMPTY);
+        RLPEncoder.putSequence(new ArrayList<>(), EMPTY);
+        RLPEncoder.putSequence(Collections.emptyList(), EMPTY);
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsupported object type. expected instanceof byte[], Iterable, or Object[]",
-                () -> RLPEncoder.sequence(new HashMap<>(), ByteBuffer.allocate(0))
+                () -> RLPEncoder.sequence(new HashMap<>(), EMPTY)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsupported object type. expected instanceof byte[], Iterable, or Object[]",
-                () -> RLPEncoder.sequence(new byte[0], ByteBuffer.allocate(0))
+                () -> RLPEncoder.sequence(new byte[0], EMPTY)
         );
         RLPEncoder.putSequence(() -> new Iterator<Object>() {
             @Override
@@ -283,9 +285,24 @@ public class RLPEncoderTest {
             public Object next() {
                 throw new NoSuchElementException();
             }
-        }, ByteBuffer.allocate(0));
+        }, EMPTY);
 
-        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.putSequence(() -> null, ByteBuffer.allocate(0)));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.sequence(() -> null));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.putSequence(() -> null, Strings.EMPTY_BYTE_ARRAY, 0));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.putSequence(() -> null, EMPTY));
+
+        assertArrayEquals(new byte[0], RLPEncoder.sequence(Collections::emptyIterator));
+        RLPEncoder.putSequence(Collections::emptyIterator, Strings.EMPTY_BYTE_ARRAY, 0);
+        RLPEncoder.putSequence(Collections::emptyIterator, EMPTY);
+
+        assertArrayEquals(new byte[] { 'A' }, RLPEncoder.sequence(new Object[] { Strings.decode("A", Strings.UTF_8) }));
+        assertArrayEquals(new byte[] { (byte) 0xc0 }, RLPEncoder.sequence(new Object[] { new Object[0] }));
+
+        assertEquals("8180", Strings.encode(RLPEncoder.string(new byte[] { -128 })));
+
+        ByteBuffer two = ByteBuffer.allocate(2);
+        RLPEncoder.putString(new byte[] { -127 }, two);
+        assertEquals("8181", Strings.encode(two));
 
         byte[] dest = new byte[6];
         int idx = RLPEncoder.putSequence(Collections.singletonList(new byte[]{0, 1, 2}), dest, 2);
