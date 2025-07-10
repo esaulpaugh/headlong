@@ -17,11 +17,12 @@
 //    targetCompatibility = JavaVersion.VERSION_1_8
 //}
 //
-//tasks.withType<JavaCompile> {
-//    if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
+//tasks.withType<JavaCompile>().configureEach {
+//    if (JavaVersion.current >= JavaVersion.VERSION_1_10) {
 //        println("setting release 8")
 //        options.release.set(8)
 //    }
+//    options.encoding = "UTF-8"
 //}
 //
 //tasks.withType<Test> {
