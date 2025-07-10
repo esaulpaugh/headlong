@@ -84,6 +84,7 @@ public final class Integers {
      * @return the minimal representation
      */
     public static byte[] toBytesUnsigned(BigInteger val) {
+//        if (val.signum() < 0) throw new IllegalArgumentException("signed value given for unsigned encoding");
         byte[] bytes = new byte[len(val)];
         putBigInt(val, bytes, 0);
         return bytes;
