@@ -633,12 +633,16 @@ public class RLPDecoderTest {
         byte[] b = new byte[] { 2 };
         byte[] c = new byte[0];
 
-        byte[] list = new byte[4];
-        assertEquals(list.length, RLPEncoder.putList(Arrays.asList(a, b, c), list, 0));
-        Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list);
+        byte[] list = new byte[6];
+        final int nextIdx = RLPEncoder.putList(Arrays.asList(a, b, c), list, 1);
+        assertEquals(5, nextIdx);
+        assertEquals(0, list[0]);
+        assertEquals(0, list[nextIdx]);
 
-        for (RLPItem item : RLP_STRICT.wrapList(list)) {
-            System.out.print(item);
+        Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list, 1);
+
+        for (RLPItem item : RLP_STRICT.wrapList(list, 1)) {
+            assertNotNull(item);
         }
 
         assertTrue(listIter.hasNext());
