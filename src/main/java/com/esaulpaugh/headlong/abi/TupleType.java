@@ -339,6 +339,20 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     /**
+     * Returns a new {@link TupleType} containing elements on interval [start, end). This is a convenience wrapper around
+     * {@link #select(boolean...)}.
+     *
+     * @param start inclusive start index
+     * @param end exclusive end index
+     * @return the sliced {@link TupleType}
+     */
+    public TupleType<J> slice(int start, int end) {
+        final boolean[] manifest = new boolean[elementTypes.length];
+        Arrays.fill(manifest, start, end, true);
+        return select(manifest);
+    }
+
+    /**
      * Returns a new {@link TupleType} from select elements in this {@link TupleType}. Only elements marked with {@code true} in {@code manifest} are included.
      * Order is preserved among the selected elements.
      *

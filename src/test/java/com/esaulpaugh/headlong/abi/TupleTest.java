@@ -342,9 +342,11 @@ public class TupleTest {
                 in,
                 "",
                 Function.newDefaultDigest()).getOutputs();
-        ByteBuffer bb = t.encode(Single.of(Single.of("")));
-        Single<Single<String>> s = t.decode(bb);
-        System.out.println(s);
+        final Single<Single<String>> orig = Single.of(Single.of(""));
+        assertEquals("[[\"\"]]", orig.toString());
+        ByteBuffer bb = t.encode(orig);
+        Single<Single<String>> decoded = t.decode(bb);
+        assertEquals(orig, decoded);
     }
 
     @Test
@@ -382,6 +384,33 @@ public class TupleTest {
             }
         }
         parent[index] = null;
+    }
+
+    @Test
+    public void testSlice() throws Throwable {
+        TupleType<?> tt = TupleType.parse("(bool,int8,address)");
+
+        assertThrown(IllegalArgumentException.class, () -> tt.slice(0, -1));
+        assertThrown(IllegalArgumentException.class, () -> tt.slice(1, 0));
+        assertThrown(IllegalArgumentException.class, () -> tt.slice(3, 1));
+
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.slice(-1, -1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.slice(0, 4));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.slice(4, 4));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.slice(1, 5));
+
+        assertEquals(TupleType.EMPTY, tt.slice(0, 0));
+        assertEquals(TupleType.EMPTY, tt.slice(1, 1));
+        assertEquals(TupleType.EMPTY, tt.slice(2, 2));
+        assertEquals(TupleType.EMPTY, tt.slice(3, 3));
+
+        assertEquals(TupleType.parse("(bool)"), tt.slice(0, 1));
+        assertEquals(TupleType.parse("(int8)"), tt.slice(1, 2));
+        assertEquals(TupleType.parse("(address)"), tt.slice(2, 3));
+
+        assertEquals(TupleType.parse("(bool,int8)"), tt.slice(0, 2));
+        assertEquals(TupleType.parse("(int8,address)"), tt.slice(1, 3));
+        assertEquals(TupleType.parse("(bool,int8,address)"), tt.slice(0, 3));
     }
 
     @Test
