@@ -58,7 +58,7 @@ public final class Strings {
         switch (encoding) {
         case HEX: return FastHex.encodeToString(buffer, from, len);
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
-        case BASE_64_URL_SAFE: return FastBase64.encodeToString(buffer, from, len, FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING);
+        case BASE_64_URL_SAFE: return FastBase64.encodeToString(buffer, from, len, FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING); // Base64.getUrlEncoder().withoutPadding().encodeToString(Arrays.copyOfRange(buffer, from, from + len));
         case ASCII: return new String(buffer, from, len, StandardCharsets.US_ASCII);
         default: throw new UnsupportedOperationException();
         }
