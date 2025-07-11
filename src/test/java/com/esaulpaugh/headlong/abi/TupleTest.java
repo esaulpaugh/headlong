@@ -414,7 +414,7 @@ public class TupleTest {
     }
 
     @Test
-    public void testSubtubleType() throws Throwable {
+    public void testSubtupleType() throws Throwable {
         TupleType<?> tt = TupleType.parse("(bytes3,uint16[],string)");
 
         assertEquals(TupleType.EMPTY, tt.select(false, false, false));
