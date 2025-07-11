@@ -26,7 +26,7 @@ public final class FastBase64 {
     public static final int URL_SAFE_CHARS = 4;
 
     private static final int LINE_LEN = 76;
-    private static final int LINE_SEP_LEN = 2; // "/r/n"
+    private static final int LINE_SEP_LEN = 2; // "\r\n"
 
     private static final short[] URL_SAFE = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
