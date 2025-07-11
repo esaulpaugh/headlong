@@ -134,7 +134,7 @@ public final class RLPDecoder {
      * blocking a platform thread. Not thread-safe.
      *
      * @param channel   input channel containing the RLP sequence data
-     * @param initialBuffer  initial buffer to use; if null, a default-sized buffer is allocated
+     * @param initialBuffer  initial buffer to use (contents ignored); if null, a default-sized buffer is allocated
      * @param maxBufferResize   iterator throws if a partial item would exceed this length in bytes
      * @param maxDelayNanos highest delay interval before hasNext ends read retries and returns false
      * @return  an iterator over the items in the stream
