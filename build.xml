@@ -3,7 +3,7 @@
 
   <!-- Project Properties -->
   <property name="project.name" value="headlong" />
-  <property name="project.version" value="13.3.1-SNAPSHOT" />
+  <property name="project.version" value="13.3.2-SNAPSHOT" />
   <property name="artifact.name" value="${project.name}-${project.version}" />
 
   <tstamp>
