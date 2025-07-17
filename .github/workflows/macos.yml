@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ macos-13-xlarge, macos-14-xlarge, macos-15-xlarge ]
+        os: [ macos-13, macos-14, macos-15 ]
         distribution: [ 'adopt-hotspot', 'adopt-openj9' ]
 
     runs-on: ${{ matrix.os }}
