@@ -26,6 +26,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Spliterators;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
@@ -140,6 +141,7 @@ public final class RLPDecoder {
      * @return  an iterator over the items in the stream
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos) {
+        Objects.requireNonNull(channel);
         return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_BUFFER_SIZE] : initialBuffer, 0) {
             private static final long INITIAL_DELAY_NANOS = 5_000L;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
