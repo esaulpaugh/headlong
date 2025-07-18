@@ -83,6 +83,7 @@ public final class RLPDecoder {
      * @return  an iterator over the items in the stream
      */
     public Iterator<RLPItem> sequenceIterator(final InputStream is) {
+        Objects.requireNonNull(is);
         return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) { // make sure index == buffer.length
             @Override
             public boolean hasNext() {
