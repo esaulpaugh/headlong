@@ -144,8 +144,8 @@ public final class TypeFactory {
             final int indexOfX = rawType.lastIndexOf('x');
             if (leadDigitValid(rawType.charAt(idx + "fixed".length())) && leadDigitValid(rawType.charAt(indexOfX + 1))) { // starts with a digit 1-9
                 try {
-                    final int M = Integer.parseInt(rawType.substring(idx + "fixed".length(), indexOfX)); // no parseUnsignedInt on older Android versions?
-                    final int N = Integer.parseInt(rawType.substring(indexOfX + 1)); // everything after x
+                    final int M = Integer.parseUnsignedInt(rawType.substring(idx + "fixed".length(), indexOfX)); // no parseUnsignedInt on older Android versions?
+                    final int N = Integer.parseUnsignedInt(rawType.substring(indexOfX + 1)); // everything after x
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
                         return new BigDecimalType(rawType, M, N, idx == 1);
                     }
