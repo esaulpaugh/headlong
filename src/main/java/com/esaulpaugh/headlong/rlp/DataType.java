@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import java.util.Arrays;
+
 /** Enumeration of the five RLP data types. */
 public enum DataType {
 
@@ -40,11 +42,11 @@ public enum DataType {
     private static final DataType[] LOOKUP = new DataType[1 << Byte.SIZE];
 
     static {
-        for (int v = (byte)0x80; v < (byte)0xb8; v++) LOOKUP[v + 128] = STRING_SHORT;
-        for (int v = (byte)0xb8; v < (byte)0xc0; v++) LOOKUP[v + 128] = STRING_LONG;
-        for (int v = (byte)0xc0; v < (byte)0xf8; v++) LOOKUP[v + 128] = LIST_SHORT;
-        for (int v = (byte)0xf8; v < (byte)0x00; v++) LOOKUP[v + 128] = LIST_LONG;
-        for (int v = (byte)0x00; v <=(byte)0x7f; v++) LOOKUP[v + 128] = SINGLE_BYTE;
+        Arrays.fill(LOOKUP, 0x00, 0x80, SINGLE_BYTE);
+        Arrays.fill(LOOKUP, 0x80, 0xb8, STRING_SHORT);
+        Arrays.fill(LOOKUP, 0xb8, 0xc0, STRING_LONG);
+        Arrays.fill(LOOKUP, 0xc0, 0xf8, LIST_SHORT);
+        Arrays.fill(LOOKUP, 0xf8, 0x100, LIST_LONG);
     }
 
     public final byte offset;
@@ -62,7 +64,7 @@ public enum DataType {
      * @return one of the five enumerated RLP data types
      */
     public static DataType type(final byte leadByte) {
-        return LOOKUP[leadByte + 128];
+        return LOOKUP[leadByte & 0xff];
     }
 
     public static boolean isSingleByte(byte b) {
