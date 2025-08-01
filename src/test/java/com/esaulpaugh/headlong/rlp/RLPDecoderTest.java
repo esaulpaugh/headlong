@@ -1125,4 +1125,14 @@ public class RLPDecoderTest {
         @Override
         public void close() { open = false; }
     }
+
+    @Test
+    public void testDataType() {
+        final String expected = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111111111222222223333333333333333333333333333333333333333333333333333333344444444";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 256; i++) {
+            sb.append(DataType.type((byte) i).ordinal());
+        }
+        assertEquals(expected, sb.toString());
+    }
 }
