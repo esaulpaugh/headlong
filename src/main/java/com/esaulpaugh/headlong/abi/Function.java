@@ -238,7 +238,7 @@ public final class Function implements ABIObject {
         return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
-    /** Decode-with-indices. */
+    /** Decode-with-indices. NOTE: Call consumes the first four bytes in the buffer. */
     public <T> T decodeCall(ByteBuffer buffer, int... indices) {
         checkSelector(buffer);
         return inputTypes.decode(buffer, indices);
