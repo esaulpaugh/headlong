@@ -109,7 +109,7 @@ final class PackedDecoder {
         case TYPE_CODE_BYTE: return bb.get();
         case TYPE_CODE_INT: return (int) decodeLong((IntType) type, bb, type.byteLengthPacked(null));
         case TYPE_CODE_LONG: return decodeLong((LongType) type, bb, type.byteLengthPacked(null));
-        case TYPE_CODE_BIG_INTEGER: return decodeBigInteger((BigIntegerType) type, type.byteLengthPacked(null), bb);
+        case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.asUnitType().unsigned, type.byteLengthPacked(null), bb);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal((BigDecimalType) type, type.byteLengthPacked(null), bb);
         case TYPE_CODE_ARRAY: return decodeArray(type.asArrayType(), bb, end);
         case TYPE_CODE_TUPLE: return type.dynamic
@@ -122,17 +122,15 @@ final class PackedDecoder {
 
     private static Tuple decodeTupleStatic(TupleType<?> tupleType, ByteBuffer bb) {
         final Object[] elements = new Object[tupleType.size()];
-        for (int i = 0; i < elements.length; i++) {
-            int prev = bb.position();
-            ABIType<Object> t = tupleType.get(i);
-            elements[i] = decode(t, bb, -1);
-            bb.position(prev + t.byteLengthPacked(null));
+        int i = 0;
+        for (ABIType<?> t : tupleType) {
+            elements[i++] = decode(t, bb, -1);
         }
         return Tuple.create(elements);
     }
 
-    private static BigInteger decodeBigInteger(BigIntegerType type, int elementLen, ByteBuffer bb) {
-        if (type.unsigned) {
+    private static BigInteger decodeBigInteger(boolean unsigned, int elementLen, ByteBuffer bb) {
+        if (unsigned) {
             return getBigInt(bb, elementLen);
         } else {
 //            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
@@ -142,11 +140,14 @@ final class PackedDecoder {
 
     private static BigDecimal decodeBigDecimal(BigDecimalType type, int elementLen, ByteBuffer bb) {
 //            unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
-        return new BigDecimal(type.unsigned ? getBigInt(bb, elementLen) : getSignedBigInt(bb, elementLen), type.scale);
+        return new BigDecimal(decodeBigInteger(type.unsigned, elementLen, bb), type.scale);
     }
 
     private static BigInteger getBigInt(ByteBuffer bb, int elementLen) {
-        return Integers.getBigInt(bb.array(), bb.position(), elementLen, true);
+        final int pos = bb.position();
+        BigInteger val = Integers.getBigInt(bb.array(), pos, elementLen, true);
+        bb.position(pos + elementLen);
+        return val;
     }
 
     private static BigInteger getSignedBigInt(ByteBuffer bb, int elementLen) {
