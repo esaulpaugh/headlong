@@ -63,7 +63,9 @@ public final class FastBase64 {
 
     private static int size(int chunks, int remainder, boolean noPadding, boolean noLineSep) {
         final int chars = (chunks * 4) + (remainder != 0 ? (noPadding ? remainder + 1 : 4) : 0);
-        return noLineSep ? chars : chars + (((chars - 1) / LINE_LEN) * 2);
+        return noLineSep
+                    ? chars
+                    : chars + LINE_SEP_LEN * ((chars - 1) / LINE_LEN);
     }
 
     public static void encodeToBytes(byte[] buffer, int offset, int len, byte[] dest, int destOff, int flags) {
