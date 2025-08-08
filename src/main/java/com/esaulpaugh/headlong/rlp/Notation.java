@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-/** A JSON-like notation for RLP items. Call {@link #parse()} get back the raw object hierarchy. */
+/** A JSON-like notation for RLP items. Call {@link #parse()} to get the raw object hierarchy. */
 public final class Notation {
 
     private static final RLPDecoder DECODER = RLPDecoder.RLP_LENIENT; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
