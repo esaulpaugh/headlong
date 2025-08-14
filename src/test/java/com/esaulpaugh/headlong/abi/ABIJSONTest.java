@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1044,10 +1045,22 @@ public class ABIJSONTest {
 
         InputStream tooDeepJson = TestUtils.getFileResource("tests/headlong/tests/deep_and_excessively_so.json");
         assertThrown(IllegalStateException.class, () -> Function.fromJson(FLAGS_NONE, tooDeepJson, Function.newDefaultDigest()));
+
+        {
+            final byte[] arr = new byte[160];
+            Arrays.fill(arr, 0, arr.length / 2, (byte) '(');
+            Arrays.fill(arr, arr.length / 2, arr.length, (byte) ')');
+            Function.parse(new String(arr, 0, 0, arr.length));
+        }
+
+        final byte[] arr2 = new byte[162];
+        Arrays.fill(arr2, 0, arr2.length / 2, (byte)'(');
+        Arrays.fill(arr2, arr2.length / 2, arr2.length, (byte)')');
+        assertThrown(IllegalArgumentException.class, "exceeds nesting limit of 79", () -> Function.parse(new String(arr2, 0, 0, arr2.length)));
     }
 
     @Test
-    public void testParseFilter() throws Throwable {
+    public void testParseFilter() {
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.RECEIVE)).parse("[{\"name\":\"\"}]").size());
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.FALLBACK)).parse("[{\"name\":\"\"}]").size());
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.CONSTRUCTOR)).parse("[{\"name\":\"\"}]").size());

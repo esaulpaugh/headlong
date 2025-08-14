@@ -29,7 +29,7 @@ public final class TypeFactory {
     }
 
     private static final int MAX_LENGTH_CHARS = 1_600;
-    private static final int NESTING_LIMIT = 80;
+    private static final int MAX_NESTING = 79;
     private static final ABIType<?> STRING = UnitType.get("string");
     private static final ABIType<?> BYTES = UnitType.get("bytes");
     private static final ABIType<?> BYTES4 = UnitType.get("bytes4");
@@ -277,9 +277,10 @@ public final class TypeFactory {
         do {
             switch (parentTypeString.charAt(i++)) {
             case '(':
-                if (++depth >= NESTING_LIMIT) {
-                    throw new IllegalArgumentException("exceeds nesting limit: " + NESTING_LIMIT);
+                if (depth >= MAX_NESTING) {
+                    throw new IllegalArgumentException("exceeds nesting limit of " + MAX_NESTING);
                 }
+                depth++;
                 continue;
             case ')':
                 if (depth == 1) {
