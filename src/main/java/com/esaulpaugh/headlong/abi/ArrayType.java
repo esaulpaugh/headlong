@@ -468,28 +468,30 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return (T[]) Array.newInstance(elementClass, len); // reflection ftw
     }
 
-    private E[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
+    private E[] decodeObjects(final int len, ByteBuffer bb, byte[] unitBuffer) {
         final E[] elements = createArray(elementType.clazz, len);
-        int i = 0;
-        try {
-            if (!elementType.dynamic) {
-                for ( ; i < elements.length; i++) {
-                    elements[i] = elementType.decode(bb, unitBuffer);
+        if (len > 0) {
+            int i = 0;
+            try {
+                if (!elementType.dynamic) {
+                    do {
+                        elements[i] = elementType.decode(bb, unitBuffer);
+                    } while (++i < len);
+                } else {
+                    final int start = bb.position();
+                    for (;;) {
+                        int jump = start + IntType.UINT30.decode(bb, unitBuffer);
+                        /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                        final int pos = bb.position();
+                        bb.position(jump);
+                        elements[i] = elementType.decode(bb, unitBuffer);
+                        if (++i >= len) break;
+                        bb.position(pos);
+                    }
                 }
-            } else {
-                final int start = bb.position(); // save the base value — element offsets are relative to this pos
-                int saved = start;
-                for ( ; i < elements.length; i++) {
-                    bb.position(saved);
-                    final int jump = start + IntType.UINT30.decode(bb, unitBuffer);
-                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    saved = bb.position();
-                    bb.position(jump); // leniently jump to specified offset
-                    elements[i] = elementType.decode(bb, unitBuffer);
-                }
+            } catch (IllegalArgumentException cause) {
+                throw TupleType.exceptionWithIndex(false, i, cause);
             }
-        } catch (IllegalArgumentException cause) {
-            throw TupleType.exceptionWithIndex(false, i, cause);
         }
         return elements;
     }
