@@ -18,7 +18,7 @@
 //}
 //
 //tasks.withType<JavaCompile>().configureEach {
-//    if (JavaVersion.current >= JavaVersion.VERSION_1_10) {
+//    if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
 //        println("setting release 8")
 //        options.release.set(8)
 //    }

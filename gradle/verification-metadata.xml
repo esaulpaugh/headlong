@@ -19,7 +19,7 @@
          <trusted-key id="12d16069219c90212a974d119ae296fd02e9f65b" group="org.apache.commons" name="commons-math3" version="3.6.1"/>
          <trusted-key id="517b94f8d0a46317a28d8ab30da8a5ec02d11ead" group="net.sf.jopt-simple" name="jopt-simple" version="5.0.4"/>
 <!--         <trusted-key id="bc87a3fd0a54480f0badbebd21939ff0ca2a6567" group="commons-codec" name="commons-codec" version="1.17.2"/>-->
-         <trusted-key id='2db4f1ef0fa761ecc4ea935c86fdc7e2a11262cb' group='commons-codec' />
+<!--         <trusted-key id='2db4f1ef0fa761ecc4ea935c86fdc7e2a11262cb' group='commons-codec' />-->
          <trusted-key id="c7be5bcc9fec15518cfda882b0f3710fa64900e7" group="com.google.code.gson"/>
          <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51">
             <trusting group="junit"/>
@@ -279,17 +279,6 @@
             </artifact>
         </component>
 
-        <component group="commons-codec" name="commons-codec" version="1.18.0">
-            <artifact name="commons-codec-1.18.0.jar">
-                <sha256 value="ba005f304cef92a3dede24a38ad5ac9b8afccf0d8f75839d6c1338634cf7f6e4" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="commons-codec-1.18.0.pom">
-                <sha256 value="74b916da4b0384c619e6dd4c18defe8aa4387f795205253cfb4bbb2f458cddce" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="commons-codec-1.18.0-sources.jar">
-                <sha256 value="6c50e3dd81284139baddf94b3d0f78d25135eea0853f6495267196cdcf5949e3" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
         <component group="org.ow2.asm" name="asm" version="9.0">
             <artifact name="asm-9.0.jar">
                 <sha256 value="0df97574914aee92fd349d0cb4e00f3345d45b2c239e0bb50f0a90ead47888e0" origin="repo.maven.apache.org/maven2/"/>
@@ -316,6 +305,23 @@
             </artifact>
             <artifact name="kotlin-reflect-2.0.21.pom">
                 <sha256 value="02ab7aeab03c68f40103026e5e9c277360cbc360818a5b2e36b9a3a9d8e8b049" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+        </component>
+
+        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="2.2.0">
+            <artifact name="kotlin-stdlib-2.2.0-sources.jar">
+                <sha256 value="967ad9599254e3a60d96d6c789547cc35c22d770d9c8fb1e3f15fac3b4c3b65d" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+            <artifact name="kotlin-stdlib-2.2.0.module">
+                <sha256 value="a5b98fdcd9db017d542e197225dcee18d658a56de1db2cc41e13196d6b1769a4" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+        </component>
+        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="2.2.0">
+            <artifact name="kotlin-reflect-2.2.0-sources.jar">
+                <sha256 value="e9719062ea18b7c10f231ee170306f95acf78c31b4f4592d32e8376ca3779f0b" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+            <artifact name="kotlin-reflect-2.2.0.pom">
+                <sha256 value="deed831efcb663e4cf3d5121e5ae796f201e37b813d2c7d607b5f1f8a86fe52e" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
 
