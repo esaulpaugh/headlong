@@ -31,16 +31,6 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         super(buffer, index, dataIndex, dataLength, endIndex);
     }
 
-    @Override
-    public boolean isList() {
-        return true;
-    }
-
-    @Override
-    public RLPList asRLPList() {
-        return this;
-    }
-
     /** @see RLPItem#duplicate() */
     @Override
     public RLPList duplicate() {

@@ -22,16 +22,6 @@ public final class RLPString extends RLPItem {
         super(buffer, index, dataIndex, dataLength, endIndex);
     }
 
-    @Override
-    public boolean isString() {
-        return true;
-    }
-
-    @Override
-    public RLPString asRLPString() {
-        return this;
-    }
-
     /** @see RLPItem#duplicate() */
     @Override
     public RLPString duplicate() {
