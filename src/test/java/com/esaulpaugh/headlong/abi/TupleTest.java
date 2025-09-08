@@ -310,9 +310,9 @@ public class TupleTest {
                     if (r != ch) {
                         sb.setCharAt(x, r);
                         assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"", () -> TupleType.parse(sb.toString()));
-                        sb.setCharAt(x, ch);
                     }
                 }
+                sb.setCharAt(x, ch);
             }
         }
     }
@@ -771,7 +771,8 @@ public class TupleTest {
             protected abstract <T extends List<?>> T createList();
         }
 
-        assertTrue(
+        assertEquals(
+                1,
                 new Nonsense() {
                     @SuppressWarnings("unchecked")
                     @Override
@@ -785,7 +786,7 @@ public class TupleTest {
                     protected <T extends List<?>> T createList() {
                         return (T) new ArrayList<String>();
                     }
-                }.<List<Boolean>>create(true, false).add(true),
+                }.<List<Boolean>>create(true, false).size(),
                 "nonsense failed"
         );
     }
