@@ -352,7 +352,7 @@ public class TupleTest {
     @Test
     public void fuzzNulls() throws Throwable {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final SplittableRandom split = new SplittableRandom(TestUtils.getSeed(31 * System.nanoTime()));
+        final SplittableRandom split = TestUtils.splittableRandom();
         final Random r = new Random(split.nextLong());
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
@@ -719,8 +719,11 @@ public class TupleTest {
         final Quintuple<Long, Long, Long, Long, Byte> q5 = Tuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
         @SuppressWarnings("rawtypes")
         final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Tuple.of(p, p, p, p, p, p);
-        final Triple<Integer, String, Triple<byte[], String, Long>> n = Tuple.of(90, "_", t);
-        final Triple<byte[], String, Long> x = n.get2();
+        final Object obj = new Object() { @Override public String toString() {return "_";} };
+        final Triple<Integer, Object, Triple<byte[], String, Long>> n = Tuple.of(90, obj, t);
+        final Integer x = n.get0();
+        final Object y = n.get1();
+        final Triple<byte[], String, Long> z = n.get2();
 
         final Tuple t0 = Tuple.from();
         final Tuple t1 = Tuple.from((Object)"".getBytes());
@@ -729,18 +732,25 @@ public class TupleTest {
         final Tuple t4 = Tuple.from(q.elements);
         final Tuple t5 = Tuple.from(-1000L + 1, Long.MAX_VALUE, (long)0, (long)-1, ByteType.ZERO_BYTE);
         final Tuple t6 = Tuple.from(p, p, p, p, p, p);
-        final Tuple t7 = Tuple.from(90, new String("_"), t);
+        final Tuple t7 = Tuple.from(90, obj, t);
         final Tuple t8 = t7.get(2);
 
         assertEquals(Tuple.EMPTY, t0);
         testEquals(s, t1);
         testEquals(p, t2);
         testEquals(t, t3);
+
+        Quadruple<byte[], Object, Number, Throwable> t4quad = (Quadruple<byte[], Object, Number, Throwable>) t4;
+        assertEquals(q.get0(), t4quad.get0());
+        assertEquals(q.get1(), t4quad.get1());
+        assertEquals(q.get2(), t4quad.get2());
+        assertEquals(q.get3(), t4quad.get3());
         testEquals(q, t4);
+
         testEquals(q5, t5);
         testEquals(s6, t6);
         testEquals(n, t7);
-        testEquals(x, t8);
+        testEquals(z, t8);
     }
 
     private static void testEquals(Tuple a, Tuple b) {
@@ -748,6 +758,8 @@ public class TupleTest {
         assertEquals(a, b);
         assertEquals(a.toString(), b.toString());
         assertEquals(a.deepCopy(), b.deepCopy());
+        assertNotSame(a, a.deepCopy());
+        assertNotSame(b, b.deepCopy());
     }
 
     @Test

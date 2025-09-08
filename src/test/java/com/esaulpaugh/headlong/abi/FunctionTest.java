@@ -24,8 +24,10 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FunctionTest {
 
@@ -43,9 +45,9 @@ public class FunctionTest {
 
     @Test
     public void testFormatLength() {
-        int len = 4 + 32;
-        byte[] buffer = new byte[len + 103];
-        for (int i = 0; i < 33; i++) {
+        final int len = 4 + 32;
+        final byte[] buffer = new byte[len];
+        for (int i = 0; i < len; i++) {
             assertEquals(
                     "ID       00000000\n" +
                     "0        0000000000000000000000000000000000000000000000000000000000000000",
@@ -155,5 +157,16 @@ public class FunctionTest {
         b[b.length - 1] = ')';
         final String sig = Strings.encode(b, Strings.ASCII);
         TestUtils.assertThrown(IllegalArgumentException.class, "function name is too long: 385 > 384", () -> Function.parse(sig));
+    }
+
+    @Test
+    public void testEnumTypes() {
+        for (TypeEnum t : TypeEnum.values()) {
+            if (t == TypeEnum.FUNCTION || t == TypeEnum.RECEIVE || t == TypeEnum.FALLBACK || t == TypeEnum.CONSTRUCTOR) {
+                assertTrue(t.isFunction);
+            } else {
+                assertFalse(t.isFunction);
+            }
+        }
     }
 }
