@@ -125,9 +125,13 @@ public class FunctionTest {
     }
 
     private static void testNonCanonicalEquals(String canonical, String nonCanonical) {
+        if (canonical.hashCode() == nonCanonical.hashCode()) {
+            System.err.println("warning. unexpected hash code match: " + canonical + " " + nonCanonical + " " + canonical.hashCode());
+        }
         assertNotEquals(canonical, nonCanonical);
         Function canon = Function.parse(canonical);
         Function nonCanon = Function.parse(nonCanonical);
+        assertEquals(canon.hashCode(), nonCanon.hashCode());
         assertEquals(canon, nonCanon);
         assertEquals(canon.getCanonicalSignature(), nonCanon.getCanonicalSignature());
     }
