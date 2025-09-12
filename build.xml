@@ -42,7 +42,7 @@
   <!-- Library Paths -->
   <!-- Gson -->
   <property name="maven.gson" value="${maven.repo}/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
-  <property name="gradle.gson" value="${gradle.repo}/com.google.code.gson/gson/${gson.version}/853ce06c11316b33a8eae5e9095da096a9528b8f/gson-${gson.version}.jar" />
+  <property name="gradle.gson" value="${gradle.repo}/com.google.code.gson/gson/${gson.version}/48b8230771e573b54ce6e867a9001e75977fe78e/gson-${gson.version}.jar" />
 
   <!-- JUnit -->
   <property name="maven.junit-api" value="${maven.repo}/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
