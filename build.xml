@@ -28,7 +28,7 @@
   <property name="compiler.max.memory" value="700m" />
 
   <!-- Dependency Versions -->
-  <property name="gson.version" value="2.13.1" />
+  <property name="gson.version" value="2.13.2" />
   <property name="junit.jupiter.version" value="5.11.4" />
   <property name="junit.platform.version" value="1.11.4" />
   <property name="opentest4j.version" value="1.3.0" />
