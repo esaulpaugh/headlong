@@ -17,11 +17,11 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -134,7 +134,7 @@ public final class Function implements ABIObject {
     }
 
     public String selectorHex() {
-        return Strings.encode(selector);
+        return FastHex.encodeToString(selector);
     }
 
     @Override
@@ -181,7 +181,7 @@ public final class Function implements ABIObject {
 
     private void generateSelector(MessageDigest messageDigest) {
         messageDigest.reset();
-        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.ASCII));
+        messageDigest.update(getCanonicalSignature().getBytes(StandardCharsets.US_ASCII));
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
@@ -253,7 +253,7 @@ public final class Function implements ABIObject {
     private void checkSelector(byte[] found) {
         if (!MessageDigest.isEqual(found, selector)) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + selectorHex()
-                        + ", found: " + Strings.encode(found));
+                        + ", found: " + FastHex.encodeToString(found));
         }
     }
 
