@@ -94,7 +94,7 @@ repositories {
 
 final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
-final String bcVersion = "1.81"
+final String bcVersion = "1.82"
 
 dependencies {
     implementation("com.google.code.gson:gson:[2.1, 2.13.2]") {
