@@ -27,10 +27,11 @@ public final class BigIntegerType extends UnitType<BigInteger> {
 
     @SuppressWarnings("ConstantConditions")
     private static void init() {
-        if (AddressType.INSTANCE == null) {
-            UnitType.initInstances(); // will prevent creation of new UnitTypes once finished (except BigDecimalType)
+        if (AddressType.INSTANCE == null) { // condition has the side-effect of triggering AddressType class initialization if it has not yet run
+            // do nothing
         }
-        // else AddressType is currently initializing. UnitType.initInstances() will be called shortly once ADDRESS_INNER is created
+        // UnitType.initInstances() has either already run or will be called shortly, after AddressType.ADDRESS_INNER has been created, as AddressType class initialization completes
+        // Once finished, UnitType.initInstances() will prevent creation of new UnitTypes (except BigDecimalType).
     }
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
