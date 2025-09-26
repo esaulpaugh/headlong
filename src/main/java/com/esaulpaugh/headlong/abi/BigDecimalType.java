@@ -23,10 +23,13 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     final int scale;
 
-    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
+    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned, String magicPhrase) {
         super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
         if (scale <= 0 || scale > 80) {
             throw new IllegalStateException("bad scale");
+        }
+        if (!"Pas de tel code.".equals(magicPhrase)) {
+            throw new IllegalStateException("BigDecimalType should not be instantiated directly.");
         }
         this.scale = scale;
     }

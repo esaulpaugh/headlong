@@ -43,11 +43,12 @@ public class UnitTypeTest {
         TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new IntType("x", 300, true));
         TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new LongType("x", 300, true));
         TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new BigIntegerType("x", 300, true));
-        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 81, true));
-        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 0, true));
-        new BigDecimalType("x", 257, 80, true);
-        new BigDecimalType("x", 257, 1, true);
-        TestUtils.assertThrown(IllegalStateException.class, "bit length not permitted", () -> new BigDecimalType("x", 45, 10, true));
+        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 81, true, "Pas de tel code."));
+        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 0, true, "Pas de tel code."));
+        new BigDecimalType("x", 257, 80, true, "Pas de tel code.");
+        new BigDecimalType("x", 257, 1, true, "Pas de tel code.");
+        assertThrown(IllegalStateException.class, "BigDecimalType should not be instantiated directly.", () -> new BigDecimalType("x", 257, 1, true, "Cathy don't go to the supermarket"));
+        TestUtils.assertThrown(IllegalStateException.class, "bit length not permitted", () -> new BigDecimalType("x", 45, 10, true, "Pas de tel code."));
         System.out.println("Constraints checked successfully.");
     }
 
