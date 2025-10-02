@@ -106,7 +106,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                <version>3.14.1</version>
                 <configuration>
 <!--                    <release>8</release>-->
                     <source>1.8</source>
@@ -158,7 +158,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -176,7 +176,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.4</version>
                 <configuration>
 <!--                    <skipTests>true</skipTests>&lt;!&ndash; ///////////////////////////// &ndash;&gt;-->
                     <parallel>all</parallel>
@@ -186,7 +186,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -232,7 +232,7 @@
 <!--            <plugin>-->
 <!--                <groupId>org.codehaus.mojo</groupId>-->
 <!--                <artifactId>exec-maven-plugin</artifactId>-->
-<!--                <version>3.5.1</version>-->
+<!--                <version>3.6.0</version>-->
 <!--                <executions>-->
 <!--                    <execution>-->
 <!--                        <id>run-benchmarks</id>-->
