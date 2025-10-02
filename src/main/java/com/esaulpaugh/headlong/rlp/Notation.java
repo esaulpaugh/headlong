@@ -64,9 +64,10 @@ public final class Notation {
         return encodeToString(rlp, 0, rlp.length);
     }
 
-    static String encodeToString(final byte[] buffer, final int index, int end) {
-        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-        buildLongList(sb, buffer, index, end, 0);
+    static String encodeToString(final byte[] buffer, final int index, final int end) {
+        final int initialCapacity = (int) Math.min((end - index) * 3L, Integer.MAX_VALUE - 15);
+        final StringBuilder sb = new StringBuilder(initialCapacity);
+        buildLongList(sb.append(BEGIN_NOTATION), buffer, index, end, 0);
         return sb.append(END_NOTATION).toString();
     }
 
@@ -78,17 +79,16 @@ public final class Notation {
         return forEncoding(RLPEncoder.sequence(objects));
     }
 
-    private static int buildString(StringBuilder sb, byte[] data, int from, int to, boolean addSpace) {
+    private static void buildString(StringBuilder sb, byte[] data, int from, int to, boolean addSpace) {
         final int len = to - from;
         if (!DECODER.lenient && len == 1 && DataType.isSingleByte(data[from])) { // same as (data[from] & 0xFF) < 0x80
             throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
                 .append(addSpace ? END_STRING + DELIMITER + SPACE : END_STRING + DELIMITER);
-        return to;
     }
 
-    private static int buildLongList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth) {
+    private static void buildLongList(StringBuilder sb, byte[] data, int dataIndex, final int end, int depth) {
         if (depth != 0) {
             sb.append(BEGIN_LIST);
         }
@@ -96,16 +96,14 @@ public final class Notation {
         if (depth != 0) {
             sb.append(getLinePadding(depth)).append(END_LIST + DELIMITER);
         }
-        return end;
     }
 
-    private static int buildShortList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth, boolean addSpace) {
+    private static void buildShortList(StringBuilder sb, byte[] data, int dataIndex, final int end, int depth, boolean addSpace) {
         sb.append(BEGIN_LIST + SPACE);
         buildListContent(sb, dataIndex, end, data, true, depth + 1);
         sb.append(addSpace
                 ? SPACE + END_LIST + DELIMITER + SPACE
                 : SPACE + END_LIST + DELIMITER);
-        return end;
     }
 
     private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
@@ -119,18 +117,20 @@ public final class Notation {
             final byte lead = data[i];
             final DataType type = DataType.type(lead);
             if (type == DataType.SINGLE_BYTE) {
-                i = buildString(sb, data, i, i + 1, shortList);
+                buildString(sb, data, i, i + 1, shortList);
+                i++;
             } else {
                 if (type.isLong && shortList) {
                     throw new IllegalArgumentException("long element found in short list");
                 }
                 final int elementDataIdx = i + 1 + /* lengthOfLength */ (type.isLong ? lead - type.offset : 0);
                 final int elementEnd = DECODER.wrap(data, i, end).endIndex;
-                i = type.isString
-                        ? buildString(sb, data, elementDataIdx, elementEnd, shortList)
-                        : type.isLong
-                            ? buildLongList(sb, data, elementDataIdx, elementEnd, elementDepth)
-                            : buildShortList(sb, data, elementDataIdx, elementEnd, elementDepth, shortList);
+                {
+                    if (type.isString) buildString(sb, data, elementDataIdx, elementEnd, shortList);
+                    else if (type.isLong) buildLongList(sb, data, elementDataIdx, elementEnd, elementDepth);
+                    else buildShortList(sb, data, elementDataIdx, elementEnd, elementDepth, shortList);
+                }
+                i = elementEnd;
             }
         } while (i < end);
         sb.setLength(sb.length() - (shortList ? DELIMITER + SPACE : DELIMITER).length()); // trim
