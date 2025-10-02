@@ -65,7 +65,7 @@ public final class Notation {
     }
 
     static String encodeToString(final byte[] buffer, final int index, final int end) {
-        final int initialCapacity = (int) Math.min((end - index) * 3L, Integer.MAX_VALUE - 15);
+        final int initialCapacity = (int) Math.min((end - index) * 3L, Integer.MAX_VALUE - 15L);
         final StringBuilder sb = new StringBuilder(initialCapacity);
         buildLongList(sb.append(BEGIN_NOTATION), buffer, index, end, 0);
         return sb.append(END_NOTATION).toString();
@@ -142,7 +142,7 @@ public final class Notation {
 
     @SuppressWarnings("deprecation")
     private static String newLinePadding(int depth) {
-        byte[] prefix = new byte[1 + (depth * 2)]; // 2 spaces per level
+        final byte[] prefix = new byte[1 + (depth * 2)]; // 2 spaces per level
         Arrays.fill(prefix, (byte) ' ');
         prefix[0] = (byte) '\n';
         return new String(prefix, 0, 0, prefix.length);
@@ -170,7 +170,7 @@ public final class Notation {
      * @return the hierarchy of objects
      */
     public static List<Object> parse(String notation) {
-        List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
+        final List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
         if (parse(notation, 0, topLevelObjects, 0) != Integer.MAX_VALUE) {
             throw new IllegalArgumentException("syntax error");
         }
