@@ -109,9 +109,10 @@ public final class Notation {
     }
 
     private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
+        if (end == dataIndex) return;
         final String elementPrefix = shortList ? null : getLinePadding(elementDepth);
         int i = dataIndex;
-        while (i < end) {
+        do {
             if (!shortList) {
                 sb.append(elementPrefix);
             }
@@ -123,8 +124,7 @@ public final class Notation {
                 if (type.isLong && shortList) {
                     throw new IllegalArgumentException("long element found in short list");
                 }
-                final int diff = lead - type.offset;
-                final int elementDataIdx = i + 1 + /* lengthOfLength */ (type.isLong ? diff : 0);
+                final int elementDataIdx = i + 1 + /* lengthOfLength */ (type.isLong ? lead - type.offset : 0);
                 final int elementEnd = DECODER.wrap(data, i, end).endIndex;
                 i = type.isString
                         ? buildString(sb, data, elementDataIdx, elementEnd, shortList)
@@ -132,10 +132,8 @@ public final class Notation {
                             ? buildLongList(sb, data, elementDataIdx, elementEnd, elementDepth)
                             : buildShortList(sb, data, elementDataIdx, elementEnd, elementDepth, shortList);
             }
-        }
-        if (/* hasElement */ dataIndex != end) {
-            sb.setLength(sb.length() - (shortList ? DELIMITER + SPACE : DELIMITER).length()); // trim
-        }
+        } while (i < end);
+        sb.setLength(sb.length() - (shortList ? DELIMITER + SPACE : DELIMITER).length()); // trim
     }
 
     private static String getLinePadding(int depth) {
