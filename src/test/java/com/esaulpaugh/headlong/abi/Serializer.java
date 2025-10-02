@@ -39,11 +39,7 @@ public class Serializer {
     }
 
     public static JsonPrimitive serializeValues(Tuple tuple, Gson gson) {
-        JsonArray valuesArray = new JsonArray();
-        for(Object val : tuple) {
-            valuesArray.add(toJsonElement(val));
-        }
-        return new JsonPrimitive(gson.toJson(valuesArray));
+        return new JsonPrimitive(gson.toJson(toJsonArray(tuple.elements)));
     }
 
     private static JsonObject wrap(String type, String value) {
@@ -76,11 +72,11 @@ public class Serializer {
             jsonObject.add("value", toJsonArray(((Tuple) val).elements));
             return jsonObject;
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("unexpected type");
     }
 
     private static JsonArray toJsonArray(Object array) {
-        JsonArray jsonArray = new JsonArray();
+        final JsonArray jsonArray = new JsonArray();
         final int len = Array.getLength(array);
         for (int i = 0; i < len; i++) {
             jsonArray.add(toJsonElement(Array.get(array, i)));
