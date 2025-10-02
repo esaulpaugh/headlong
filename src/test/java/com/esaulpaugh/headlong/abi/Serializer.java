@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -45,76 +46,45 @@ public class Serializer {
         return new JsonPrimitive(gson.toJson(valuesArray));
     }
 
+    private static JsonObject wrap(String type, String value) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("type", type);
+        obj.addProperty("value", value);
+        return obj;
+    }
+
     private static JsonElement toJsonElement(Object val) {
-        if(val instanceof Boolean) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("bool"));
-            object.add("value", new JsonPrimitive(val.toString()));
-            return object;
-        } else if(val instanceof Integer || val instanceof Long) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("number"));
-            object.add("value", new JsonPrimitive(val.toString()));
-            return object;
-        } else if(val instanceof BigInteger) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("string"));
-            object.add("value", new JsonPrimitive("0x" + Strings.encode(((BigInteger) val).toByteArray())));
-            return object;
-        } else if(val instanceof BigDecimal) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("number"));
-            object.add("value", new JsonPrimitive(((BigDecimal) val).unscaledValue().toString()));
-            return object;
-        } else if(val instanceof byte[]) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("buffer"));
-            object.add("value", new JsonPrimitive("0x" + Strings.encode((byte[]) val)));
-            return object;
-        } else if(val instanceof String) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("buffer"));
-            object.add("value", new JsonPrimitive((String) val));
-            return object;
-        } else if(val instanceof Address) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("string"));
-            object.add("value", new JsonPrimitive(val.toString()));
-            return object;
-        } else if(val instanceof boolean[]) {
-            JsonArray array = new JsonArray();
-            for(boolean e : (boolean[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof int[]) {
-            JsonArray array = new JsonArray();
-            for(int e : (int[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof long[]) {
-            JsonArray array = new JsonArray();
-            for(long e : (long[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof Object[]) {
-            JsonArray array = new JsonArray();
-            for(Object e : (Object[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
+        if (val instanceof Boolean) {
+            return wrap("bool", val.toString());
+        } else if (val instanceof Integer || val instanceof Long) {
+            return wrap("number", val.toString());
+        } else if (val instanceof BigInteger) {
+            return wrap("string", "0x" + Strings.encode(((BigInteger) val).toByteArray()));
+        } else if (val instanceof BigDecimal) {
+            return wrap("number", ((BigDecimal) val).unscaledValue().toString());
+        } else if (val instanceof byte[]) {
+            return wrap("buffer", "0x" + Strings.encode((byte[]) val));
+        } else if (val instanceof String) {
+            return wrap("buffer", (String) val);
+        } else if (val instanceof Address) {
+            return wrap("string", val.toString());
+        } else if (val.getClass().isArray()) { // boolean[], int[], long[], Object[]
+            return toJsonArray(val);
         } else if(val instanceof Tuple) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("tuple"));
-            JsonArray array = new JsonArray();
-            for(Object e : (Tuple) val) {
-                array.add(toJsonElement(e));
-            }
-            object.add("value", array);
-            return object;
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("type", "tuple");
+            jsonObject.add("value", toJsonArray(((Tuple) val).elements));
+            return jsonObject;
         }
-        throw new Error();
+        throw new IllegalArgumentException();
+    }
+
+    private static JsonArray toJsonArray(Object array) {
+        JsonArray jsonArray = new JsonArray();
+        final int len = Array.getLength(array);
+        for (int i = 0; i < len; i++) {
+            jsonArray.add(toJsonElement(Array.get(array, i)));
+        }
+        return jsonArray;
     }
 }
