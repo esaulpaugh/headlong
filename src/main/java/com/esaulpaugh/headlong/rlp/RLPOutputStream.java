@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 public final class RLPOutputStream extends OutputStream {
 
-    private static final int MAX_BUFFER_LEN = 65_536;
+    private static final int MAX_BUFFER_LEN = 131_072;
 
     private final OutputStream out;
     private final byte[] internalBuf;
@@ -55,7 +55,7 @@ public final class RLPOutputStream extends OutputStream {
         this.out = Objects.requireNonNull(out);
         this.internalBuf = new byte[bufferLen];
         this.bb = ByteBuffer.wrap(internalBuf);
-        this.bufferedItemLimit = bufferLen - 8; // allow room for RLP string header
+        this.bufferedItemLimit = bufferLen - (1 + Long.BYTES); // allow room for RLP item header
     }
 
     @Override
