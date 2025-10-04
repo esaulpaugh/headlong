@@ -572,6 +572,7 @@ public final class TestUtils {
         return parallelRun(tasks, tasks, COMMON, timeoutSeconds, test);
     }
 
+    @SuppressWarnings("resource")
     public static ParallelRun parallelRun(int tasks, int threads, ParallelMode mode, long timeoutSeconds, IntConsumer test) {
         return () -> {
             final ExecutorService pool = mode == FIXED
