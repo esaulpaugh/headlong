@@ -81,7 +81,7 @@ public final class RLPOutputStream extends OutputStream {
         } else {
             final ByteBuffer temp = ByteBuffer.allocate(RLPEncoder.itemLen(len));
             RLPEncoder.putString(buffer, offset, len, temp);
-            out.write(temp.array(), 0, temp.position());
+            out.write(temp.array(), 0, temp.position()); // itemLen(len) could be oversized by 1 for single-byte items, so use position()
         }
     }
 
