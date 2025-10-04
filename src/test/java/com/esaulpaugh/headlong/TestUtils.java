@@ -119,19 +119,10 @@ public final class TestUtils {
     }
 
     public static long pickLong(Random r, int byteLen, boolean unsigned) {
-        long val = r.nextLong();
-        switch (byteLen) {
-        case 1: val &= 0xFFL; break;
-        case 2: val &= 0xFFFFL; break;
-        case 3: val &= 0xFFFFFFL; break;
-        case 4: val &= 0xFFFFFFFFL; break;
-        case 5: val &= 0xFFFFFFFFFFL; break;
-        case 6: val &= 0xFFFFFFFFFFFFL; break;
-        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
-        case 8: break;
-        default: throw new IllegalArgumentException("byteLen out of range");
+        if (byteLen < 1 || byteLen > Long.BYTES) {
+            throw new IllegalArgumentException("byteLen out of range");
         }
-        return (unsigned && val < 0L) || (byteLen < 8 && !unsigned && r.nextBoolean()) ? ~val : val;
+        return uniformLong(r, unsigned, byteLen * 8);
     }
 
     public static long wildLong(Random r) {
