@@ -64,6 +64,7 @@ public final class TestUtils {
     private static final long UNINITIALIZED = Long.MIN_VALUE;
     private static volatile long envHash = UNINITIALIZED;
 
+    @SuppressWarnings("ConstantConditions")
     public static long getEnvHash() {
         long hash = TestUtils.envHash;
         if (hash == UNINITIALIZED) {
