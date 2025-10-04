@@ -141,21 +141,33 @@ public final class RLPEncoder {
      * Puts into the destination buffer at its current position the RLP encoding of the given byte string.
      *
      * @param byteString the byte string to be encoded
-     * @param dest    the destination for the sequence of RLP encodings
+     * @param dest    the destination for the RLP string item
      */
     public static void putString(byte[] byteString, ByteBuffer dest) {
-        if (byteString.length == 1) {
-            if (!DataType.isSingleByte(byteString[0])) {
+        putString(byteString, 0, byteString.length, dest);
+    }
+
+    /**
+     * Puts into the destination buffer at its current position the RLP encoding of the given byte string.
+     *
+     * @param byteString the byte string to be encoded
+     * @param offset     the starting position in the byte string
+     * @param length     the number of bytes to encode
+     * @param dest       the destination for the RLP string item
+     */
+    public static void putString(byte[] byteString, int offset, int length, ByteBuffer dest) {
+        if (length == 1) {
+            if (!DataType.isSingleByte(byteString[offset])) {
                 dest.put((byte) (STRING_SHORT_OFFSET + 1));
             }
-        } else if (isShort(byteString.length)) {
-            dest.put((byte) (STRING_SHORT_OFFSET + byteString.length)); // dataLen is 0 or 2-55
+        } else if (isShort(length)) {
+            dest.put((byte) (STRING_SHORT_OFFSET + length)); // dataLen is 0 or 2-55
         } else { // long string
-            final int len = Integers.len(byteString.length);
+            final int len = Integers.len(length);
             dest.put((byte) (STRING_LONG_OFFSET + len));
-            Integers.putLong(byteString.length, len, dest);
+            Integers.putLong(length, len, dest);
         }
-        dest.put(byteString);
+        dest.put(byteString, offset, length);
     }
 
     public static byte[] sequence(Object... objects) {
