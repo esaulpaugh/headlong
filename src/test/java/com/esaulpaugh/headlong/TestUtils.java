@@ -131,7 +131,7 @@ public final class TestUtils {
         case 8: break;
         default: throw new IllegalArgumentException("byteLen out of range");
         }
-        return (unsigned && val < 0) || r.nextBoolean() ? ~val : val;
+        return (unsigned && val < 0L) || (byteLen < 8 && !unsigned && r.nextBoolean()) ? ~val : val;
     }
 
     public static long wildLong(Random r) {
