@@ -70,7 +70,7 @@ public final class TestUtils {
     }
 
     public static long getSeed() {
-        return splittableRandom().nextLong();
+        return RandomHolder.SHARED.nextLong();
     }
 
     public static SplittableRandom splittableRandom() {
