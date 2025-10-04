@@ -34,11 +34,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.stream.Stream;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -64,7 +66,7 @@ public class RLPStreamTest {
 
     @Test
     public void testRLPOutputStream() throws Throwable {
-        TestUtils.assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
+        assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
         try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
             ros.write(0xc0);
             ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
@@ -79,11 +81,14 @@ public class RLPStreamTest {
                 new HashSet<byte[]>(),
                 new Object[] { new byte[] { 0x77, 0x61 } }
         };
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 0)) {
             ros.writeSequence(objects);
             assertEquals(Notation.forObjects(objects), Notation.forEncoding(baos.toByteArray()));
         }
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
+
+        assertThrown(IllegalArgumentException.class, "bufferLen too large: 65537 > 65536", () -> new RLPOutputStream(null, 65_537));
+
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 65536)) {
             ros.writeList(objects);
             assertEquals(Notation.forObjects((Object) objects), Notation.forEncoding(baos.toByteArray()));
             assertEquals("ce880573490923738490c0c3827761", baos.toString());
@@ -140,11 +145,12 @@ public class RLPStreamTest {
 
     @Test
     public void testCopyToRLPOutputStream() throws IOException {
+        final Random r = TestUtils.seededRandom();
         final byte[] encoding = new byte[] { (byte) 0x87, 0, 1, 2, 3, 4, 5, 6 };
         final RLPString y = RLP_STRICT.wrapString(encoding);
         {
             final Baos b = new Baos();
-            final RLPOutputStream rlpOut = new RLPOutputStream(b);
+            final RLPOutputStream rlpOut = new RLPOutputStream(b, r.nextInt(26));
             y.copyData(rlpOut);
             assertArrayEquals(encoding, b.toByteArray());
         }
@@ -167,7 +173,7 @@ public class RLPStreamTest {
             encodings.add(item.encoding());
         }
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
+        assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
                 .map(RLP_STRICT::wrapItem)
                 .mapToInt(RLPItem::asInt)
                 .forEach(System.out::println));
@@ -186,13 +192,13 @@ public class RLPStreamTest {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
-            TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", () -> System.out.println(iter.hasNext()));
+            assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", () -> System.out.println(iter.hasNext()));
             try (Stream<RLPItem> stream2 = RLPDecoder.stream(RLP_STRICT.sequenceIterator(pis))) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 Iterator<RLPItem> iter2 = stream2.iterator();
                 for (int i = 0; i < 3; i++) {
-                    TestUtils.assertThrown(
+                    assertThrown(
                             IllegalArgumentException.class,
                             "long element data length must be 56 or greater; found: 55 for element @ 0",
                             () -> System.out.println(iter2.hasNext())
@@ -369,7 +375,7 @@ public class RLPStreamTest {
 
     private static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
         assertFalse(iter.hasNext());
-        TestUtils.assertThrown(NoSuchElementException.class, iter::next);
+        assertThrown(NoSuchElementException.class, iter::next);
         assertFalse(iter.hasNext());
         logReceipt(zero, false);
     }

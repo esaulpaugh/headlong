@@ -19,35 +19,62 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * An {@link OutputStream} in which the data is encoded to RLP format before writing to the underlying {@link OutputStream}.
+ * An {@link OutputStream} that encodes data to RLP format before writing to the underlying {@link OutputStream}.
  * Each call to {@link #write(int)}, {@link #write(byte[])}, or {@link #write(byte[], int, int)} will write one RLP string item.
  * Buffered or otherwise unpredictably-sized writes to an {@link RLPOutputStream} will result in an unpredictable RLP structure.
+ * Not thread-safe.
  */
 public final class RLPOutputStream extends OutputStream {
 
+    private static final int MAX_BUFFER_LEN = 65_536;
+
     private final OutputStream out;
+    private final byte[] internalBuf;
+    private final ByteBuffer bb;
+    private final int bufferedItemLimit;
 
     public RLPOutputStream(OutputStream out) {
+        this(out, 8_192);
+    }
+
+    public RLPOutputStream(OutputStream out, int bufferLen) {
+        if (bufferLen > MAX_BUFFER_LEN) {
+            throw new IllegalArgumentException("bufferLen too large: " + bufferLen + " > " + MAX_BUFFER_LEN);
+        }
         this.out = Objects.requireNonNull(out);
+        this.internalBuf = new byte[bufferLen];
+        this.bb = ByteBuffer.wrap(internalBuf);
+        this.bufferedItemLimit = bufferLen - 8; // allow room for RLP string header
     }
 
     @Override
     public void write(int b) throws IOException {
-        writeOut(b == 0 ? RLPDecoder.RLP_ZERO_BYTE : RLPEncoder.string(Integers.toBytes(b)));
+        if (b == 0) {
+            out.write(RLPDecoder.RLP_ZERO_BYTE);
+        } else {
+            write(Integers.toBytes(b));
+        }
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        writeOut(RLPEncoder.string(b));
+        write(b, 0, b.length);
     }
 
     @Override
     public void write(byte[] buffer, int offset, int len) throws IOException {
-        writeOut(RLPEncoder.string(Arrays.copyOfRange(buffer, offset, offset + len)));
+        if (len <= bufferedItemLimit) {
+            bb.rewind();
+            RLPEncoder.putString(buffer, offset, len, bb);
+            out.write(internalBuf, 0, bb.position());
+        } else {
+            writeOut(RLPEncoder.string(Arrays.copyOfRange(buffer, offset, offset + len)));
+        }
     }
 
     public void writeSequence(Object... rawObjects) throws IOException {
