@@ -79,7 +79,9 @@ public final class RLPOutputStream extends OutputStream {
             RLPEncoder.putString(buffer, offset, len, bb);
             out.write(internalBuf, 0, bb.position());
         } else {
-            writeOut(RLPEncoder.string(Arrays.copyOfRange(buffer, offset, offset + len)));
+            final ByteBuffer temp = ByteBuffer.allocate(1 + Long.BYTES + len); // header + payload
+            RLPEncoder.putString(buffer, offset, len, temp);
+            out.write(temp.array(), 0, temp.position());
         }
     }
 
