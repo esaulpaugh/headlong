@@ -540,9 +540,9 @@ public final class TestUtils {
 
     public static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
-        return len != 1
-                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
-                : "()";
+        if (len == 1) return "()";
+        sb.setCharAt(len - 1, ')'); // replace trailing comma
+        return sb.toString();
     }
 
     public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
