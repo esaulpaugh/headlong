@@ -61,6 +61,31 @@ public final class TestUtils {
 
     private TestUtils() {}
 
+    private static final long UNINITIALIZED = Long.MIN_VALUE;
+    private static volatile long envHash = UNINITIALIZED;
+
+    public static long getEnvHash() {
+        long hash = TestUtils.envHash;
+        if (hash == UNINITIALIZED) {
+            synchronized (TestUtils.class) {
+                hash = TestUtils.envHash;
+                if (hash == UNINITIALIZED) {
+                    final Object env = System.getenv();
+                    hash = env.hashCode();
+                    hash = 31L * hash + System.identityHashCode(env);
+                    hash = 31L * hash + System.getProperty("java.version").hashCode();
+                    hash = 31L * hash + System.getProperty("os.arch").hashCode();
+                    hash = 31L * hash + System.getProperty("os.version").hashCode();
+                    if (hash == UNINITIALIZED) { // unlikely collision with sentinel
+                        ++hash;
+                    }
+                    TestUtils.envHash = hash;
+                }
+            }
+        }
+        return hash;
+    }
+
     private static final class RandomHolder {
         static final SplittableRandom SHARED = new SplittableRandom(new SecureRandom().nextLong());
     }
@@ -102,16 +127,6 @@ public final class TestUtils {
             c ^= c >>> 33;
         }
         return c;
-    }
-
-    public static long getEnvHash() {
-        final Object env = System.getenv();
-        long hash = env.hashCode();
-        hash = 31L * hash + System.identityHashCode(env);
-        hash = 31L * hash + System.getProperty("java.version").hashCode();
-        hash = 31L * hash + System.getProperty("os.arch").hashCode();
-        hash = 31L * hash + System.getProperty("os.version").hashCode();
-        return hash;
     }
 
     public static long pickLong(Random r) {
