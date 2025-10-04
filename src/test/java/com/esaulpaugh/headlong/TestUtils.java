@@ -120,9 +120,9 @@ public final class TestUtils {
 
     public static long pickLong(Random r, int byteLen, boolean unsigned) {
         if (byteLen < 1 || byteLen > Long.BYTES) {
-            throw new IllegalArgumentException("byteLen out of range");
+            throw new IllegalArgumentException("byteLen out of range: " + byteLen);
         }
-        return uniformLong(r, unsigned, byteLen * 8);
+        return uniformLong(r, unsigned, byteLen * Byte.SIZE);
     }
 
     public static long wildLong(Random r) {
