@@ -86,7 +86,7 @@ public class RLPStreamTest {
             assertEquals(Notation.forObjects(objects), Notation.forEncoding(baos.toByteArray()));
         }
 
-        assertThrown(IllegalArgumentException.class, "bufferLen too large: 65537 > 65536", () -> new RLPOutputStream(null, 65_537));
+        assertThrown(IllegalArgumentException.class, "bufferLen too large: 131073 > 131072", () -> new RLPOutputStream(null, 131_073));
 
         try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 65536)) {
             ros.writeList(objects);
