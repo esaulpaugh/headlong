@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RLPDecoderTest {
@@ -249,13 +250,18 @@ public class RLPDecoderTest {
 
     @Test
     public void duplicateString() {
-        RLPString str = RLP_STRICT.wrap(LONG_LIST_BYTES, 13);
-        RLPString dup = str.duplicate();
+        final RLPString str = RLP_STRICT.wrap(LONG_LIST_BYTES, 13);
+        final RLPString dup = str.duplicate();
 
+        assertNotSame(str, dup);
         assertEquals(str, dup);
         assertEquals(str.hashCode(), dup.hashCode());
         assertEquals(str.toString(), dup.toString());
         assertEquals(str.type(), dup.type());
+
+        final RLPItem dup2 = RLP_STRICT.wrapItem(LONG_LIST_BYTES, 13);
+        assertNotSame(str, dup2);
+        assertEquals(str, dup2);
 
         assertEquals(0, dup.index);
         assertEquals(str.dataIndex - str.index, dup.dataIndex);
@@ -1128,11 +1134,19 @@ public class RLPDecoderTest {
 
     @Test
     public void testDataType() {
-        final String expected = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111111111222222223333333333333333333333333333333333333333333333333333333344444444";
-        StringBuilder sb = new StringBuilder();
+        final String ordinals    = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111111111222222223333333333333333333333333333333333333333333333333333333344444444";
+        final String singleBytes = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+        StringBuilder ordinalsBuilder = new StringBuilder();
+        StringBuilder singleBytesBuilder = new StringBuilder();
+
         for (int i = 0; i < 256; i++) {
-            sb.append(DataType.type((byte) i).ordinal());
+            final byte b = (byte) i;
+            ordinalsBuilder.append(DataType.type(b).ordinal());
+            singleBytesBuilder.append(DataType.isSingleByte(b) ? 1 : 0);
         }
-        assertEquals(expected, sb.toString());
+
+        assertEquals(ordinals, ordinalsBuilder.toString());
+        assertEquals(singleBytes, singleBytesBuilder.toString());
     }
 }
