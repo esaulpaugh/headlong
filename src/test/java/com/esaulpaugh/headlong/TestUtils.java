@@ -69,11 +69,11 @@ public final class TestUtils {
         return ThreadLocalRandom.current();
     }
 
-    public static long getSeed() {
+    public static synchronized long getSeed() {
         return RandomHolder.SHARED.nextLong();
     }
 
-    public static SplittableRandom splittableRandom() {
+    public static synchronized SplittableRandom splittableRandom() {
         return RandomHolder.SHARED.split();
     }
 
@@ -348,13 +348,11 @@ public final class TestUtils {
     }
 
     public static BigInteger parseBigInteger(JsonElement in) {
-        String string = in.getAsString();
-        return new BigInteger(string, 10);
+        return new BigInteger(parseString(in), 10);
     }
 
     public static BigInteger parseBigIntegerStringPoundSign(JsonElement in) {
-        String string = in.getAsString();
-        return new BigInteger(string.substring(1), 10);
+        return new BigInteger(parseString(in).substring(1), 10);
     }
 
     public static long parseLong(JsonElement in) {
@@ -362,7 +360,7 @@ public final class TestUtils {
     }
 
     public static Address parseAddress(JsonElement in) {
-        return Address.wrap(Address.toChecksumAddress(in.getAsString()));
+        return Address.wrap(Address.toChecksumAddress(parseString(in)));
     }
 
     /** Asserts that the arguments are either both true or both false. */

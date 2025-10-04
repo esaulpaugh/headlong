@@ -353,20 +353,19 @@ public class TupleTest {
     public void fuzzNulls() throws Throwable {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
         final SplittableRandom split = TestUtils.splittableRandom();
-        final Random r = new Random(split.nextLong());
+        final Random seedableRandom = new Random();
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
-            MonteCarloTestCase mctc = new MonteCarloTestCase(split.nextLong(), limits, r, k);
+            MonteCarloTestCase mctc = new MonteCarloTestCase(split.nextLong(), limits, seedableRandom, k);
             Tuple args = mctc.argsTuple;
             if (args.elements.length > 0) {
-                int idx = r.nextInt(args.elements.length);
-                replace(args.elements, idx);
+                replaceIndex(args.elements, split.nextInt(args.elements.length));
                 assertThrown(IllegalArgumentException.class, ": null", () -> mctc.function.encodeCall(args));
             }
         }
     }
 
-    private static void replace(Object[] parent, int index) {
+    private static void replaceIndex(Object[] parent, int index) {
         Object element = parent[index];
         if(element instanceof Object[]) {
             Object[] eArr = (Object[]) element;
