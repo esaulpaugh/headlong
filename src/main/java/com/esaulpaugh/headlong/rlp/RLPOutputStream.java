@@ -42,6 +42,12 @@ public final class RLPOutputStream extends OutputStream {
         this(out, 8_192);
     }
 
+    /**
+     * Creates an RLPOutputStream with a custom buffer size.
+     *
+     * @param out   the OutputStream to wrap
+     * @param bufferLen the size of this instance's internal buffer
+     */
     public RLPOutputStream(OutputStream out, int bufferLen) {
         if (bufferLen > MAX_BUFFER_LEN) {
             throw new IllegalArgumentException("bufferLen too large: " + bufferLen + " > " + MAX_BUFFER_LEN);
@@ -78,19 +84,33 @@ public final class RLPOutputStream extends OutputStream {
     }
 
     public void writeSequence(Object... rawObjects) throws IOException {
-        writeOut(RLPEncoder.sequence(rawObjects));
+        writeSequence(Arrays.asList(rawObjects));
     }
 
     public void writeSequence(Iterable<?> rawObjects) throws IOException {
-        writeOut(RLPEncoder.sequence(rawObjects));
+        final int encodedLen = RLPEncoder.sumEncodedLen(rawObjects);
+        if (encodedLen <= bufferedItemLimit) {
+            bb.rewind();
+            RLPEncoder.putSequence(rawObjects, bb);
+            out.write(internalBuf, 0, bb.position());
+        } else {
+            writeOut(RLPEncoder.sequence(rawObjects));
+        }
     }
 
     public void writeList(Object... rawElements) throws IOException {
-        writeOut(RLPEncoder.list(rawElements));
+        writeList(Arrays.asList(rawElements));
     }
 
     public void writeList(Iterable<?> rawElements) throws IOException {
-        writeOut(RLPEncoder.list(rawElements));
+        final int dataLen = RLPEncoder.sumEncodedLen(rawElements);
+        if (dataLen <= bufferedItemLimit) {
+            bb.rewind();
+            RLPEncoder.encodeList(dataLen, rawElements, bb);
+            out.write(internalBuf, 0, bb.position());
+        } else {
+            writeOut(RLPEncoder.list(rawElements));
+        }
     }
 
     private void writeOut(byte[] rlp) throws IOException {

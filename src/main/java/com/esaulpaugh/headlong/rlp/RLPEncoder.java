@@ -77,7 +77,7 @@ public final class RLPEncoder {
         return dataLen < MIN_LONG_DATA_LEN;
     }
 
-    private static int sumEncodedLen(Iterable<?> rawItems) {
+    static int sumEncodedLen(Iterable<?> rawItems) {
         long sum = 0L;
         for (Object raw : rawItems) {
             sum += encodedLen(raw);
@@ -120,7 +120,7 @@ public final class RLPEncoder {
         }
     }
 
-    private static void encodeList(int dataLen, Iterable<?> elements, ByteBuffer bb) {
+    static void encodeList(int dataLen, Iterable<?> elements, ByteBuffer bb) {
         insertListPrefix(dataLen, bb);
         putSequence(elements, bb);
     }
