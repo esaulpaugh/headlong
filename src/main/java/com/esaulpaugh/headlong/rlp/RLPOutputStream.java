@@ -31,6 +31,7 @@ import java.util.Objects;
  */
 public final class RLPOutputStream extends OutputStream {
 
+    private static final int MIN_BUFFER_LEN = 128;
     private static final int MAX_BUFFER_LEN = 131_072;
 
     private final OutputStream out;
@@ -49,6 +50,9 @@ public final class RLPOutputStream extends OutputStream {
      * @param bufferLen the size of this instance's internal buffer
      */
     public RLPOutputStream(OutputStream out, int bufferLen) {
+        if (bufferLen < MIN_BUFFER_LEN) {
+            throw new IllegalArgumentException("bufferLen too small: " + bufferLen + " < " + MIN_BUFFER_LEN);
+        }
         if (bufferLen > MAX_BUFFER_LEN) {
             throw new IllegalArgumentException("bufferLen too large: " + bufferLen + " > " + MAX_BUFFER_LEN);
         }
@@ -63,7 +67,7 @@ public final class RLPOutputStream extends OutputStream {
         if (b == 0) {
             out.write(RLPDecoder.RLP_ZERO_BYTE);
         } else {
-            write(Integers.toBytes(b));
+            write(internalBuf, 0, Integers.putInt(b, internalBuf, 0));
         }
     }
 
