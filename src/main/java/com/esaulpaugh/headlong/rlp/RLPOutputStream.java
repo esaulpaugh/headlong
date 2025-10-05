@@ -40,7 +40,7 @@ public final class RLPOutputStream extends OutputStream {
     private final int bufferedItemLimit;
 
     public RLPOutputStream(OutputStream out) {
-        this(out, 8_192);
+        this(out, 1_280);
     }
 
     /**
