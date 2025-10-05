@@ -87,6 +87,7 @@ public class RLPStreamTest {
             ros.write(0);
             ros.writeList(Collections.singletonList(new byte[]{-1}));
             ros.write(Short.MAX_VALUE);
+            ros.writeSequence(new byte[] { 1, 0 }, new Object[] { new byte[] { 1, 1 } }, new byte[0]);
             ros.write(Short.MIN_VALUE);
         }
 
@@ -118,6 +119,13 @@ public class RLPStreamTest {
         assertEquals(-1, list.elements().get(0).asByte());
 
         assertArrayEquals(Integers.toBytes(Short.MAX_VALUE), iter.next().asBytes());
+
+        assertArrayEquals(new byte[] {1,0}, iter.next().asBytes());
+        RLPList nested = iter.next().asRLPList();
+        assertEquals(1, nested.elements().size());
+        assertArrayEquals(new byte[] {1,1}, nested.elements().get(0).asBytes());
+        assertArrayEquals(new byte[0], iter.next().asBytes());
+
         assertEquals("ffff8000", Strings.encode(iter.next().asBytes()));
         assertFalse(iter.hasNext());
     }
