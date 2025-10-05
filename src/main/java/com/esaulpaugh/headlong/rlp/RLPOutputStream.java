@@ -65,9 +65,9 @@ public final class RLPOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
         if (b == 0) {
-            out.write(RLPDecoder.RLP_ZERO_BYTE);
+            out.write(0);
         } else {
-            write(internalBuf, 0, Integers.putInt(b, internalBuf, 0));
+            write(Integers.toBytes(b));
         }
     }
 

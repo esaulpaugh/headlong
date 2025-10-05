@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
@@ -81,7 +79,7 @@ public class RLPStreamTest {
                 new HashSet<byte[]>(),
                 new Object[] { new byte[] { 0x77, 0x61 } }
         };
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 0)) {
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 128)) {
             ros.writeSequence(objects);
             assertEquals(Notation.forObjects(objects), Notation.forEncoding(baos.toByteArray()));
         }
@@ -145,12 +143,11 @@ public class RLPStreamTest {
 
     @Test
     public void testCopyToRLPOutputStream() throws IOException {
-        final Random r = TestUtils.seededRandom();
         final byte[] encoding = new byte[] { (byte) 0x87, 0, 1, 2, 3, 4, 5, 6 };
         final RLPString y = RLP_STRICT.wrapString(encoding);
         {
             final Baos b = new Baos();
-            final RLPOutputStream rlpOut = new RLPOutputStream(b, r.nextInt(26));
+            final RLPOutputStream rlpOut = new RLPOutputStream(b, 128);
             y.copyData(rlpOut);
             assertArrayEquals(encoding, b.toByteArray());
         }
