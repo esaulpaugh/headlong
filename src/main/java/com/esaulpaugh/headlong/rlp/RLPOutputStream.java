@@ -62,10 +62,18 @@ public final class RLPOutputStream extends OutputStream {
         this.bufferedItemLimit = bufferLen - (1 + Long.BYTES); // allow room for RLP item header
     }
 
+    /**
+     * Writes the RLP encoding of the given integer to the underlying {@link OutputStream}.
+     * <p>
+     * NOTE: This violates the general method contract in that it may write <em>multiple</em> bytes to the underlying stream,
+     * depending on the integer being encoded.
+     *
+     * @param b the integer to write as RLP bytes
+     */
     @Override
     public void write(int b) throws IOException {
-        if (b == 0) {
-            out.write(0);
+        if (b >= 0 && b < 128) {
+            out.write(b);
         } else {
             write(Integers.toBytes(b));
         }
