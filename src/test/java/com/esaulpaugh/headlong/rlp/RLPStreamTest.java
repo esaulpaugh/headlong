@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +28,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +66,61 @@ public class RLPStreamTest {
             (byte) 0x84, 'd', 'o', 'g', 's',
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
+
+    @Test
+    public void testStreamRoundTrip() throws IOException {
+        final byte[] mysteryBytes = new byte[5];
+        TestUtils.seededRandom().nextBytes(mysteryBytes);
+        final byte[][] complexData = {
+                {},
+                TEST_STRING.getBytes(StandardCharsets.UTF_8),
+                mysteryBytes
+        };
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (RLPOutputStream ros = new RLPOutputStream(baos)) {
+            ros.write(Integer.MAX_VALUE);
+            ros.write(Integer.MIN_VALUE);
+            for (byte[] e : complexData) ros.write(e);
+            for (byte[] e : complexData) ros.write(e, 0, e.length);
+            ros.write(127);
+            ros.write(0);
+            ros.writeList(Collections.singletonList(new byte[]{-1}));
+            ros.write(Short.MAX_VALUE);
+            ros.write(Short.MIN_VALUE);
+        }
+
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(new ByteArrayInputStream(baos.toByteArray()));
+        testStreamData(iter, mysteryBytes);
+
+        ReadableByteChannel channel = Channels.newChannel(new ByteArrayInputStream(baos.toByteArray()));
+        testStreamData(RLP_STRICT.sequenceIterator(channel), mysteryBytes);
+    }
+
+    private static void testStreamData(Iterator<RLPItem> iter, byte[] mysteryBytes) {
+        assertArrayEquals(Integers.toBytes(Integer.MAX_VALUE), iter.next().asBytes());
+        assertArrayEquals(Integers.toBytes(Integer.MIN_VALUE), iter.next().asBytes());
+
+        assertArrayEquals(new byte[] {}, iter.next().asBytes());
+        assertEquals(TEST_STRING, new String(iter.next().asBytes(), StandardCharsets.UTF_8));
+        assertArrayEquals(mysteryBytes, iter.next().asBytes());
+
+        assertArrayEquals(new byte[] {}, iter.next().asBytes());
+        assertEquals(TEST_STRING, new String(iter.next().asBytes(), StandardCharsets.UTF_8));
+        assertArrayEquals(mysteryBytes, iter.next().asBytes());
+
+        assertArrayEquals(new byte[] { 0x7f }, iter.next().asBytes());
+        assertArrayEquals(new byte[] { 0x00 }, iter.next().asBytes());
+
+        RLPList list = iter.next().asRLPList();
+        assertEquals("c281ff", list.encodingString(Strings.HEX));
+        assertEquals(1, list.elements().size());
+        assertEquals(-1, list.elements().get(0).asByte());
+
+        assertArrayEquals(Integers.toBytes(Short.MAX_VALUE), iter.next().asBytes());
+        assertEquals("ffff8000", Strings.encode(iter.next().asBytes()));
+        assertFalse(iter.hasNext());
+    }
 
     @Test
     public void testRLPOutputStream() throws Throwable {
