@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -592,7 +593,14 @@ public class ABIJSONTest {
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint24)"), error.getInputs());
         assertEquals("InsufficientBalance(uint256,uint24)", error.getCanonicalSignature());
-        assertEquals(Function.parse("InsufficientBalance(uint,uint24)"), error.function());
+
+        final byte[] digest = new Keccak(256).digest(error.getCanonicalSignature().getBytes(StandardCharsets.US_ASCII));
+        final Function func = error.function();
+
+        assertEquals(FastHex.encodeToString(digest, 0, 4), func.selectorHex());
+        assertEquals("fcb7e215", func.selectorHex());
+        assertEquals(Function.parse("InsufficientBalance(uint,uint24)"), func);
+
         assertEquals(json, error.toJson(true));
         assertEquals(json, error.toString());
 
