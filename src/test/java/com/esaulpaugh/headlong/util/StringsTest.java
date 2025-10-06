@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -313,24 +314,37 @@ public class StringsTest {
 
     @Disabled("slow")
     @Test
-    public void testHexDecode() {
-        int count = 0;
-        for (int k = 0; k < 256; k++) {
-            for (int i = 0; i < 256; i++) {
-                for (int j = 0; j < 256; j++) {
-                    try {
-                        String s = "0" + (char) k + (char) i + (char) j;
-                        byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
-                        assertArrayEquals(FastHex.decode(bytes, 0, bytes.length), FastHex.decode(s));
-                    } catch (IllegalArgumentException iae) {
-                        if (iae.getMessage().startsWith("i")) {
-                            count++;
+    public void testHexDecodeParallel() throws Exception {
+        final int bytes = 256;
+
+        final long[] counts = new long[bytes];
+
+        TestUtils.parallelRun(bytes, 300, id -> {
+            final int k = id;
+            int count = 0;
+            for (int i = 0; i < bytes; i++) {
+                for (int j = 0; j < bytes; j++) {
+                    for (int l = 0; l < bytes; l++) {
+                        String s = "" + (char) k + (char) i + (char) j + (char) l;
+                        byte[] bytesArray = s.getBytes(StandardCharsets.US_ASCII);
+                        try {
+                            assertArrayEquals(FastHex.decode(bytesArray, 0, bytesArray.length), FastHex.decode(s));
+                        } catch (IllegalArgumentException iae) {
+                            if (iae.getMessage().startsWith("i")) {
+                                count++;
+                            }
                         }
                     }
                 }
             }
-        }
-        assertEquals((int) Math.pow("0123456789ABCDEFabcdef".length(), 3), 256 * 256 * 256 - count);
-        assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.cbrt(256 * 256 * 256 - count));
+            counts[k] = count;
+        }).run();
+
+        final long countSum = Arrays.stream(counts).sum();
+        final long expectedValids = 256L * 256L * 256L * 256L - countSum;
+        System.out.println("count sum = " + countSum);
+        assertEquals((int) Math.pow("0123456789ABCDEFabcdef".length(), 4), expectedValids);
+        assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.sqrt(Math.sqrt(expectedValids)));
+        assertEquals(234256L, expectedValids);
     }
 }
