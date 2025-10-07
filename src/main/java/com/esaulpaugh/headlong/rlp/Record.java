@@ -24,9 +24,9 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -66,7 +66,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         final byte[] content = RLPEncoder.encodeRecordContent(seqBytes, pairs, payloadLen);
 
         // copy payload to record before sending to signer
-        byte[] record = recordBuf.array();
+        final byte[] record = recordBuf.array();
         System.arraycopy(content, content.length - payloadLen, record, record.length - payloadLen, payloadLen);
 
         final byte[] signature = signer.sign(content);
@@ -101,7 +101,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     }
 
     public Record with(Signer signer, long seq, KVP... newPairs) {
-        final HashSet<KVP> pairSet = new HashSet<>();
+        final LinkedHashSet<KVP> pairSet = new LinkedHashSet<>();
         for (KVP pair : newPairs) {
             if (!pairSet.add(pair)) {
                 throw KVP.duplicateKeyErr(pair.key);
