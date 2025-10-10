@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.util.Arrays;
 
@@ -180,17 +179,22 @@ public final class Address {
     private static String doChecksum(final byte[] addressBytes) {
         final Keccak keccak256 = new Keccak(256);
         keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
-        final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
-        final byte[] buffer = new byte[offset + ADDRESS_DATA_BYTES];
+        final byte[] hash = new byte[ADDRESS_DATA_BYTES];
         try {
-            keccak256.digest(buffer, offset, ADDRESS_DATA_BYTES); // only get the first 20 bytes of the hash
+            keccak256.digest(hash, 0, ADDRESS_DATA_BYTES); // only get the first 20 bytes of the hash
         } catch (DigestException de) {
             throw new AssertionError(de);
         }
-        final byte[] hash = FastHex.encodeToBytes(buffer);
-        final byte[] uppercase = UPPERCASE;
-        for (int i = PREFIX_LEN; i < addressBytes.length; i++) { // hash and addressBytes both length 42
-            if (hash[i] >= '8') addressBytes[i] = uppercase[addressBytes[i]];
+        for (int b = 0, c = PREFIX_LEN; b < hash.length; b++) {
+            final byte hashByte = hash[b];
+            if ((hashByte >>> 4) >= 8) {
+                addressBytes[c] = UPPERCASE[addressBytes[c]];
+            }
+            c++;
+            if ((hashByte & 0xF) >= 8) {
+                addressBytes[c] = UPPERCASE[addressBytes[c]];
+            }
+            c++;
         }
         return new String(addressBytes, 0, 0, addressBytes.length);
     }
