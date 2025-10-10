@@ -20,6 +20,7 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 import java.util.Arrays;
 
 /**
@@ -181,7 +182,11 @@ public final class Address {
         keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
         final byte[] buffer = new byte[offset + ADDRESS_DATA_BYTES];
-        keccak256.digest(ByteBuffer.wrap(buffer, offset, ADDRESS_DATA_BYTES)); // only get the first 20 bytes of the hash
+        try {
+            keccak256.digest(buffer, offset, ADDRESS_DATA_BYTES); // only get the first 20 bytes of the hash
+        } catch (DigestException de) {
+            throw new AssertionError(de);
+        }
         final byte[] hash = FastHex.encodeToBytes(buffer);
         final byte[] uppercase = UPPERCASE;
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) { // hash and addressBytes both length 42
