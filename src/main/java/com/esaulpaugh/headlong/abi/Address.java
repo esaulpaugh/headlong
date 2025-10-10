@@ -20,7 +20,7 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Provides type safety by disambiguating address arguments from {@link String} and {@link BigInteger} while imposing
@@ -117,7 +117,9 @@ public final class Address {
         if (start < PREFIX_LEN) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
-        final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
+        final byte[] addressBytes = new byte[ADDRESS_LEN_CHARS];
+        Arrays.fill(addressBytes, (byte)'0');
+        addressBytes[1] = 'x';
         minimalHex.getBytes(0, len, addressBytes, start);
         return doChecksum(addressBytes);
     }
@@ -151,7 +153,9 @@ public final class Address {
     public static String toChecksumAddress(final String address) {
         if (address.length() == ADDRESS_LEN_CHARS) {
             checkPrefix(address);
-            final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
+            final byte[] addressBytes = new byte[ADDRESS_LEN_CHARS];
+            addressBytes[0] = '0';
+            addressBytes[1] = 'x';
             for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
                 final byte val = LOWERCASE[address.charAt(i)];
                 if (val == 0) throw new IllegalArgumentException("illegal hex val @ " + i);
