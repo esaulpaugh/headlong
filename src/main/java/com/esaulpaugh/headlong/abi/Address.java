@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
-import java.security.DigestException;
 import java.util.Arrays;
 
 /**
