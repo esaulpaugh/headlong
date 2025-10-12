@@ -179,13 +179,8 @@ public final class Address {
     private static String doChecksum(final byte[] addressBytes) {
         final Keccak keccak256 = new Keccak(256);
         keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
-        final byte[] hash = new byte[ADDRESS_DATA_BYTES];
-        try {
-            keccak256.digest(hash, 0, ADDRESS_DATA_BYTES); // only get the first 20 bytes of the hash
-        } catch (DigestException de) {
-            throw new AssertionError(de);
-        }
-        for (int b = 0, c = PREFIX_LEN; b < hash.length; b++) {
+        final byte[] hash = keccak256.digest();
+        for (int b = 0, c = PREFIX_LEN; b < ADDRESS_DATA_BYTES; b++) {
             final byte hashByte = hash[b];
             if ((hashByte >>> 4) >= 8) {
                 addressBytes[c] = UPPERCASE[addressBytes[c]];
