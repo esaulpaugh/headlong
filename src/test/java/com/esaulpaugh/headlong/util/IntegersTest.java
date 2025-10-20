@@ -28,6 +28,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.ToIntBiFunction;
 import java.util.function.ToIntFunction;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.insertBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -174,7 +175,7 @@ public class IntegersTest {
 
     @Disabled("tests TestUtils methods")
     @Test
-    public void testInsertBytes() {
+    public void testInsertBytes() throws Throwable {
         byte[] ten = new byte[10];
 
         final byte a = 1, b = 11, c = 111, d = 9, e = 99, f = -1, g = -100, h = 64;
@@ -215,6 +216,9 @@ public class IntegersTest {
         Arrays.fill(ten, (byte) 0);
         insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
+
+        assertThrown(IllegalArgumentException.class, "n is out of range: -1", () -> insertBytes(-1, ten, 1, a,b,c,d, e,f,g,h));
+        assertThrown(IllegalArgumentException.class, "n is out of range: 9", () -> insertBytes(9, ten, 1, a,b,c,d, e,f,g,h));
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = TestUtils.randomBytes(4);

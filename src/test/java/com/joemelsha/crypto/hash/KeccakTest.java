@@ -205,7 +205,7 @@ public class KeccakTest {
     @Disabled("slow")
     @Test
     public void benchmark() {
-        byte[] bytes = TestUtils.randomBytes(50, TestUtils.seededRandom());
+        byte[] bytes = TestUtils.randomBytes(50);
 
         final String labelWrapped = WrappedKeccak.class.getSimpleName() + ":\t";
         final String labelKeccak = Keccak.class.getSimpleName() + ":\t\t\t";

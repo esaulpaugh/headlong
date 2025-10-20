@@ -69,8 +69,7 @@ public class RLPStreamTest {
 
     @Test
     public void testStreamRoundTrip() throws IOException {
-        final byte[] mysteryBytes = new byte[5];
-        TestUtils.seededRandom().nextBytes(mysteryBytes);
+        final byte[] mysteryBytes = TestUtils.randomBytes(5);
         final byte[][] sequence = {
                 Strings.EMPTY_BYTE_ARRAY,
                 TEST_STRING.getBytes(StandardCharsets.UTF_8),
