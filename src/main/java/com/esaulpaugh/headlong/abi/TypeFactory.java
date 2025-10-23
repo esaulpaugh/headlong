@@ -147,7 +147,7 @@ public final class TypeFactory {
                     final int M = Integer.parseInt(rawType.substring(idx + "fixed".length(), indexOfX)); // no parseUnsignedInt on older Android versions?
                     final int N = Integer.parseInt(rawType.substring(indexOfX + 1)); // everything after x
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
-                        return new BigDecimalType(rawType, M, N, idx == 1, "Pas de tel code.");
+                        return new BigDecimalType(rawType, M, N, idx == 1, BigDecimalType.CODE);
                     }
                 } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
                     /* fall through */

@@ -257,8 +257,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
             map("address", AddressType.INSTANCE);
 
-            map("fixed128x18", new BigDecimalType("fixed128x18", 128, 18, false, "Pas de tel code."));
-            map("ufixed128x18", new BigDecimalType("ufixed128x18", 128, 18, true, "Pas de tel code."));
+            map("fixed128x18", new BigDecimalType("fixed128x18", 128, 18, false, BigDecimalType.CODE));
+            map("ufixed128x18", new BigDecimalType("ufixed128x18", 128, 18, true, BigDecimalType.CODE));
 
             map("decimal", get("int168"));
             map("fixed", get("fixed128x18"));

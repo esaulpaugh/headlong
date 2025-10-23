@@ -21,17 +21,20 @@ import java.nio.ByteBuffer;
 /** Represents a decimal type such as fixed or ufixed. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
+    static final Object CODE = new String("Pas de tel code.");
+
     final int scale;
 
-    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned, String magicPhrase) {
+    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned, Object code) {
         super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
         if (scale <= 0 || scale > 80) {
             throw new IllegalStateException("bad scale");
         }
-        if (!"Pas de tel code.".equals(magicPhrase)) {
-            throw new IllegalStateException("BigDecimalType should not be instantiated directly.");
+        if (code == CODE) {
+            this.scale = scale;
+            return;
         }
-        this.scale = scale;
+        throw new IllegalStateException("BigDecimalType should not be instantiated directly.");
     }
 
     public int getScale() {
