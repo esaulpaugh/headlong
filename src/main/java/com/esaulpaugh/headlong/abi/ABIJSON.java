@@ -458,9 +458,10 @@ public final class ABIJSON {
         final JsonReader reader = new JsonReader(r);
         switch (STRICTNESS) {
         case 2: reader.setNestingLimit(50); /* fall through */
-        case 1: reader.setStrictness(Strictness.STRICT); return reader;
-        default: reader.setLenient(false); return reader;
+        case 1: reader.setStrictness(Strictness.STRICT); break;
+        default: reader.setLenient(false);
         }
+        return reader;
     }
 
     private static final class NonSyncWriter extends CharArrayWriter {
