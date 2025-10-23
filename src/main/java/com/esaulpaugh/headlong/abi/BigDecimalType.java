@@ -21,8 +21,7 @@ import java.nio.ByteBuffer;
 /** Represents a decimal type such as fixed or ufixed. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    @SuppressWarnings("StringOperationCanBeSimplified")
-    static final Object CODE = new String("Pas de tel code.");
+    static final Object CODE = new Object(); // new String("Pas de tel code.")
 
     final int scale;
 
