@@ -61,8 +61,10 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         }
         this.bitLength = bitLength;
         this.unsigned = unsigned;
-        this.min = minValue();
-        this.max = maxValue();
+        this.min = unsigned ? BigInteger.ZERO : BigInteger.ONE.shiftLeft(bitLength - 1).negate();
+        this.max = BigInteger.ONE
+                    .shiftLeft(unsigned ? bitLength : bitLength - 1)
+                    .subtract(BigInteger.ONE);
         this.minLong = this.min.longValue();
         this.maxLong = this.max.longValue();
     }
@@ -76,13 +78,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     public final BigInteger minValue() {
-        return unsigned ? BigInteger.ZERO : BigInteger.ONE.shiftLeft(bitLength - 1).negate();
+        return min;
     }
 
     public final BigInteger maxValue() {
-        return BigInteger.ONE
-                .shiftLeft(unsigned ? bitLength : bitLength - 1)
-                .subtract(BigInteger.ONE);
+        return max;
     }
 
     @Override
