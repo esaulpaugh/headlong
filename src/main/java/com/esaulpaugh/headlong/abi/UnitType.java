@@ -51,7 +51,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
-        if (!(this instanceof BigDecimalType)) {
+        if (this.getClass() != BigDecimalType.class) {
             if (INSTANCE_COUNT.incrementAndGet() > INSTANCE_LIMIT) {
                 INSTANCE_COUNT.decrementAndGet();
                 throw new IllegalStateException("instance not permitted");
