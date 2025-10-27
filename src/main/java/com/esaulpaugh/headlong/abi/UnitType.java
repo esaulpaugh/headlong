@@ -56,9 +56,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 INSTANCE_COUNT.decrementAndGet();
                 throw new IllegalStateException("instance not permitted");
             }
-        } else if (bitLength > UNIT_LENGTH_BITS) {
-            bitLength = UNIT_LENGTH_BITS;
-        } else if (bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
+        } else if (bitLength > UNIT_LENGTH_BITS || bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
             throw new IllegalStateException("bit length not permitted");
         }
         this.bitLength = bitLength;
