@@ -61,10 +61,14 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         }
         this.bitLength = bitLength;
         this.unsigned = unsigned;
-        this.min = unsigned ? BigInteger.ZERO : BigInteger.ONE.shiftLeft(bitLength - 1).negate();
-        this.max = BigInteger.ONE
-                    .shiftLeft(unsigned ? bitLength : bitLength - 1)
-                    .subtract(BigInteger.ONE);
+        if (unsigned) {
+            this.min = BigInteger.ZERO;
+            this.max = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE);
+        } else {
+            final BigInteger shifted = BigInteger.ONE.shiftLeft(bitLength - 1);
+            this.min = shifted.negate();
+            this.max = shifted.subtract(BigInteger.ONE);
+        }
         this.minLong = this.min.longValue();
         this.maxLong = this.max.longValue();
     }
