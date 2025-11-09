@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.joemelsha.crypto.hash.Keccak;
@@ -263,15 +264,12 @@ public class ABIJSONTest {
         int i = 0;
         jsons[i++] = FUNCTION_A_JSON;
         jsons[i++] = FUNCTION_B_JSON;
-        JsonArray contractArray = TestUtils.parseArray(CONTRACT_JSON);
-        final int n = contractArray.size();
-        for (int j = 0; j < n; j++) {
-            jsons[i++] = TestUtils.toPrettyPrint(contractArray.get(j).getAsJsonObject());
+
+        for (JsonElement e : TestUtils.parseArray(CONTRACT_JSON)) {
+            jsons[i++] = TestUtils.toPrettyPrint(e.getAsJsonObject());
         }
-        JsonArray fallbackEtc = TestUtils.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
-        final int n2 = fallbackEtc.size();
-        for (int j = 0; j < n2; j++) {
-            jsons[i++] = TestUtils.toPrettyPrint(fallbackEtc.get(j).getAsJsonObject());
+        for (JsonElement e : TestUtils.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE)) {
+            jsons[i++] = TestUtils.toPrettyPrint(e.getAsJsonObject());
         }
 
         for (String originalJson : jsons) {
