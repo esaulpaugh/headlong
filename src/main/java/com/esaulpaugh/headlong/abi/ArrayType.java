@@ -307,8 +307,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private void encodeBytes(byte[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         dest.put(arr);
-        int rem = Integers.mod(arr.length, UNIT_LENGTH_BYTES);
-        insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
+        insert00Padding(Integers.mod(-arr.length, UNIT_LENGTH_BYTES), dest);
     }
 
     private void encodeInts(int[] arr, ByteBuffer dest) {
