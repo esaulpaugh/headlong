@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -125,7 +126,7 @@ public final class RLPDecoder {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_BUFFER_SIZE << 3, 640_000L);
+        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_BUFFER_SIZE << 3, 640_000L, false);
     }
 
     /**
@@ -141,7 +142,7 @@ public final class RLPDecoder {
      * @param maxDelayNanos highest delay interval before hasNext ends read retries and returns false
      * @return  an iterator over the items in the stream
      */
-    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos) {
+    public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos, boolean interruptible) {
         Objects.requireNonNull(channel);
         return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_BUFFER_SIZE] : initialBuffer, 0) {
             private static final long INITIAL_DELAY_NANOS = 5_000L;
@@ -156,6 +157,9 @@ public final class RLPDecoder {
                 }
                 try {
                     while (true) {
+                        if (interruptible && Thread.interrupted()) {
+                            throw new InterruptedIOException("sequenceIterator interrupted");
+                        }
                         final int capacity = bb.capacity();
                         if (index == capacity) {
                             resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
@@ -180,6 +184,7 @@ public final class RLPDecoder {
                         if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
                             break;
                         }
+                        // assert bytesRead == 0;
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
