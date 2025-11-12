@@ -972,7 +972,7 @@ public class RLPDecoderTest {
             final byte[] string = RLPEncoder.string(new byte[8192 + r.nextInt(10_000)]);
             final int maxResize = r.nextInt(string.length);
             mrbc.setAvailableBytes(string);
-            Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(mrbc, initialBuffer, maxResize, 200_000L);
+            Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(mrbc, initialBuffer, maxResize, 200_000L, false);
             final String msg = "resize would exceed limit: " + string.length + " > " + maxResize;
             assertThrown(UncheckedIOException.class, msg, iter::hasNext);
             assertThrown(UncheckedIOException.class, msg, iter::next);
