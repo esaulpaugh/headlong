@@ -965,14 +965,14 @@ public class RLPDecoderTest {
     @Test
     public void testSizeLimit() throws Throwable {
         final Random r = TestUtils.seededRandom();
-        CustomChannel mrbc = new CustomChannel();
+        final CustomChannel channel = new CustomChannel();
         final byte[] initialBuffer = new byte[8050];
         TestUtils.seededRandom().nextBytes(initialBuffer);
         for (int i = 0; i < 3; i++) {
             final byte[] string = RLPEncoder.string(new byte[8192 + r.nextInt(10_000)]);
             final int maxResize = r.nextInt(string.length);
-            mrbc.setAvailableBytes(string);
-            Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(mrbc, initialBuffer, maxResize, 200_000L, false);
+            channel.setAvailableBytes(string);
+            final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, maxResize, 200_000L, false);
             final String msg = "resize would exceed limit: " + string.length + " > " + maxResize;
             assertThrown(UncheckedIOException.class, msg, iter::hasNext);
             assertThrown(UncheckedIOException.class, msg, iter::next);
@@ -1062,7 +1062,7 @@ public class RLPDecoderTest {
         assertFalse(iterator.hasNext());
     }
 
-    static class CustomChannel implements ReadableByteChannel {
+    static final class CustomChannel implements ReadableByteChannel {
 
         private final List<byte[]> data = new ArrayList<>();
         private final int maxRead;
@@ -1094,7 +1094,7 @@ public class RLPDecoderTest {
         }
 
         @Override
-        public int read(ByteBuffer dst) throws IOException {
+        public int read(ByteBuffer dst) {
             if (!open) return -1;
             if (shouldReturnZero || data.isEmpty()) return 0;
 
