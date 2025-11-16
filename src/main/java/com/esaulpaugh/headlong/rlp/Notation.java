@@ -40,7 +40,7 @@ public final class Notation {
     private static final String[] LINE_PADDING_CACHE;
 
     static {
-        LINE_PADDING_CACHE = new String[8]; // pick any cache size
+        LINE_PADDING_CACHE = new String[12]; // pick any cache size
         for (int i = 0; i < LINE_PADDING_CACHE.length; i++) {
             LINE_PADDING_CACHE[i] = newLinePadding(i);
         }
