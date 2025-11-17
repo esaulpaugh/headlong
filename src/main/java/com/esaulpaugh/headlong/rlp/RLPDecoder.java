@@ -174,13 +174,12 @@ public final class RLPDecoder {
                                     if (bytesRead == Integer.MAX_VALUE) {
                                         resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), bb.position() - index); // pos == limit, pos == capacity
                                     }
+                                    checkInterrupt();
                                     continue;
                                 }
                             }
                         }
-                        if (interruptible && Thread.interrupted()) {
-                            throw new InterruptedIOException("sequenceIterator interrupted");
-                        }
+                        checkInterrupt();
                         if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
                             break;
                         }
@@ -195,6 +194,12 @@ public final class RLPDecoder {
                     throw new UncheckedIOException(io);
                 }
                 return false;
+            }
+
+            private void checkInterrupt() throws InterruptedIOException {
+                if (interruptible && Thread.interrupted()) {
+                    throw new InterruptedIOException("sequenceIterator interrupted");
+                }
             }
 
             private int calculateResize(long encodingLen, int defaultSize) throws IOException {
