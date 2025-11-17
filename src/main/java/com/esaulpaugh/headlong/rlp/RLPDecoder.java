@@ -157,9 +157,6 @@ public final class RLPDecoder {
                 }
                 try {
                     while (true) {
-                        if (interruptible && Thread.interrupted()) {
-                            throw new InterruptedIOException("sequenceIterator interrupted");
-                        }
                         final int capacity = bb.capacity();
                         if (index == capacity) {
                             resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
@@ -180,6 +177,9 @@ public final class RLPDecoder {
                                     continue;
                                 }
                             }
+                        }
+                        if (interruptible && Thread.interrupted()) {
+                            throw new InterruptedIOException("sequenceIterator interrupted");
                         }
                         if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
                             break;
