@@ -24,6 +24,7 @@ import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.InterruptibleChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -144,6 +145,9 @@ public final class RLPDecoder {
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos, boolean interruptible) {
         Objects.requireNonNull(channel);
+        if (interruptible && !(channel instanceof InterruptibleChannel)) {
+            throw new IllegalArgumentException("interruptible=true requires an InterruptibleChannel");
+        }
         return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_BUFFER_SIZE] : initialBuffer, 0) {
             private static final long INITIAL_DELAY_NANOS = 5_000L;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
@@ -174,12 +178,13 @@ public final class RLPDecoder {
                                     if (bytesRead == Integer.MAX_VALUE) {
                                         resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), bb.position() - index); // pos == limit, pos == capacity
                                     }
-                                    checkInterrupt();
                                     continue;
                                 }
                             }
                         }
-                        checkInterrupt();
+                        if (interruptible && Thread.interrupted()) {
+                            throw new InterruptedIOException("sequenceIterator interrupted");
+                        }
                         if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
                             break;
                         }
@@ -194,12 +199,6 @@ public final class RLPDecoder {
                     throw new UncheckedIOException(io);
                 }
                 return false;
-            }
-
-            private void checkInterrupt() throws InterruptedIOException {
-                if (interruptible && Thread.interrupted()) {
-                    throw new InterruptedIOException("sequenceIterator interrupted");
-                }
             }
 
             private int calculateResize(long encodingLen, int defaultSize) throws IOException {
