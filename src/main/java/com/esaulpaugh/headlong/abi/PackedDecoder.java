@@ -73,23 +73,9 @@ final class PackedDecoder {
                 firstDynamicIndex = i;
                 break;
             }
-            if (type instanceof ArrayType) {
-                final ArrayType<ABIType<Object>, ?, ?> arrayType = type.asArrayType();
-                final int elementByteLength = arrayType.getElementType() instanceof UnitType
-                        ? UNIT_LENGTH_BYTES
-                        : arrayType.getElementType().byteLengthPacked(null);
-                end -= elementByteLength * arrayType.getLength();
-                bb.position(end);
-                elements[i] = decodeArray(arrayType, bb, -1);
-            } else if (type instanceof TupleType) {
-                end -= type.byteLengthPacked(null);
-                bb.position(end);
-                elements[i] = decodeTupleStatic(type.asTupleType(), bb);
-            } else {
-                end -= type.byteLengthPacked(null);
-                bb.position(end);
-                elements[i] = decode(type, bb, -1);
-            }
+            end -= type.byteLengthPacked(null);
+            bb.position(end);
+            elements[i] = decode(type, bb, -1);
         }
 
         for (int i = 0; i <= firstDynamicIndex; i++) {
