@@ -72,7 +72,7 @@ public class PackedEncoderTest {
         TupleType<Pair<BigInteger[], Tuple[]>> tupleType = TupleType.parse("(int120[],(int96,ufixed256x47)[])");
         Pair<BigInteger[], Tuple[]> test = Tuple.of(new BigInteger[] { BigInteger.TEN }, new Tuple[] { Tuple.of(BigInteger.TEN, new BigDecimal(BigInteger.TEN, 47)) });
         ByteBuffer bb = tupleType.encodePacked(test);
-        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> tupleType.decodePacked(bb.array()));
+        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements: 2", () -> tupleType.decodePacked(bb.array()));
 
         TupleType<Single<BigInteger[][]>> _tt = TupleType.parse("(int144[][1])");
         Single<BigInteger[][]> _test = Single.of(new BigInteger[][] { new BigInteger[] { } });
