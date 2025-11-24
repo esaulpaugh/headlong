@@ -210,15 +210,12 @@ public final class RLPDecoder {
             }
 
             private void resize(int len, int keptBytes) {
-                if (len == bb.capacity()) {
-                    System.arraycopy(buffer, index, buffer, 0, keptBytes);
-                    bb.position(keptBytes);
-                } else {
-                    bb = ByteBuffer.allocate(len);
-                    bb.put(buffer, index, keptBytes);
-                    buffer = bb.array();
-                }
-                index = 0;
+                // always allocate a new buffer so as not to overwrite data being viewed by earlier RLPItems!
+                ByteBuffer bbPrime = ByteBuffer.allocate(len);
+                bbPrime.put(buffer, index, keptBytes);
+                this.bb = bbPrime;
+                this.buffer = bbPrime.array();
+                this.index = 0;
             }
         };
     }
