@@ -28,7 +28,9 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -987,6 +989,54 @@ public class RLPDecoderTest {
             for (byte b : item.encoding()) {
                 assertEquals(original[off++], b, "RLPItem memory corruption");
             }
+        }
+    }
+
+    @Test
+    public void testShortInputResizeCorruption() throws IOException, InterruptedException {
+        final byte[] original = new byte[] { (byte)0x81, (byte)0xff, (byte)0xc1, (byte)0xc0 };
+
+        final Pipe pipe = Pipe.open();
+        final ReadableByteChannel reader = pipe.source();
+        try (WritableByteChannel writer = pipe.sink()) {
+            final Thread writerThread = new Thread(() -> {
+                try {
+                    writer.write(ByteBuffer.wrap(original, 0, 3));
+                    Thread.sleep(5);
+                    writer.write(ByteBuffer.wrap(original, 3, 1));
+                    writer.close();
+                } catch (IOException io) {
+                    throw new UncheckedIOException(io);
+                } catch (InterruptedException ie) {
+                    throw new RuntimeException(ie);
+                }
+            });
+            writerThread.start();
+
+            final byte[] initialBuffer = new byte[3];
+
+            final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(
+                    reader,
+                    initialBuffer,
+                    initialBuffer.length,
+                    50L,
+                    false
+            );
+
+            final List<RLPItem> items = new ArrayList<>();
+            while (iter.hasNext()) {
+                items.add(iter.next());
+            }
+
+            int offset = 0;
+            for (RLPItem item : items) {
+                byte[] enc = item.encoding();
+                for (byte b : enc) {
+                    assertEquals(original[offset++], b, "RLPItem memory corruption");
+                }
+            }
+
+            writerThread.join();
         }
     }
 
