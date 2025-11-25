@@ -4,7 +4,7 @@
 [![Java CI GraalVM Maven](https://github.com/esaulpaugh/headlong/actions/workflows/graalvm.yml/badge.svg)](https://github.com/esaulpaugh/headlong/actions/workflows/graalvm.yml)
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community)
 
-#### Important Update Regarding Maven Central: https://github.com/esaulpaugh/headlong/discussions/77
+#### Bug Advisory: https://github.com/esaulpaugh/headlong/discussions/78
 
 Contract ABI and Recursive Length Prefix made easy for the JVM.
 
