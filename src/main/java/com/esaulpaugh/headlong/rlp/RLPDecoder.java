@@ -192,6 +192,9 @@ public final class RLPDecoder {
                             break;
                         }
                         // assert bytesRead == 0;
+                        if (bytesRead != 0) {
+                            throw new IOException("misreported read result: " + bytesRead);
+                        }
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
