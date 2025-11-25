@@ -141,6 +141,9 @@ public final class RLPDecoder {
      * @param initialBuffer  initial buffer to use (contents ignored); if null, a default-sized buffer is allocated
      * @param maxBufferResize   iterator throws if a partial item would exceed this length in bytes
      * @param maxDelayNanos highest delay interval before hasNext ends read retries and returns false
+     * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
+     *                      throw InterruptedIOException prior to waiting for more data; if true, requires channel to
+     *                      implement InterruptibleChannel;
      * @return  an iterator over the items in the stream
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos, boolean interruptible) {
@@ -185,7 +188,7 @@ public final class RLPDecoder {
                         if (interruptible && Thread.interrupted()) {
                             throw new InterruptedIOException("sequenceIterator interrupted");
                         }
-                        if (channelClosed || bytesRead == -1 || delayNanos > maxDelayNanos) {
+                        if (channelClosed || bytesRead < 0 || delayNanos > maxDelayNanos) {
                             break;
                         }
                         // assert bytesRead == 0;
