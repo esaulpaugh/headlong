@@ -963,6 +963,34 @@ public class RLPDecoderTest {
     }
 
     @Test
+    public void testNoCorruptionAfterResize() {
+        final byte[] original = new byte[] { (byte)0x81, (byte)0xff, (byte)0xc1, (byte)0xc0 };
+        final ReadableByteChannel channel = Channels.newChannel(new ByteArrayInputStream(original));
+
+        final byte[] initialBuffer = new byte[original.length / 2];
+
+        final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(
+                channel,
+                initialBuffer,
+                initialBuffer.length,
+                50L,
+                false
+        );
+
+        final List<RLPItem> items = new ArrayList<>();
+        while (iter.hasNext()) {
+            items.add(iter.next());
+        }
+
+        int off = 0;
+        for (RLPItem item : items) {
+            for (byte b : item.encoding()) {
+                assertEquals(original[off++], b, "RLPItem memory corruption");
+            }
+        }
+    }
+
+    @Test
     public void testSizeLimit() throws Throwable {
         final Random r = TestUtils.seededRandom();
         final CustomChannel channel = new CustomChannel();
