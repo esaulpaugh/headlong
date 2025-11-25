@@ -967,49 +967,25 @@ public class RLPDecoderTest {
     @Test
     public void testNoCorruptionAfterResize() {
         final byte[] original = new byte[] { (byte)0x81, (byte)0xff, (byte)0xc1, (byte)0xc0 };
-        final ReadableByteChannel channel = Channels.newChannel(new ByteArrayInputStream(original));
-
         final byte[] initialBuffer = new byte[original.length / 2];
 
-        final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(
-                channel,
-                initialBuffer,
-                initialBuffer.length,
-                50L,
-                false
-        );
-
-        final List<RLPItem> items = new ArrayList<>();
-        while (iter.hasNext()) {
-            items.add(iter.next());
-        }
-
-        int off = 0;
-        for (RLPItem item : items) {
-            for (byte b : item.encoding()) {
-                assertEquals(original[off++], b, "RLPItem memory corruption");
-            }
-        }
+        testForMemoryCorruption(Channels.newChannel(new ByteArrayInputStream(original)), initialBuffer, original);
     }
 
     @Test
+    public void testShortInputResizeCorruption() throws IOException {
         final byte[] original = new byte[] { (byte)0x81, (byte)0xff, (byte)0xc1, (byte)0xc0 };
         final Pipe pipe = Pipe.open();
-        final ReadableByteChannel reader = pipe.source();
-        try (WritableByteChannel writer = pipe.sink()) {
-                    writer.write(ByteBuffer.wrap(original, 3, 1));
-                    writer.close();
-                } catch (IOException io) {
-                    throw new RuntimeException(ie);
-                }
-            });
-            writerThread.start();
         final byte[] initialBuffer = new byte[3];
 
         try (WritableByteChannel writer = pipe.sink()) {
             writer.write(ByteBuffer.wrap(original));
         }
 
+        testForMemoryCorruption(pipe.source(), initialBuffer, original);
+    }
+
+    private static void testForMemoryCorruption(ReadableByteChannel reader, byte[] initialBuffer, byte[] data) {
         final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(
                 reader,
                 initialBuffer,
@@ -1026,7 +1002,7 @@ public class RLPDecoderTest {
         int offset = 0;
         for (RLPItem item : items) {
             for (byte b : item.encoding()) {
-                assertEquals(original[offset++], b, "RLPItem memory corruption");
+                assertEquals(data[offset++], b, "RLPItem memory corruption");
             }
         }
     }
