@@ -28,7 +28,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
@@ -973,16 +972,11 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void testShortInputResizeCorruption() throws IOException {
+    public void testShortInputResizeCorruption() {
         final byte[] original = new byte[] { (byte)0x81, (byte)0xff, (byte)0xc1, (byte)0xc0 };
-        final Pipe pipe = Pipe.open();
         final byte[] initialBuffer = new byte[3];
 
-        try (WritableByteChannel writer = pipe.sink()) {
-            writer.write(ByteBuffer.wrap(original));
-        }
-
-        testForMemoryCorruption(pipe.source(), initialBuffer, original);
+        testForMemoryCorruption(Channels.newChannel(new ByteArrayInputStream(original)), initialBuffer, original);
     }
 
     private static void testForMemoryCorruption(ReadableByteChannel reader, byte[] initialBuffer, byte[] data) {
