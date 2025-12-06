@@ -32,7 +32,7 @@
   <property name="junit.jupiter.version" value="5.11.4" />
   <property name="junit.platform.version" value="1.11.4" />
   <property name="opentest4j.version" value="1.3.0" />
-  <property name="bcprov.version" value="1.82" />
+  <property name="bcprov.version" value="1.83" />
 
   <!-- Maven Repository Paths -->
   <property name="maven.repo" value="${user.home}/.m2/repository" />
@@ -66,7 +66,7 @@
 
   <!-- Bouncy Castle -->
   <property name="maven.bcprov" value="${maven.repo}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
-  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/99788fdc10be07ee0de3e08f0827381abcf0c8f2/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/ba3ef343f598df1d8ecbcc38b78f5bd459a41ca1/bcprov-jdk14-${bcprov.version}.jar" />
 
   <!-- Conditionally use Gradle if -Dgradle-cache=true -->
   <condition property="gson" value="${gradle.gson}" else="${maven.gson}">
