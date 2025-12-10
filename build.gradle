@@ -8,8 +8,9 @@ plugins {
 group = "com.esaulpaugh"
 version = "13.3.2-SNAPSHOT"
 
-final String versionStr = getProject().getGradle().getGradleVersion()
-final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf((int)".".charAt(0))))
+final int gradleMajorVersion = gradle.gradleVersion.tokenize('.')[0] as int
+
+System.out.println("gradleMajorVersion = " + gradleMajorVersion)
 
 if (gradleMajorVersion >= 5) {
     java {
