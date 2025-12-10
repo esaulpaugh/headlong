@@ -208,7 +208,7 @@ public final class RLPDecoder {
             }
 
             private int calculateResize(long encodingLen, int defaultSize) throws IOException {
-                long resize = Math.min(maxBufferResize, defaultSize);
+                long resize = Math.min(defaultSize, maxBufferResize);
                 if (resize < encodingLen && (resize = encodingLen) > maxBufferResize) {
                     throw new IOException("resize would exceed limit: " + resize + " > " + maxBufferResize);
                 }
