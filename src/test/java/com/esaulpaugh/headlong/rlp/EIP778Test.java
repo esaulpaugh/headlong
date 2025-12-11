@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -506,5 +505,47 @@ public class EIP778Test {
                 "client --> [\"dd\", \"\"]",
                 new KVP(RLPDecoder.RLP_STRICT.wrapString(RLPEncoder.string(Strings.decode(CLIENT, UTF_8))), RLPDecoder.RLP_STRICT.wrapBits(0xc482646480L)).toString()
         );
+    }
+
+    @Test
+    public void testWithValue() {
+        final Random r = TestUtils.seededRandom();
+        final String keyStr = generateUtf8String(r.nextInt(128), r);
+        final KVP base = new KVP(keyStr, new byte[] { -2, (byte)keyStr.hashCode(), 77, 60 });
+
+        final byte[] baseRLPCopy = Arrays.copyOf(base.rlp, base.rlp.length);
+        final RLPString baseKeyCopy = base.key.duplicate();
+
+        final RLPItem dummyValue = RLPDecoder.RLP_STRICT.wrapBits(0x81ffL);
+
+        assertArrayEquals(base.rlp, baseRLPCopy);
+        assertEquals(base.key, RLPDecoder.RLP_STRICT.wrapString(baseRLPCopy));
+        assertEquals(base.value(), RLPDecoder.RLP_STRICT.wrap(baseRLPCopy, baseKeyCopy.endIndex));
+
+        KVP newBase = base;
+        for (int i = 0; i < 128; i++) {
+            for (int j = 0; j < 8; j++) {
+                byte[] val = new byte[i];
+                r.nextBytes(val);
+                final byte[] valCopy = Arrays.copyOf(val, val.length);
+                KVP with = newBase.withValue(val);
+                val = null;
+
+                assertArrayEquals(baseRLPCopy, base.rlp);
+                assertArrayEquals(valCopy, with.value().asBytes());
+                assertEquals(keyStr, base.key().asString(Strings.UTF_8));
+                assertEquals(keyStr, with.key().asString(Strings.UTF_8));
+                assertEquals(baseKeyCopy, with.key());
+
+                assertNotSame(base, with);
+
+//                assertEquals(base.key().endIndex + RLPEncoder.stringEncodedLen(valCopy), with.rlp.length);
+
+                assertTrue(new KVP(base.key(), dummyValue).equals(with));
+                assertTrue(with.equals(new KVP(base.key(), dummyValue)));
+
+                newBase = with;
+            }
+        }
     }
 }
