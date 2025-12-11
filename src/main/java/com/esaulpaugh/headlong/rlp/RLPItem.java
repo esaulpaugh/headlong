@@ -323,6 +323,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     @Override
     public final int compareTo(RLPItem othr) {
+        // Arrays.compareUnsigned // Java 9+
         int thisOffset = this.dataIndex;
         int othrOffset = othr.dataIndex;
         final int end = thisOffset + Math.min(this.dataLength, othr.dataLength);
@@ -330,7 +331,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
             int t = this.buffer[thisOffset++];
             int o = othr.buffer[othrOffset++];
             if (t != o) {
-                return t - o;
+                return (t & 0xFF) - (o & 0xFF); // unsigned difference (required for sorting utf-8)
             }
         }
         return this.dataLength - othr.dataLength;

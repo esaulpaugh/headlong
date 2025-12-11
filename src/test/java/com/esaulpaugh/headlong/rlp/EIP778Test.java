@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.KVP.CLIENT;
@@ -186,25 +188,58 @@ public class EIP778Test {
         );
     }
 
+    private static String generateUtf8String(final int len, Random r) {
+        final StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            final int codePoint;
+            switch (r.nextInt(3)) {
+            case 0: // ASCII
+                codePoint = r.nextInt(0x80); // 0..127
+                break;
+            case 1: // 2-byte (U+0080..U+07FF)
+                codePoint = 0x80 + r.nextInt(0x800 - 0x80);
+                break;
+            default: // 3-byte (U+0800..U+FFFF, excluding surrogates)
+                codePoint = 0x0800 + r.nextInt(0xFFFF - 0x0800 + 1);
+                if (Character.isSurrogate((char) codePoint)) {
+                    sb.appendCodePoint(0x0800); // replace surrogate with valid code point
+                    continue;
+                }
+                break;
+            }
+            sb.appendCodePoint(codePoint);
+        }
+        return sb.toString();
+    }
+
     @Test
-    public void testSort() {
+    public void testSortPairs() {
         final Random r = TestUtils.seededRandom();
-        for (int j = 0; j < 50; j++) {
-            for (int i = 0; i < 50; i++) {
-                String a = TestUtils.generateASCIIString(j, r);
-                String b = TestUtils.generateASCIIString(j, r);
+        testSort(50, j -> TestUtils.generateASCIIString(j, r));
+        testSort(50, j -> generateUtf8String(j, r));
+    }
+
+    private static void testSort(final int n, IntFunction<String> generator) {
+        for (int len = 0; len < n; len++) {
+            for (int i = 0; i < n; i++) {
+                final String a = generator.apply(len);
+                final String b = generator.apply(len);
                 if (!a.equals(b)) {
-                    int str = a.compareTo(b) < 0 ? 0 : 1;
-                    KVP pairA = new KVP(a, EMPTY_BYTE_ARRAY);
-                    KVP pairB = new KVP(b, EMPTY_BYTE_ARRAY);
-                    int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
-                    assertEquals(str, pair);
+                    final KVP pairA = new KVP(a, a.getBytes(StandardCharsets.UTF_8));
+                    final KVP pairB = new KVP(b, b.getBytes(StandardCharsets.UTF_8));
+                    assertEquals(Integer.signum(a.compareTo(b)), Integer.signum(pairA.compareTo(pairB)), "Failed for a='" + a + "', b='" + b + "'");
                 }
             }
         }
+    }
+
+    @Test
+    public void testSortRecords() {
+        final Random r = TestUtils.seededRandom();
         final Record[] records = new Record[] {
                 VECTOR.with(SIGNER, 101L),
-                VECTOR.with(SIGNER, 50L, new KVP(UDP, new byte[0])),
+                VECTOR.with(SIGNER, 52L, new KVP(UDP, EMPTY_BYTE_ARRAY)),
+                VECTOR.with(SIGNER, 50L, new KVP("ÜDP", EMPTY_BYTE_ARRAY)),
                 VECTOR,
                 VECTOR.with(SIGNER, 99L),
                 VECTOR.with(SIGNER, 0L)
@@ -215,7 +250,7 @@ public class EIP778Test {
         for (Record e : records) {
             sb.append(e.getSeq()).append(',');
         }
-        assertEquals("0,1,50,99,101,", sb.toString());
+        assertEquals("0,1,50,52,99,101,", sb.toString());
     }
 
     @Test
