@@ -126,9 +126,11 @@ public final class RLPDecoder {
     }
 
     private static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int DEFAULT_MAX_BUFFER_RESIZE = 384 * 1024;
+    private static final long DEFAULT_MAX_DELAY_NANOS = 640_000L;
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_BUFFER_SIZE << 3, 640_000L, false);
+        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_MAX_BUFFER_RESIZE, DEFAULT_MAX_DELAY_NANOS, false);
     }
 
     /**
