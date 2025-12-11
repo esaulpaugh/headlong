@@ -143,7 +143,7 @@ public final class RLPDecoder {
      *
      * @param channel   input channel containing the RLP sequence data
      * @param initialBuffer  initial buffer to use (contents ignored); if null, a default-sized buffer is allocated
-     * @param maxBufferResize   iterator throws if a partial item would exceed this length in bytes
+     * @param maxBufferResize   iterator throws if an item would exceed this length in bytes
      * @param maxDelayNanos highest delay interval before read retries are considered failed
      * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
      *                      throw InterruptedIOException prior to waiting for more data; if true, requires channel to
