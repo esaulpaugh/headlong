@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -189,7 +190,10 @@ public final class RLPDecoder {
                             throw new InterruptedIOException("sequenceIterator interrupted");
                         }
                         if (channelClosed || bytesRead < 0 || delayNanos > maxDelayNanos) {
-                            break;
+                            if (index < end) {
+                                throw new UncheckedIOException(new EOFException("stream ended mid-item"));
+                            }
+                            return false;
                         }
                         // assert bytesRead == 0;
                         if (bytesRead != 0) {
@@ -204,7 +208,6 @@ public final class RLPDecoder {
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
-                return false;
             }
 
             private int calculateResize(long encodingLen, int defaultSize) throws IOException {
