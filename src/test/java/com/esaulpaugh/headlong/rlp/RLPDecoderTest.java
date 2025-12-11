@@ -22,14 +22,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,6 +39,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
@@ -1080,7 +1079,7 @@ public class RLPDecoderTest {
                 assertEquals('\0', channelIter.next().asChar(true));
             }
             assertFalse(channelIter.hasNext());
-            channel.shouldReturnZero = true;
+            channel.setShouldReturnZero(true);
             assertFalse(channelIter.hasNext());
         }
     }
@@ -1115,27 +1114,27 @@ public class RLPDecoderTest {
             this.maxRead = maxRead;
         }
 
-        private boolean open = true;
-        private boolean shouldReturnZero = false; // Simulate no data available
+        private final AtomicBoolean open = new AtomicBoolean(true);
+        private final AtomicBoolean shouldReturnZero = new AtomicBoolean(false); // Simulate no data available
 
-        public void setAvailableBytes(byte[] bytes) {
+        public synchronized void setAvailableBytes(byte[] bytes) {
             data.clear();
             data.add(bytes);
             pos = 0;
         }
 
-        public void addMoreBytes(byte[] bytes) {
+        public synchronized void addMoreBytes(byte[] bytes) {
             data.add(bytes);
         }
 
-        public void setShouldReturnZero(boolean shouldReturnZero) {
-            this.shouldReturnZero = shouldReturnZero;
+        public void setShouldReturnZero(boolean value) {
+            shouldReturnZero.set(value);
         }
 
         @Override
-        public int read(ByteBuffer dst) {
-            if (!open) return -1;
-            if (shouldReturnZero || data.isEmpty()) return 0;
+        public synchronized int read(ByteBuffer dst) {
+            if (!open.get()) return -1;
+            if (shouldReturnZero.get() || data.isEmpty()) return 0;
 
             int lenSum = -pos;
             for (byte[] e : data) {
@@ -1165,10 +1164,10 @@ public class RLPDecoderTest {
         }
 
         @Override
-        public boolean isOpen() { return open; }
+        public boolean isOpen() { return open.get(); }
 
         @Override
-        public void close() { open = false; }
+        public void close() { open.set(false); }
     }
 
     @Test
