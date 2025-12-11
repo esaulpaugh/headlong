@@ -98,7 +98,7 @@ public final class RLPEncoder {
         throw new IllegalArgumentException("unsupported object type. expected instanceof byte[], Iterable, or Object[]");
     }
 
-    private static int stringEncodedLen(byte[] byteString) {
+    static int stringEncodedLen(byte[] byteString) {
         return itemLen(byteString.length == 1 && DataType.isSingleByte(byteString[0]) ? 0 : byteString.length);
     }
 

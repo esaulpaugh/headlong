@@ -52,8 +52,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP(String keyUtf8, byte[] strBytes) {
-        this.rlp = RLPEncoder.sequence(Strings.decode(keyUtf8, UTF_8), strBytes);
-        this.key = RLP_STRICT.wrapString(rlp);
+        this(RLPEncoder.sequence(Strings.decode(keyUtf8, UTF_8), strBytes));
     }
 
     public KVP(RLPString key, RLPItem value) {
@@ -64,12 +63,22 @@ public final class KVP implements Comparable<KVP> {
         this.key = RLP_STRICT.wrapString(rlp);
     }
 
+    private KVP(byte[] rlp) {
+        this.rlp = rlp;
+        this.key = RLP_STRICT.wrapString(rlp);
+    }
+
     public KVP withValue(String val, int valEncoding) {
         return withValue(Strings.decode(val, valEncoding));
     }
 
     public KVP withValue(byte[] value) {
-        return new KVP(key, RLP_STRICT.wrapString(RLPEncoder.string(value)));
+//         return new KVP(key, RLP_STRICT.wrapString(RLPEncoder.string(value)));
+        final int vlen = RLPEncoder.stringEncodedLen(value);
+        final byte[] out = new byte[key.endIndex + vlen];
+        System.arraycopy(rlp, 0, out, 0, key.endIndex);
+        RLPEncoder.putString(value, ByteBuffer.wrap(out, key.endIndex, vlen));
+        return new KVP(out);
     }
 
     public RLPString key() {

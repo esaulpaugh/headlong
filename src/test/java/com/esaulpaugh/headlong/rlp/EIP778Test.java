@@ -326,7 +326,8 @@ public class EIP778Test {
 
     private static void testEqual(KVP a, KVP b) {
         assertNotSame(a, b);
-        assertEquals(a, b);
+        assertTrue(a.equals(b));
+        assertTrue(b.equals(a));
     }
 
     @Test
@@ -539,10 +540,10 @@ public class EIP778Test {
 
                 assertNotSame(base, with);
 
-//                assertEquals(base.key().endIndex + RLPEncoder.stringEncodedLen(valCopy), with.rlp.length);
+                assertEquals(base.key().endIndex + RLPEncoder.stringEncodedLen(valCopy), with.rlp.length);
 
-                assertTrue(new KVP(base.key(), dummyValue).equals(with));
-                assertTrue(with.equals(new KVP(base.key(), dummyValue)));
+                final KVP dummy = new KVP(base.key(), dummyValue);
+                testEqual(dummy, with);
 
                 newBase = with;
             }
