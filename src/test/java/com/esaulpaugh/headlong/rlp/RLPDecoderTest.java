@@ -921,23 +921,44 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void testPartialThenCompleteRLP() {
+    public void testPartialWaitsThrows() throws Throwable {
         CustomChannel channel = new CustomChannel();
 
-        channel.setAvailableBytes(new byte[] { (byte)0x82 });
-        Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(channel);
-        assertFalse(iterator.hasNext());
+        // Start a partial item
+        channel.setAvailableBytes(new byte[] { (byte)0x83 });
+
+        // long timeout
+        final Iterator<RLPItem> iterator = RLP_STRICT.sequenceIterator(channel, null, 8192, 12_000_000L, false);
+
+        // Start in a thread to avoid blocking the test
+        AtomicBoolean itemAvailable = new AtomicBoolean(false);
+        Thread t = new Thread(() -> itemAvailable.set(iterator.hasNext()));
+        t.start();
+
+        // Let it read and start waiting
+        Thread.sleep(2);
+
+        // Finish the item
+        channel.addMoreBytes(new byte[3]);
+
+        t.join(500);
+        assertTrue(itemAvailable.get());
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+        assertEquals(RLP_STRICT.wrapBits(0x83000000L), iterator.next());
+
         assertFalse(iterator.hasNext());
 
-        channel.addMoreBytes(new byte[2]);
-        channel.setShouldReturnZero(true);
-        assertFalse(iterator.hasNext());
-        channel.setShouldReturnZero(false);
-        assertTrue(iterator.hasNext());
+        channel.addMoreBytes(new byte[] { (byte)0x81 });
+
+        // Partial item + timeout -> throws EOF
+        assertThrown(UncheckedIOException.class, "stream ended mid-item", iterator::hasNext);
+
+        // channel EOF: -1
         channel.close();
-        assertTrue(iterator.hasNext());
-        assertEquals(RLP_STRICT.wrapBits(0x820000), iterator.next());
-        assertFalse(iterator.hasNext());
+
+        // Partial item + channel EOF -> throws EOF
+        assertThrown(UncheckedIOException.class, "stream ended mid-item", iterator::hasNext);
     }
 
     @Test
