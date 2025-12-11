@@ -116,14 +116,6 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public int compareTo(KVP other) {
-        int result = this.key.compareTo(other.key);
-        if (result == 0) {
-            throw duplicateKeyErr(key);
-        }
-        return result;
-    }
-
-    static IllegalArgumentException duplicateKeyErr(RLPString key) {
-        return new IllegalArgumentException("duplicate key: " + key.asString(UTF_8));
+        return this.key.compareTo(other.key);
     }
 }

@@ -23,7 +23,6 @@ import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -55,7 +54,13 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
             throw new IllegalArgumentException("negative seq");
         }
 
-        Collections.sort(pairs);
+        pairs.sort((a, b) -> {
+            int cmp = a.key.compareTo(b.key);
+            if (cmp == 0) {
+                throw duplicateKeyErr(a.key);
+            }
+            return cmp;
+        });
 
         final byte[] seqBytes = Integers.toBytes(seq);
         final int payloadLen = RLPEncoder.payloadLen(seqBytes, pairs); // content list prefix not included
@@ -104,7 +109,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         final LinkedHashSet<KVP> pairSet = new LinkedHashSet<>();
         for (KVP pair : newPairs) {
             if (!pairSet.add(pair)) {
-                throw KVP.duplicateKeyErr(pair.key);
+                throw duplicateKeyErr(pair.key);
             }
         }
         for (KVP pair : this) {
@@ -140,7 +145,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
             rlpIter.next(); // value
             if (prevKey != null && key.compareTo(prevKey) <= 0) {
                 throw key.compareTo(prevKey) == 0
-                        ? KVP.duplicateKeyErr(key)
+                        ? duplicateKeyErr(key)
                         : new IllegalArgumentException("key out of order");
             }
             prevKey = key;
@@ -236,5 +241,9 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         final byte[] arr = bb.array();
         System.arraycopy(rlpList.buffer, index, arr, bb.position(), contentDataLen);
         return arr;
+    }
+
+    private static IllegalArgumentException duplicateKeyErr(RLPString key) {
+        return new IllegalArgumentException("duplicate key: " + key.asString(Strings.UTF_8));
     }
 }
