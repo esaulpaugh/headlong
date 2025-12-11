@@ -132,9 +132,10 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} blocks until a full RLP
-     * item is available or throws {@link UncheckedIOException} if a partial item cannot be completed due to
-     * EOF, channel closure, or the next wait in the exponential backoff would exceed {@code maxDelayNanos}.
+     * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may block until a full RLP item is
+     * available. If EOF reached, the channel has been closed, or the next wait in the exponential backoff would exceed
+     * {@code maxDelayNanos}, {@link Iterator#hasNext()} will return false when there is no partial item already buffered. If a
+     * partial item is already buffered, an {@link UncheckedIOException} will be thrown.
      * <p>
      * It is the responsibility of the caller to close the channel; the returned iterator itself never
      * calls {@link java.nio.channels.Channel#close()}. Consider iterating within a virtual thread to avoid
@@ -146,8 +147,9 @@ public final class RLPDecoder {
      * @param maxDelayNanos highest delay interval before read retries are considered failed
      * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
      *                      throw InterruptedIOException prior to waiting for more data; if true, requires channel to
-     *                      implement InterruptibleChannel;
-     * @throws UncheckedIOException if a partial item cannot be completed due to EOF, channel closure, or exceeding {@code maxDelayNanos}
+     *                      implement InterruptibleChannel
+     * @throws UncheckedIOException if a partial item cannot be completed due to EOF, channel closure, or exceeding
+     *                              {@code maxDelayNanos}, or if another I/O error occurs while reading from the channel
      * @return  an iterator over the items in the stream
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos, boolean interruptible) {
