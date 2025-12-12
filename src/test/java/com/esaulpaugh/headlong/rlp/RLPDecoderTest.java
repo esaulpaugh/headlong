@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -51,6 +52,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -825,8 +827,21 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void testExports2() {
+    public void testExports2() throws Throwable {
+
         RLPItem item = RLP_STRICT.wrapString(new byte[] { (byte)0x83,1,3,5 });
+        final RLPItem finalItem = item;
+
+        assertThrown(BufferOverflowException.class, () -> {
+            ByteBuffer small = ByteBuffer.allocate(1);
+            finalItem.copy(small);
+        });
+
+        assertThrown(BufferOverflowException.class, () -> {
+            ByteBuffer small = ByteBuffer.allocate(1);
+            finalItem.copyData(small);
+        });
+
         final ByteBuffer out = ByteBuffer.allocate(5);
         out.position(1);
         item.copyData(out);
@@ -888,16 +903,19 @@ public class RLPDecoderTest {
     @Test
     public void testCasts() throws Throwable {
         final RLPItem item0 = RLP_STRICT.wrapBits(0x7f);
-        final RLPString str0 = item0.asRLPString();
-        assertThrown(ClassCastException.class, "RLPString", str0::asRLPList);
-
+        final RLPString str = item0.asRLPString();
+        assertThrown(ClassCastException.class, "RLPString", str::asRLPList);
 
         final RLPItem item1 = RLP_STRICT.wrapBits(0xc0);
+        final RLPList list = item1.asRLPList();
         assertThrown(ClassCastException.class, "RLPList", item1::asRLPString);
-        RLPList list = item1.asRLPList();
 
-        RLPString s = RLP_STRICT.wrapBits(0x70);
-        list = RLP_STRICT.wrapBits(0xc1ff);
+        assertInstanceOf(RLPString.class, str);
+        assertInstanceOf(RLPList.class, list);
+
+        RLPList list2 = RLP_STRICT.wrapBits(0xc786010203040506L);
+        assertEquals(1, list2.elements().size());
+        assertEquals(RLP_STRICT.wrapBits(0x86010203040506L), list2.iterator().next());
     }
 
     @Test
