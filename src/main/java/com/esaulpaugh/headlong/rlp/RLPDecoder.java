@@ -189,7 +189,7 @@ public final class RLPDecoder {
                                 if (!channelClosed && bytesRead > 0) {
                                     delayNanos = INITIAL_DELAY_NANOS;
                                     if (bytesRead == Integer.MAX_VALUE) {
-                                        resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), bb.position() - index); // pos == limit, pos == capacity
+                                        resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), end - index); // end == bb.pos,bb.lim,bb.cap
                                     }
                                     continue;
                                 }
