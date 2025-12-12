@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -739,6 +740,7 @@ public class TupleTest {
         testEquals(p, t2);
         testEquals(t, t3);
 
+        @SuppressWarnings("unchecked")
         Quadruple<byte[], Object, Number, Throwable> t4quad = (Quadruple<byte[], Object, Number, Throwable>) t4;
         assertEquals(q.get0(), t4quad.get0());
         assertEquals(q.get1(), t4quad.get1());
@@ -764,29 +766,55 @@ public class TupleTest {
     @Test
     void testTypeWitnesses() {
         abstract class Nonsense {
-            public <T extends List<?>> T create(Boolean... bools) {
-                return createList();
+            public <T extends List<?>> T create(Object input) {
+                return makeList();
             }
-            protected abstract <T extends List<?>> T createList();
+
+            @SuppressWarnings("unchecked")
+            protected <T extends List<?>> T makeList() {
+                return (T) new ArrayList<String>();
+            }
         }
 
-        assertEquals(
-                1,
+        assertTrue(
                 new Nonsense() {
                     @SuppressWarnings("unchecked")
                     @Override
-                    public <T extends List<?>> T create(Boolean... bools) {
+                    public <T extends List<?>> T create(Object input) {
+                        final Boolean[] bools = (Boolean[]) input;
                         return (T) Stream.of(bools)
                                 .filter(b -> b == super.<List<String>>create(bools).add(""))
                                 .collect(Collectors.toList());
                     }
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected <T extends List<?>> T createList() {
-                        return (T) new ArrayList<String>();
-                    }
-                }.<List<Boolean>>create(true, false).size(),
-                "nonsense failed"
+                }.<List<Boolean>>create(new Boolean[] { true, false }).get(0),
+                "Nonsense 0 failed"
         );
+
+        final String expected = "\0\0";
+        final String actual = new Nonsense() {
+
+            String consumeString(String s) {
+                return s;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T extends List<?>> T create(Object input) {
+                return (T) Collections.singletonList(
+                        consumeString(
+                                super.<List<String>>create(input)
+                                        .get(0)
+                        )
+                );
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T extends List<?>> T makeList() {
+                return (T) Collections.singletonList(expected);
+            }
+        }.<List<String>>create(null).get(0);
+
+        assertEquals(expected, actual, "Nonsense 1 failed.");
     }
 }
