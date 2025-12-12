@@ -35,6 +35,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
@@ -42,6 +43,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 import static java.util.Spliterator.IMMUTABLE;
 import static java.util.Spliterator.NONNULL;
@@ -298,13 +300,12 @@ public final class RLPDecoder {
     @SuppressWarnings("unchecked")
     <T extends RLPItem> T wrap(byte[] buffer, int index, int containerEnd) {
         byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        switch (type.ordinal()) {
+        switch (DataType.ordinal(lead)) {
         case ORDINAL_SINGLE_BYTE: return (T) newSingleByte(buffer, index, containerEnd);
         case ORDINAL_STRING_SHORT: return (T) newStringShort(buffer, index, lead, containerEnd, lenient);
         case ORDINAL_LIST_SHORT: return (T) newListShort(buffer, index, lead, containerEnd);
-        case ORDINAL_STRING_LONG:
-        case ORDINAL_LIST_LONG: return newLongItem(lead, type.offset, type.isString, buffer, index, containerEnd, lenient);
+        case ORDINAL_STRING_LONG: return newLongItem(lead, STRING_LONG_OFFSET, true, buffer, index, containerEnd, lenient);
+        case ORDINAL_LIST_LONG: return newLongItem(lead, LIST_LONG_OFFSET, false, buffer, index, containerEnd, lenient);
         default: throw new AssertionError();
         }
     }
