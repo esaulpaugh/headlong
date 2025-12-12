@@ -815,6 +815,6 @@ public class TupleTest {
             }
         }.<List<String>>create(null).get(0);
 
-        assertEquals(expected, actual, "Nonsense 1 failed.");
+        assertSame(expected, actual, "Nonsense 1 failed.");
     }
 }
