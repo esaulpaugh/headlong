@@ -39,19 +39,19 @@ public enum DataType {
 
     public static final int MIN_LONG_DATA_LEN = 56;
 
-    private static final DataType[] LOOKUP = new DataType[1 << Byte.SIZE];
-    private static final int[] ORDINALS = new int[LOOKUP.length];
+    private static final DataType[] TYPES = new DataType[1 << Byte.SIZE];
+    private static final int[] ORDINALS = new int[TYPES.length];
 
     static {
-        Arrays.fill(LOOKUP, 0x00, 0x80, SINGLE_BYTE);
-        Arrays.fill(LOOKUP, 0x80, 0xb8, STRING_SHORT);
-        Arrays.fill(LOOKUP, 0xb8, 0xc0, STRING_LONG);
-        Arrays.fill(LOOKUP, 0xc0, 0xf8, LIST_SHORT);
-        Arrays.fill(LOOKUP, 0xf8, 0x100, LIST_LONG);
+        Arrays.fill(TYPES,    0x00, 0x80, SINGLE_BYTE);
         Arrays.fill(ORDINALS, 0x00, 0x80, ORDINAL_SINGLE_BYTE);
+        Arrays.fill(TYPES,    0x80, 0xb8, STRING_SHORT);
         Arrays.fill(ORDINALS, 0x80, 0xb8, ORDINAL_STRING_SHORT);
+        Arrays.fill(TYPES,    0xb8, 0xc0, STRING_LONG);
         Arrays.fill(ORDINALS, 0xb8, 0xc0, ORDINAL_STRING_LONG);
+        Arrays.fill(TYPES,    0xc0, 0xf8, LIST_SHORT);
         Arrays.fill(ORDINALS, 0xc0, 0xf8, ORDINAL_LIST_SHORT);
+        Arrays.fill(TYPES,    0xf8, 0x100, LIST_LONG);
         Arrays.fill(ORDINALS, 0xf8, 0x100, ORDINAL_LIST_LONG);
     }
 
@@ -70,7 +70,7 @@ public enum DataType {
      * @return one of the five enumerated RLP data types
      */
     public static DataType type(final byte leadByte) {
-        return LOOKUP[leadByte & 0xff];
+        return TYPES[leadByte & 0xff];
     }
 
     public static int ordinal(byte leadByte) {
