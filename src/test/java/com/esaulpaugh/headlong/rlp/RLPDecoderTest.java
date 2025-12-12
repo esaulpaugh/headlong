@@ -30,6 +30,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -499,38 +500,46 @@ public class RLPDecoderTest {
         assertTrue(RLP_STRICT.wrapBits(0x79).asBoolean());
     }
 
+    private static final byte[] RLP_ZERO_BYTE = new byte[1];
+
     @Test
-    public void chars() {
+    public void chars() throws Throwable {
         byte[][] burma17 = new byte[256][];
-        burma17[0] = RLPDecoder.RLP_ZERO_BYTE;
+        burma17[0] = RLPDecoderTest.RLP_ZERO_BYTE;
         for (int i = 1; i < burma17.length; i++) {
             burma17[i] = RLPEncoder.string(Integers.toBytes(i));
         }
 
-        HashSet<Character> chars = new HashSet<>(512);
-        HashSet<Character> sizeTwo = new HashSet<>(256);
+        final BitSet seen = new BitSet(256);
+        final BitSet sizeTwo = new BitSet(256);
         for (byte[] bytes : burma17) {
             RLPItem item = RLP_STRICT.wrap(bytes);
-            Character c = (char) item.asByte(true);
-            if (!chars.add(c)) {
+            int c = item.asInt(true);
+            if (c < 0) throw new AssertionError();
+            if (seen.get(c)) {
                 throw new RuntimeException(item.toString());
             }
+            seen.set(c);
             if(bytes.length != 1) {
-                sizeTwo.add(c);
+                sizeTwo.set(c);
             }
         }
-        assertEquals(256, chars.size());
-        assertEquals(128, sizeTwo.size());
+        assertEquals(256, seen.cardinality());
+        assertEquals(128, sizeTwo.cardinality());
 
-        assertEquals('\0', RLP_STRICT.wrapBits(0xc0).asChar(false));
-        assertEquals('\0', RLP_STRICT.wrapBits(0x80).asChar(false));
-        assertEquals('\0', RLP_STRICT.wrapBits(0x00).asChar(true));
-        assertEquals('\u0009', RLP_STRICT.wrapBits(0x820009).asChar(true));
+        long[] values = {
+                0x00, 0x01, 0x7F, 0x80, 0x8100L, 0x817FL, 0x820009L, 0x820102L, 0x8200FFL, 0xc0, 0xc100L, 0xc17FL, 0x820004L
+        };
+        char[] expected = {
+                '\0', '\u0001', '\u007F', '\0', '\0', '\u007F', '\t', '\u0102', '\u00FF', '\0', '\0', '\u007F', '\04'
+        };
+        for (int i = 0; i < values.length; i++) {
+            RLPItem item = RLP_LENIENT.wrapBits(values[i]);
+            boolean leadingZero = item.dataLength > 0 && item.data()[0] == 0;
+            assertEquals(expected[i], item.asChar(leadingZero), "index " + i);
+        }
 
-        assertEquals('\0', RLP_STRICT.wrapBits(0xc0L).asChar(false));
-        assertEquals('\0', RLP_STRICT.wrapBits(0x80L).asChar(false));
-        assertEquals('\0', RLP_STRICT.wrapBits(0x00L).asChar(true));
-        assertEquals('\u0009', RLP_STRICT.wrapBits(0x820009L).asChar(true));
+        assertThrown(IllegalArgumentException.class, "len is out of range: 3", () -> RLP_STRICT.wrapBits(0x83000000L).asChar(true));
     }
 
     @Test
