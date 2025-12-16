@@ -29,10 +29,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1150,7 +1152,8 @@ public class RLPDecoderTest {
 
     static final class CustomChannel implements ReadableByteChannel {
 
-        private final List<byte[]> data = new ArrayList<>();
+        private final Deque<byte[]> data = new ArrayDeque<>();
+        private long len = 0L;
         private final int maxRead;
         private int pos = 0;
 
@@ -1169,10 +1172,12 @@ public class RLPDecoderTest {
             data.clear();
             data.add(bytes);
             pos = 0;
+            len = bytes.length;
         }
 
         public synchronized void addMoreBytes(byte[] bytes) {
             data.add(bytes);
+            len += bytes.length;
         }
 
         public void setShouldReturnZero(boolean value) {
@@ -1184,31 +1189,29 @@ public class RLPDecoderTest {
             if (!open.get()) return -1;
             if (shouldReturnZero.get() || data.isEmpty()) return 0;
 
-            int lenSum = -pos;
-            for (byte[] e : data) {
-                lenSum += e.length;
-            }
+            final long available = len - pos;
+            int bytesToRead = (int)Math.min(Math.min(dst.remaining(), available), maxRead);
+            final int totalRead = bytesToRead;
 
-            int bytesToRead = Math.min(Math.min(dst.remaining(), lenSum), maxRead);
-            lenSum = bytesToRead;
-
-            for (int j = 0; bytesToRead > 0; j++) {
-                byte[] e = data.get(j);
-                if (e.length == 0) continue;
-                final int effectiveLen = e.length - pos;
-                if (bytesToRead < effectiveLen) {
-                    dst.put(e, pos, bytesToRead);
-                    pos += bytesToRead;
-                    bytesToRead = 0;
-                    break;
+            while (bytesToRead > 0) {
+                byte[] e = data.getFirst();
+                if (e.length > 0) {
+                    final int effectiveLen = e.length - pos;
+                    if (bytesToRead < effectiveLen) {
+                        dst.put(e, pos, bytesToRead);
+                        pos += bytesToRead;
+                        bytesToRead = 0;
+                        break;
+                    }
+                    dst.put(e, pos, effectiveLen);
+                    bytesToRead -= effectiveLen;
                 }
-                dst.put(e, pos, effectiveLen);
-                bytesToRead -= effectiveLen;
-                data.set(j, Strings.EMPTY_BYTE_ARRAY);
+                len -= e.length;
+                data.removeFirst();
                 pos = 0;
             }
 
-            return lenSum - bytesToRead;
+            return totalRead - bytesToRead;
         }
 
         @Override
