@@ -65,12 +65,9 @@ jar {
                 "Build-Date": todayUTC()
         )
     }
-    finalizedBy(sourcesJar)
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
+assemble.dependsOn(javadocJar, sourcesJar)
 
 publishing {
     publications {
