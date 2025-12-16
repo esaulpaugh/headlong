@@ -42,9 +42,8 @@
 //    from(tasks.javadoc.get().destinationDir)
 //}
 //
-//artifacts {
-//    add("archives", sourcesJar)
-//    add("archives", javadocJar)
+//tasks.assemble {
+//    dependsOn(sourcesJar, javadocJar)
 //}
 //
 //val dateFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC)
