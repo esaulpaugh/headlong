@@ -108,10 +108,7 @@ publishing {
     }
 }
 
-tasks.named("build") {
-    finalizedBy("publishGsonLocalPublicationToMavenLocal")
-}
-
+build.finalizedBy("publishGsonLocalPublicationToMavenLocal")
 
 sourceSets {
     jmh {
