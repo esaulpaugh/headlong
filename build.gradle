@@ -69,6 +69,10 @@ jar {
 
 assemble.dependsOn(javadocJar, sourcesJar)
 
+repositories {
+    mavenCentral()
+}
+
 publishing {
     publications {
         headlong(MavenPublication) {
@@ -79,15 +83,41 @@ publishing {
     }
 }
 
+configurations {
+    gsonJar
+}
+
+dependencies {
+    gsonJar("com.google.code.gson:gson:2.13.2") {
+        exclude(group: "com.google.errorprone", module: "error_prone_annotations")
+    }
+}
+
+publishing {
+    publications {
+        gsonLocal(MavenPublication) {
+            groupId = "com.google.code.gson"
+            artifactId = "gson"
+            version = "2.13.2"
+
+            artifact configurations.gsonJar.singleFile
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+tasks.named("build") {
+    finalizedBy("publishGsonLocalPublicationToMavenLocal")
+}
+
+
 sourceSets {
     jmh {
         java.srcDirs = ["src/jmh/java"]
         compileClasspath += sourceSets.main.runtimeClasspath
     }
-}
-
-repositories {
-    mavenCentral()
 }
 
 final String junitVersion = "5.11.4"
