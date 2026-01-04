@@ -93,14 +93,44 @@ dependencies {
     }
 }
 
+// Put dependencies into maven local so build.xml can work without "-Dgradle-cache=true"
 publishing {
     publications {
         gsonLocal(MavenPublication) {
             groupId = "com.google.code.gson"
             artifactId = "gson"
             version = "2.13.2"
-
             artifact configurations.gsonJar.singleFile
+        }
+        junitApiLocal(MavenPublication) {
+            groupId = "org.junit.jupiter"
+            artifactId = "junit-jupiter-api"
+            version = "5.11.4"
+            artifact configurations.junitApiJar.singleFile
+        }
+        junitEngineLocal(MavenPublication) {
+            groupId = "org.junit.jupiter"
+            artifactId = "junit-jupiter-engine"
+            version = "5.11.4"
+            artifact configurations.junitEngineJar.singleFile
+        }
+        junitLauncherLocal(MavenPublication) {
+            groupId = "org.junit.platform"
+            artifactId = "junit-platform-launcher"
+            version = "1.11.4"
+            artifact configurations.junitPlatformLauncherJar.singleFile
+        }
+        opentest4jLocal(MavenPublication) {
+            groupId = "org.opentest4j"
+            artifactId = "opentest4j"
+            version = "1.3.0"
+            artifact configurations.opentest4jJar.singleFile
+        }
+        bcprovLocal(MavenPublication) {
+            groupId = "org.bouncycastle"
+            artifactId = "bcprov-jdk14"
+            version = "1.83"
+            artifact configurations.bcprovJar.singleFile
         }
     }
     repositories {
@@ -108,7 +138,14 @@ publishing {
     }
 }
 
-build.finalizedBy("publishGsonLocalPublicationToMavenLocal")
+build.finalizedBy(
+        "publishGsonLocalPublicationToMavenLocal",
+        "publishJunitApiLocalPublicationToMavenLocal",
+        "publishJunitEngineLocalPublicationToMavenLocal",
+        "publishJunitLauncherLocalPublicationToMavenLocal",
+        "publishOpentest4jLocalPublicationToMavenLocal",
+        "publishBcprovLocalPublicationToMavenLocal"
+)
 
 sourceSets {
     jmh {
