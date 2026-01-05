@@ -1,0 +1,245 @@
+//import java.text.SimpleDateFormat
+//import java.util.Date
+//import java.util.TimeZone
+//import org.gradle.api.tasks.bundling.Jar
+//
+//plugins {
+//    `java-library`
+//    `maven-publish`
+//}
+//
+//group = "com.esaulpaugh"
+//version = "13.3.2-SNAPSHOT"
+//
+//val gradleMajorVersion = gradle.gradleVersion.split('.')[0].toInt()
+//val gradleMinorVersion = gradle.gradleVersion.split('.').getOrNull(1)?.toIntOrNull() ?: 0
+//
+//println("Gradle version = ${gradle.gradleVersion} (major: $gradleMajorVersion, minor: $gradleMinorVersion)")
+//
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_1_8
+//    targetCompatibility = JavaVersion.VERSION_1_8
+//}
+//
+//tasks.withType<JavaCompile> {
+//    if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
+//        options.compilerArgs.addAll(listOf("--release", "8"))
+//    }
+//    options.encoding = "UTF-8"
+//}
+//
+//tasks.withType<Test> {
+//    useJUnitPlatform()
+//    maxParallelForks = Runtime.getRuntime().availableProcessors()
+//}
+//
+//fun todayUTC(): String {
+//    val sdf = SimpleDateFormat("MMMM d yyyy")
+//    sdf.timeZone = TimeZone.getTimeZone("UTC")
+//    return sdf.format(Date())
+//}
+//
+//fun Jar.setClassifierCompat(classifierValue: String) {
+//    if (gradleMajorVersion >= 6 || (gradleMajorVersion == 5 && gradleMinorVersion >= 1)) {
+//        // gradle 5.1+ has archiveClassifier property
+//        try {
+//            val archiveClassifierProp = this::class.java.getMethod("getArchiveClassifier")
+//            val provider = archiveClassifierProp.invoke(this)
+//            val setMethod = provider::class.java.getMethod("set", Any::class.java)
+//            setMethod.invoke(provider, classifierValue)
+//        } catch (e: Exception) {
+//            /* fallback */
+//            val classifierMethod = this::class.java.getMethod("setClassifier", String::class.java)
+//            classifierMethod.invoke(this, classifierValue)
+//        }
+//    } else {
+//        // gradle 5.0 uses classifier property
+//        val classifierMethod = this::class.java.getMethod("setClassifier", String::class.java)
+//        classifierMethod.invoke(this, classifierValue)
+//    }
+//}
+//
+//val javadocJar by tasks.creating(Jar::class) {
+//    dependsOn(tasks.javadoc)
+//    setClassifierCompat("javadoc")
+//    from(tasks.javadoc.get().destinationDir)
+//}
+//
+//val sourcesJar by tasks.creating(Jar::class) {
+//    dependsOn(tasks.classes)
+//    setClassifierCompat("sources")
+//    from(sourceSets["main"].allSource)
+//}
+//
+//tasks.withType<Jar> {
+//    manifest {
+//        attributes(
+//            "Implementation-Title" to project.name,
+//            "Implementation-Version" to project.version,
+//            "Automatic-Module-Name" to "com.esaulpaugh.headlong",
+//            "Created-By" to "Gradle KTS",
+//            "Build-Date" to todayUTC()
+//        )
+//    }
+//}
+//
+//sourceSets {
+//    create("jmh") {
+//        java.srcDirs("src/jmh/java")
+//        compileClasspath += sourceSets["main"].runtimeClasspath
+//    }
+//}
+//
+//fun JavaExec.setMainCompat(mainValue: String) {
+//    if (gradleMajorVersion >= 7) {
+//        // gradle 7+ uses mainClass property
+//        try {
+//            val mainClassProp = this::class.java.getMethod("getMainClass")
+//            val provider = mainClassProp.invoke(this)
+//            val setMethod = provider::class.java.getMethod("set", Any::class.java)
+//            setMethod.invoke(provider, mainValue)
+//        } catch (e: Exception) {
+//            /* fallback */
+//            val mainMethod = this::class.java.getMethod("setMain", String::class.java)
+//            mainMethod.invoke(this, mainValue)
+//        }
+//    } else {
+//        // gradle 5-6 uses main property
+//        val mainMethod = this::class.java.getMethod("setMain", String::class.java)
+//        mainMethod.invoke(this, mainValue)
+//    }
+//}
+//
+//val jmh by tasks.creating(JavaExec::class) {
+//    dependsOn("jmhClasses")
+//    setMainCompat("org.openjdk.jmh.Main")
+//    classpath = sourceSets["jmh"].compileClasspath + sourceSets["jmh"].runtimeClasspath
+//}
+//
+//tasks.named("classes") {
+//    finalizedBy("jmhClasses")
+//}
+//
+//tasks.named("assemble") {
+//    dependsOn(javadocJar, sourcesJar)
+//}
+//
+//repositories {
+//    mavenCentral()
+//}
+//
+//publishing {
+//    publications {
+//        create<MavenPublication>("headlong") {
+//            from(components["java"])
+//            artifact(sourcesJar)
+//            artifact(javadocJar)
+//        }
+//    }
+//}
+//
+//// Custom configs for publishing individual JARs to Maven Local
+//configurations {
+//    create("gsonJar")
+//    create("junitApiJar")
+//    create("junitEngineJar")
+//    create("junitPlatformLauncherJar")
+//    create("opentest4jJar")
+//    create("bcprovJar")
+//}
+//
+//val junitVersion = "5.11.4"
+//val jmhVersion = "1.37"
+//val bcVersion = "1.83"
+//
+//dependencies {
+//    implementation("com.google.code.gson:gson:[2.1, 2.13.2]") {
+//        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+//    }
+//
+//    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+//    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+//    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
+//    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
+//
+//    "jmhImplementation"("org.openjdk.jmh:jmh-core:$jmhVersion")
+//    "jmhAnnotationProcessor"("org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion")
+//}
+//
+//dependencies {
+//    add("gsonJar", "com.google.code.gson:gson:2.13.2") {
+//        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+//    }
+//    add("junitApiJar", "org.junit.jupiter:junit-jupiter-api:$junitVersion") {
+//        isTransitive = false
+//    }
+//    add("junitEngineJar", "org.junit.jupiter:junit-jupiter-engine:$junitVersion") {
+//        isTransitive = false
+//    }
+//    add("junitPlatformLauncherJar", "org.junit.platform:junit-platform-launcher:1.11.4") {
+//        isTransitive = false
+//    }
+//    add("opentest4jJar", "org.opentest4j:opentest4j:1.3.0")
+//    add("bcprovJar", "org.bouncycastle:bcprov-jdk14:1.83")
+//}
+//
+//// Put dependencies into maven local so build.xml can work without "-Dgradle-cache=true"
+//publishing {
+//    publications {
+//        create<MavenPublication>("gsonLocal") {
+//            groupId = "com.google.code.gson"
+//            artifactId = "gson"
+//            version = "2.13.2"
+//            artifact(configurations["gsonJar"].singleFile)
+//        }
+//        create<MavenPublication>("junitApiLocal") {
+//            groupId = "org.junit.jupiter"
+//            artifactId = "junit-jupiter-api"
+//            version = "5.11.4"
+//            artifact(configurations["junitApiJar"].singleFile)
+//        }
+//        create<MavenPublication>("junitEngineLocal") {
+//            groupId = "org.junit.jupiter"
+//            artifactId = "junit-jupiter-engine"
+//            version = "5.11.4"
+//            artifact(configurations["junitEngineJar"].singleFile)
+//        }
+//        create<MavenPublication>("junitLauncherLocal") {
+//            groupId = "org.junit.platform"
+//            artifactId = "junit-platform-launcher"
+//            version = "1.11.4"
+//            artifact(configurations["junitPlatformLauncherJar"].singleFile)
+//        }
+//        create<MavenPublication>("opentest4jLocal") {
+//            groupId = "org.opentest4j"
+//            artifactId = "opentest4j"
+//            version = "1.3.0"
+//            artifact(configurations["opentest4jJar"].singleFile)
+//        }
+//        create<MavenPublication>("bcprovLocal") {
+//            groupId = "org.bouncycastle"
+//            artifactId = "bcprov-jdk14"
+//            version = "1.83"
+//            artifact(configurations["bcprovJar"].singleFile)
+//        }
+//    }
+//    repositories {
+//        mavenLocal()
+//    }
+//}
+//
+//tasks.named("build") {
+//    finalizedBy(
+//        "publishGsonLocalPublicationToMavenLocal",
+//        "publishJunitApiLocalPublicationToMavenLocal",
+//        "publishJunitEngineLocalPublicationToMavenLocal",
+//        "publishJunitLauncherLocalPublicationToMavenLocal",
+//        "publishOpentest4jLocalPublicationToMavenLocal",
+//        "publishBcprovLocalPublicationToMavenLocal"
+//    )
+//}
+//
+//tasks.withType<AbstractArchiveTask> {
+//    isPreserveFileTimestamps = false
+//    isReproducibleFileOrder = true
+//}
