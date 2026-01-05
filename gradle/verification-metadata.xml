@@ -190,20 +190,20 @@
             </artifact>
         </component>
 
-        <component group="me.champeau.jmh" name="jmh-gradle-plugin" version="0.7.2">
-            <artifact name="jmh-gradle-plugin-0.7.2.jar">
-                <sha256 value="d9672099ff8fc3f9bf3d4d015864e1586f07ecbd2a8a177a66184ef0b68aba65" origin="plugins.gradle.org/m2/"/>
+        <component group="me.champeau.jmh" name="jmh-gradle-plugin" version="0.7.3">
+            <artifact name="jmh-gradle-plugin-0.7.3.jar">
+                <sha256 value="d7097e619541d90e0a970b2a68573e22ad01d2999ee5365d56d59830765bf98f" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="jmh-gradle-plugin-0.7.2.module">
-                <sha256 value="6d849ae7454ab391718e5fc70e2716418ef3ed264472345bd80c6de64e00b6c4" origin="plugins.gradle.org/m2/"/>
+            <artifact name="jmh-gradle-plugin-0.7.3.module">
+                <sha256 value="3487d1aba24fe0af527c6d5f78b5f0e8fd64fe9878708b460e6600e39a47bc43" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="jmh-gradle-plugin-0.7.2-sources.jar">
-                <sha256 value="7d7e1ffc0abfe0e63deec4742ac1a4f7552b65c275b093d4d5e5dfc06f0be190" origin="plugins.gradle.org/m2/"/>
+            <artifact name="jmh-gradle-plugin-0.7.3-sources.jar">
+                <sha256 value="511634ff0eed0a14a0cc9aa86bf80f4d289ffbd70e2e59ebe86856ef5509de77" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
-        <component group="me.champeau.jmh" name="me.champeau.jmh.gradle.plugin" version="0.7.2">
-            <artifact name="me.champeau.jmh.gradle.plugin-0.7.2.pom">
-                <sha256 value="57e0c23ac60945aefb5a0c4a9339bea68a295364ca47c7a9079a032f79013abb" origin="plugins.gradle.org/m2/"/>
+        <component group="me.champeau.jmh" name="me.champeau.jmh.gradle.plugin" version="0.7.3">
+            <artifact name="me.champeau.jmh.gradle.plugin-0.7.3.pom">
+                <sha256 value="d516226b3b114e4b32d42544d1d2796c732c5465d5dae7cc846be6b23bed8d1d" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
 
