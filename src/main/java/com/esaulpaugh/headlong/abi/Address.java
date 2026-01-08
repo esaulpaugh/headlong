@@ -1,5 +1,5 @@
 /*
-   Copyright 2021 Evan Saulpaugh
+   Copyright 2021-2026 Evan Saulpaugh
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
