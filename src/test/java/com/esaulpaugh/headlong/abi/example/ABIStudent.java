@@ -84,6 +84,6 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
 
     @Override
     public Quintuple<String, BigDecimal, byte[], byte[], Integer> toTuple() {
-        return Tuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+        return Tuple.of(name, new BigDecimal(Float.toString(gpa)), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }
