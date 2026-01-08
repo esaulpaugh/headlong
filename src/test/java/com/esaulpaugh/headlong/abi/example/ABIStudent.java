@@ -26,7 +26,9 @@ import java.util.Arrays;
 
 public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, byte[], byte[], Integer>> {
 
-    public static final TupleType<Quintuple<String, BigDecimal, byte[], byte[], Integer>> TYPE = TupleType.parse("(string,fixed128x2,bytes,bytes,uint16)");
+    private static final int GPA_SCALE = 2;
+
+    public static final TupleType<Quintuple<String, BigDecimal, byte[], byte[], Integer>> TYPE = TupleType.parse("(string,fixed128x" + GPA_SCALE + ",bytes,bytes,uint16)");
 
     private final String name;
     private final float gpa;
@@ -92,7 +94,7 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
 
     private static Quintuple<String, BigDecimal, byte[], byte[], Integer> toTuple(String name, float gpa, byte[] publicKey, BigDecimal balance) {
         BigDecimal gpaBD = new BigDecimal(Float.toString(gpa))
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(GPA_SCALE, RoundingMode.HALF_UP);
         return Tuple.of(name, gpaBD, publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 
