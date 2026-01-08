@@ -16,18 +16,16 @@
 package com.esaulpaugh.headlong.abi.example;
 
 import com.esaulpaugh.headlong.abi.Quintuple;
-import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.example.ABIStudent.TYPE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ABIStudentTest {
-
-    private static final TupleType<Quintuple<String, BigDecimal, byte[], byte[], Integer>> TT = TupleType.parse("(string,fixed128x2,bytes,bytes,uint16)");
 
     public static final String STUDENT_ABI = "00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000dbba100000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000a48752059616f62616e67000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002198900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070477f6005a784900000000000000000000000000000000000000000000000000";
 
@@ -35,13 +33,13 @@ public class ABIStudentTest {
     public void abiDecodeEncode() {
         final ByteBuffer studentAbi = ByteBuffer.wrap(Strings.decode(STUDENT_ABI));
 
-        final ABIStudent mikhail = new ABIStudent(TT.decode(studentAbi)); // EU Gene perrylink Junior
+        final ABIStudent mikhail = ABIStudent.decode(studentAbi.array()); // EU Gene perrylink Junior
         final Quintuple<String, BigDecimal, byte[], byte[], Integer> tuple = mikhail.toTuple();
-        final ByteBuffer reencoded = TT.encode(tuple);
+        final ByteBuffer reencoded = TYPE.encode(tuple);
         assertArrayEquals(studentAbi.array(), reencoded.array());
 
         System.out.println(Strings.encode(reencoded));
-        System.out.println(Strings.encode(TT.encodePacked(mikhail.toTuple())));
+        System.out.println(Strings.encode(TYPE.encodePacked(mikhail.toTuple())));
         System.out.println(mikhail);
     }
 }

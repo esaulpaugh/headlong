@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi.example;
 
 import com.esaulpaugh.headlong.abi.Quintuple;
 import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.abi.TupleType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,6 +26,8 @@ import java.util.Arrays;
 
 public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, byte[], byte[], Integer>> {
 
+    public static final TupleType<Quintuple<String, BigDecimal, byte[], byte[], Integer>> TYPE = TupleType.parse("(string,fixed128x2,bytes,bytes,uint16)");
+
     private final String name;
     private final float gpa;
     private final byte[] publicKey;
@@ -32,11 +35,12 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
     private transient final Quintuple<String, BigDecimal, byte[], byte[], Integer> tuple;
 
     public ABIStudent(String name, float gpa, byte[] publicKey, BigDecimal balance) {
+        byte[] keyCopy = Arrays.copyOf(publicKey, publicKey.length);
+        this.tuple = toTuple(name, gpa, keyCopy, balance);
         this.name = name;
-        this.gpa = gpa;
-        this.publicKey = Arrays.copyOf(publicKey, publicKey.length);
+        this.gpa = tuple.get1().floatValue();
+        this.publicKey = keyCopy;
         this.balance = balance;
-        this.tuple = toTuple(name, gpa, publicKey, balance);
     }
 
     public ABIStudent(Quintuple<String, BigDecimal, byte[], byte[], Integer> values) {
@@ -90,5 +94,9 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
         BigDecimal gpaBD = new BigDecimal(Float.toString(gpa))
                 .setScale(2, RoundingMode.HALF_UP);
         return Tuple.of(name, gpaBD, publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+    }
+
+    public static ABIStudent decode(byte[] arr) {
+        return new ABIStudent(TYPE.decode(arr));
     }
 }
