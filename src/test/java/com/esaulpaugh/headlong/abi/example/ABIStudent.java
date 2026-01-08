@@ -20,8 +20,8 @@ import com.esaulpaugh.headlong.abi.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, byte[], byte[], Integer>> {
 
@@ -29,12 +29,14 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
     private final float gpa;
     private final byte[] publicKey;
     private final BigDecimal balance;
+    private transient final Quintuple<String, BigDecimal, byte[], byte[], Integer> tuple;
 
     public ABIStudent(String name, float gpa, byte[] publicKey, BigDecimal balance) {
         this.name = name;
         this.gpa = gpa;
         this.publicKey = Arrays.copyOf(publicKey, publicKey.length);
         this.balance = balance;
+        this.tuple = toTuple(name, gpa, publicKey, balance);
     }
 
     public ABIStudent(Quintuple<String, BigDecimal, byte[], byte[], Integer> values) {
@@ -64,26 +66,29 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(new Object[] { name, gpa, publicKey, balance });
+        return toTuple().hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
         if(!getClass().isInstance(o)) return false;
         ABIStudent other = (ABIStudent) o;
-        return Objects.equals(other.name, this.name)
-                && Math.abs(other.gpa - this.gpa) < 0.00005f
-                && Arrays.equals(other.publicKey, this.publicKey)
-                && Objects.equals(other.balance, this.balance);
+        return other.toTuple().equals(toTuple());
     }
 
     @Override
     public String toString() {
-        return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
+        return toTuple().toString();
     }
 
     @Override
     public Quintuple<String, BigDecimal, byte[], byte[], Integer> toTuple() {
-        return Tuple.of(name, new BigDecimal(Float.toString(gpa)), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+        return tuple;
+    }
+
+    private static Quintuple<String, BigDecimal, byte[], byte[], Integer> toTuple(String name, float gpa, byte[] publicKey, BigDecimal balance) {
+        BigDecimal gpaBD = new BigDecimal(Float.toString(gpa))
+                .setScale(2, RoundingMode.HALF_UP);
+        return Tuple.of(name, gpaBD, publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }
