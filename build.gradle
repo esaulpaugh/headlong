@@ -129,7 +129,11 @@ final def artifactsToPublish = [
         "org.junit.jupiter:junit-jupiter-api:5.11.4",
         "org.junit.jupiter:junit-jupiter-engine:5.11.4",
         "org.junit.platform:junit-platform-launcher:1.11.4",
-        "org.bouncycastle:bcprov-jdk14:1.83"
+        "org.bouncycastle:bcprov-jdk14:1.83",
+        "org.openjdk.jmh:jmh-core:1.37",
+        "org.openjdk.jmh:jmh-generator-annprocess:1.37",
+        "net.sf.jopt-simple:jopt-simple:5.0.4",
+        "org.apache.commons:commons-math3:3.6.1"
 ]
 
 task populateM2 {
