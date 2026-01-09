@@ -121,3 +121,72 @@ tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
+
+final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/repository")
+
+final def artifactsToPublish = [
+        "com.google.code.gson:gson:2.13.2",
+        "org.junit.jupiter:junit-jupiter-api:5.11.4",
+        "org.junit.jupiter:junit-jupiter-engine:5.11.4",
+        "org.junit.platform:junit-platform-launcher:1.11.4",
+        "org.bouncycastle:bcprov-jdk14:1.83"
+]
+
+task populateM2 {
+    doLast {
+        artifactsToPublish.each { gav ->
+            def (group, name, ver) = gav.split(":")
+
+            // detached configuration with exclusions
+            def dep = dependencies.create("${group}:${name}:${ver}") {
+                if (group == 'com.google.code.gson') {
+                    exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+                }
+            }
+
+            // force resolution
+            def resolvedArtifacts = configurations.detachedConfiguration(dep).resolvedConfiguration.resolvedArtifacts
+
+            resolvedArtifacts.each { artifact ->
+                def id = artifact.moduleVersion.id
+                def groupPath = id.group.replace('.', '/')
+                def targetDir = new File(localMavenRepo, "${groupPath}/${id.name}/${id.version}")
+                targetDir.mkdirs()
+
+                // copy JAR
+                def jarFile = artifact.file
+                def targetJar = new File(targetDir, jarFile.name)
+                if (!targetJar.exists()) {
+                    println "Copying JAR ${jarFile.name} -> ${targetDir}"
+                    copy {
+                        from jarFile
+                        into targetDir
+                    }
+                } else {
+                    println "Skipping JAR ${jarFile.name}, already exists"
+                }
+
+                // attempt to copy .pom file
+                def pomCandidates = fileTree(new File(System.getProperty("user.home"), ".gradle/caches/modules-2/files-2.1")) {
+                    include "**/${id.name}/${id.version}/**/*.pom"
+                }
+
+                if (pomCandidates.files) {
+                    def sourcePom = pomCandidates.files.first()
+                    def targetPom = new File(targetDir, "${id.name}-${id.version}.pom")
+                    if (!targetPom.exists()) {
+                        println "Copying POM ${sourcePom.name} -> ${targetDir}"
+                        copy {
+                            from sourcePom
+                            into targetDir
+                        }
+                    } else {
+                        println "Skipping POM ${sourcePom.name}, already exists"
+                    }
+                } else {
+                    println "No POM found for ${id.group}:${id.name}:${id.version}, skipping"
+                }
+            }
+        }
+    }
+}
