@@ -31,4 +31,4 @@ jobs:
           java -version
           chmod +x ./gradlew
           ./gradlew build --no-daemon
-          ant -noinput -buildfile build.xml clean all
+          ant -noinput -buildfile build.xml clean all "-Dgradle-cache=true"

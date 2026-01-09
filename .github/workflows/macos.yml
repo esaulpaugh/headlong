@@ -34,4 +34,4 @@ jobs:
           java -version
           gradle -version
           gradle build --no-daemon
-          ant -noinput -buildfile build.xml clean all
+          ant -noinput -buildfile build.xml clean all "-Dgradle-cache=true"
