@@ -288,6 +288,7 @@
     <java classname="${main.class}" fork="true">
       <classpath>
         <pathelement path="${classes.dir}"/>
+        <pathelement path="${gson}"/>
         <pathelement path="${jmh.core}"/>
         <pathelement path="${jopt}"/>
         <pathelement path="${commons.math3}"/>
