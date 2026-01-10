@@ -32,11 +32,6 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-test {
-    useJUnitPlatform()
-    maxParallelForks = Runtime.runtime.availableProcessors()
-}
-
 task javadocJar(type: Jar, dependsOn: javadoc) {
     if (gradleMajorVersion >= 6) getArchiveClassifier().set("javadoc")
     else classifier = "javadoc"
@@ -90,22 +85,40 @@ repositories {
     mavenCentral()
 }
 
-final String junitVersion = "5.11.4"
-final String jmhVersion = "1.37"
-final String bcVersion = "1.83"
+ext {
+    junitVersion = "5.11.4"
+    junitPlatformVersion = "1.11.4"
+    bcVersion = "1.83"
+    jmhVersion = "1.37"
+}
 
 dependencies {
-    implementation("com.google.code.gson:gson:[2.1, 2.13.2]") {
-        exclude(group: "com.google.errorprone", module: "error_prone_annotations")
+    implementation("com.google.code.gson:gson:[2.1,2.13.2]") {
+        exclude group: "com.google.errorprone", module: "error_prone_annotations"
     }
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:" + junitVersion)
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:" + junitVersion)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
-    testImplementation("org.bouncycastle:bcprov-jdk14:" + bcVersion)
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testImplementation("org.bouncycastle:bcprov-jdk14:${bcVersion}")
 
-    jmhImplementation("org.openjdk.jmh:jmh-core:" + jmhVersion)
-    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:" + jmhVersion)
+    testRuntimeOnly("org.junit.platform:junit-platform-console-standalone:${junitPlatformVersion}")
+
+    jmhImplementation("org.openjdk.jmh:jmh-core:${jmhVersion}")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:${jmhVersion}")
+}
+
+task consoleTest(type: JavaExec) {
+    group = "verification"
+    description = "Run tests via junit-platform-console-standalone"
+
+    classpath = sourceSets.test.runtimeClasspath
+    main = "org.junit.platform.console.ConsoleLauncher"
+
+    args "--scan-classpath", "--disable-banner"
+}
+
+test {
+    dependsOn consoleTest
+    enabled = false
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
@@ -126,14 +139,11 @@ final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/reposi
 
 final def artifactsToPublish = [
         "com.google.code.gson:gson:2.13.2",
+        "org.junit.platform:junit-platform-console-standalone:1.11.4",
         "org.junit.jupiter:junit-jupiter-api:5.11.4",
-        "org.junit.jupiter:junit-jupiter-engine:5.11.4",
-        "org.junit.platform:junit-platform-launcher:1.11.4",
         "org.bouncycastle:bcprov-jdk14:1.83",
         "org.openjdk.jmh:jmh-core:1.37",
-        "org.openjdk.jmh:jmh-generator-annprocess:1.37",
-        "net.sf.jopt-simple:jopt-simple:5.0.4",
-        "org.apache.commons:commons-math3:3.6.1"
+        "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 ]
 
 task populateM2 {
