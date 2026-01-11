@@ -1,9 +1,12 @@
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.artifacts.ResolvedArtifact
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
+import java.security.MessageDigest
 
 plugins {
     `java-library`
@@ -145,8 +148,6 @@ tasks.withType<AbstractArchiveTask> {
 }
 
 // ------------------ Populate Maven Local Task ------------------
-val localMavenRepo = File(System.getProperty("user.home"), ".m2/repository")
-
 val artifactsToPublish = listOf(
     "com.google.code.gson:gson:2.13.2",
     "org.junit.platform:junit-platform-console-standalone:1.11.4",
@@ -156,14 +157,43 @@ val artifactsToPublish = listOf(
     "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 )
 
+fun copyWithHash(sourceFile: File, targetFile: File): Boolean {
+    if (!targetFile.exists()) {
+        project.copy {
+            from(sourceFile)
+            into(targetFile.parentFile)
+        }
+
+        val md = MessageDigest.getInstance("SHA-1")
+        targetFile.inputStream().use { inputStream ->
+            val buffer = ByteArray(8192)
+            var read: Int
+            while (inputStream.read(buffer).also { read = it } != -1) {
+                md.update(buffer, 0, read)
+            }
+        }
+        val sha1 = md.digest().joinToString("") { "%02x".format(it) }
+        File(targetFile.parentFile, targetFile.name + ".sha1").writeText(sha1)
+
+        return true
+    }
+    return false
+}
+
+val localMavenRepo = File(System.getProperty("user.home"), ".m2/repository")
+
 tasks.register("populateM2") {
+    group = "publishing"
+    description = "Copies selected artifacts (JAR + POM + SHA-1) into local Maven repository"
+
     doLast {
         artifactsToPublish.forEach { gav ->
             val (group, name, version) = gav.split(":")
+
             val dep = dependencies.create("$group:$name:$version")
             if (dep is org.gradle.api.artifacts.ModuleDependency) {
-                if (group == "com.google.code.gson") {
-                    dep.exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+                if (group == "com.google.code.gson" && name == "gson") {
+                    dep.exclude(mapOf("group" to "com.google.errorprone", "module" to "error_prone_annotations"))
                 }
             }
 
@@ -176,36 +206,29 @@ tasks.register("populateM2") {
                 val targetDir = File(localMavenRepo, "$groupPath/${id.name}/${id.version}")
                 targetDir.mkdirs()
 
-                val jarFile = artifact.file
-                val targetJar = File(targetDir, jarFile.name)
-                if (!targetJar.exists()) {
-                    println("Copying JAR ${jarFile.name} -> $targetDir")
-                    copy {
-                        from(jarFile)
-                        into(targetDir)
-                    }
-                } else {
-                    println("Skipping JAR ${jarFile.name}, already exists")
-                }
+                // Copy JAR with SHA-1
+                val targetJar = File(targetDir, artifact.file.name)
+                if (copyWithHash(artifact.file, targetJar)) {
+                    println("Copying JAR ${artifact.file.name} -> $targetDir (with SHA-1)")
 
-                // attempt to copy .pom file
-                val pomCandidates = fileTree(File(System.getProperty("user.home"), ".gradle/caches/modules-2/files-2.1")) {
-                    include("**/${id.name}/${id.version}/**/*.pom")
-                }
-                if (pomCandidates.files.isNotEmpty()) {
-                    val sourcePom = pomCandidates.files.first()
-                    val targetPom = File(targetDir, "${id.name}-${id.version}.pom")
-                    if (!targetPom.exists()) {
-                        println("Copying POM ${sourcePom.name} -> $targetDir")
-                        copy {
-                            from(sourcePom)
-                            into(targetDir)
+                    // Copy POM with SHA-1
+                    try {
+                        val pomDep = dependencies.create("${id.group}:${id.name}:${id.version}@pom")
+                        val pomFiles = configurations.detachedConfiguration(pomDep).resolve()
+
+                        pomFiles.forEach { pomFile ->
+                            val targetPom = File(targetDir, pomFile.name)
+                            if (copyWithHash(pomFile, targetPom)) {
+                                println("Copying POM ${pomFile.name} -> $targetDir (with SHA-1)")
+                            } else {
+                                println("Skipping POM ${pomFile.name}, already exists")
+                            }
                         }
-                    } else {
-                        println("Skipping POM ${sourcePom.name}, already exists")
+                    } catch (_: Exception) {
+                        println("No POM available for ${id.group}:${id.name}:${id.version}")
                     }
                 } else {
-                    println("No POM found for ${id.group}:${id.name}:${id.version}, skipping")
+                    println("Skipping JAR ${artifact.file.name}, already exists")
                 }
             }
         }

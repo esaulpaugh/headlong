@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat
+import java.security.MessageDigest
 
 plugins {
     id("java-library")
@@ -146,17 +147,41 @@ final def artifactsToPublish = [
 
 final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/repository")
 
+def copyWithHash(File sourceFile, File targetFile) {
+    if (!targetFile.exists()) {
+        copy {
+            from sourceFile
+            into targetFile.parentFile
+        }
+
+        MessageDigest md = MessageDigest.getInstance("SHA-1")
+        targetFile.withInputStream { is ->
+            byte[] buffer = new byte[8192]
+            int read
+            while ((read = is.read(buffer)) != -1) md.update(buffer, 0, read)
+        }
+        def sha1 = md.digest().collect { String.format("%02x", it) }.join()
+        new File(targetFile.parentFile, targetFile.name + ".sha1").text = sha1
+
+        return true
+    }
+    return false
+}
+
 task populateM2 {
+    group = "publishing"
+    description = "Copies selected artifacts (JAR + POM + SHA-1) into local Maven repository"
+
     doLast {
         artifactsToPublish.each { gav ->
             def (group, name, ver) = gav.split(":")
 
-            // detached configuration with exclusions
             def dep = dependencies.create("${group}:${name}:${ver}") {
-                exclude group: 'com.google.errorprone', module: 'error_prone_annotations' // e.g. from gson
+                if (group == 'com.google.code.gson' && name == 'gson') {
+                    exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+                }
             }
 
-            // force resolution
             def resolvedArtifacts = configurations.detachedConfiguration(dep).resolvedConfiguration.resolvedArtifacts
 
             resolvedArtifacts.each { artifact ->
@@ -165,38 +190,28 @@ task populateM2 {
                 def targetDir = new File(localMavenRepo, "${groupPath}/${id.name}/${id.version}")
                 targetDir.mkdirs()
 
-                // copy JAR
-                def jarFile = artifact.file
-                def targetJar = new File(targetDir, jarFile.name)
-                if (!targetJar.exists()) {
-                    println "Copying JAR ${jarFile.name} -> ${targetDir}"
-                    copy {
-                        from jarFile
-                        into targetDir
-                    }
-                } else {
-                    println "Skipping JAR ${jarFile.name}, already exists"
-                }
+                // Copy JAR with SHA-1
+                def targetJar = new File(targetDir, artifact.file.name)
+                if (copyWithHash(artifact.file, targetJar)) {
+                    println "Copying JAR ${artifact.file.name} -> ${targetDir} (with SHA-1)"
+                    // Copy POM with SHA-1
+                    try {
+                        def pomDep = dependencies.create("${id.group}:${id.name}:${id.version}@pom")
+                        def pomFiles = configurations.detachedConfiguration(pomDep).resolve()
 
-                // attempt to copy .pom file
-                def pomCandidates = fileTree(new File(System.getProperty("user.home"), ".gradle/caches/modules-2/files-2.1")) {
-                    include "**/${id.name}/${id.version}/**/*.pom"
-                }
-
-                if (pomCandidates.files) {
-                    def sourcePom = pomCandidates.files.first()
-                    def targetPom = new File(targetDir, "${id.name}-${id.version}.pom")
-                    if (!targetPom.exists()) {
-                        println "Copying POM ${sourcePom.name} -> ${targetDir}"
-                        copy {
-                            from sourcePom
-                            into targetDir
+                        pomFiles.each { pomFile ->
+                            def targetPom = new File(targetDir, pomFile.name)
+                            if (copyWithHash(pomFile, targetPom)) {
+                                println "Copying POM ${pomFile.name} -> ${targetDir} (with SHA-1)"
+                            } else {
+                                println "Skipping POM ${pomFile.name}, already exists"
+                            }
                         }
-                    } else {
-                        println "Skipping POM ${sourcePom.name}, already exists"
+                    } catch (Exception ignored) {
+                        println "No POM available for ${id.group}:${id.name}:${id.version}"
                     }
                 } else {
-                    println "No POM found for ${id.group}:${id.name}:${id.version}, skipping"
+                    println "Skipping JAR ${artifact.file.name}, already exists"
                 }
             }
         }
