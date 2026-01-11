@@ -140,6 +140,9 @@
             <artifact name="junit-jupiter-api-5.11.4.module">
                 <sha256 value="a6ea2fefb3aa5868fd7a780ae1da1162e76dda3760b48015c2a419d2372ff3cb" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-jupiter-api-5.11.4.pom">
+                <sha256 value="512d23ff39c76665a1a3645526230bcf889bd49884304f7febe047b018eeb339" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
             <artifact name="junit-jupiter-api-5.11.4-sources.jar">
                 <sha256 value="5f54639572bcafc393754f0ce89677192947c01ffe2600a597b60b59bc437f3b" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
@@ -173,6 +176,9 @@
             <artifact name="junit-platform-commons-1.11.4.module">
                 <sha256 value="0b9e2625c8f468b3cd4132cc0a805f89fe41f852d1adfff75f3eb1465ca1cb6b" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-platform-commons-1.11.4.pom">
+                <sha256 value="cd12d2b7c242f165548ed9c9406160dcedb6080925b47cf731e0fdae5fb4bce2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
             <artifact name="junit-platform-commons-1.11.4-sources.jar">
                 <sha256 value="a2f0c562a7fe4066044d93bb20ce527b4669c1ddaefca2244a53356db747c5e2" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
@@ -184,6 +190,9 @@
             </artifact>
             <artifact name="opentest4j-1.3.0.module">
                 <sha256 value="48bf1d6c8b5dc94f74652bd17900f654deb714350248cf5e8fca27b9090c8e0d" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="opentest4j-1.3.0.pom">
+                <sha256 value="9bf7cffc410f3e8372c2522578df9ca56d9d43bd937e30948706c232a943b355" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
             <artifact name="opentest4j-1.3.0-sources.jar">
                 <sha256 value="724a24e3a68267d5ebac9411389a15638a71e50c62448ffa58f59c34d5c1ebb2" origin="repo.maven.apache.org/maven2/"/>
