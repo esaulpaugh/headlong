@@ -118,8 +118,8 @@ task consoleTest(type: JavaExec) {
 }
 
 test {
-    dependsOn consoleTest
-    enabled = false
+    useJUnitPlatform()
+    maxParallelForks = Runtime.runtime.availableProcessors()
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
