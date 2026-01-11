@@ -21,6 +21,7 @@
         <argLine>-Dfile.encoding=UTF-8 -XX:+UseSerialGC</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.4</junit.version>
+        <standalone.version>1.11.4</standalone.version>
         <jmh.version>1.37</jmh.version>
         <maven.build.timestamp.format>MMMM d yyyy</maven.build.timestamp.format>
     </properties>
@@ -63,6 +64,13 @@
             <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency><!-- this is dependency so that ant build.xml can piggyback off of .m2 (maven local) !-->
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-console-standalone</artifactId>
+            <version>${standalone.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <profiles>
