@@ -135,8 +135,6 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
-final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/repository")
-
 final def artifactsToPublish = [
         "com.google.code.gson:gson:2.13.2",
         "org.junit.platform:junit-platform-console-standalone:1.11.4",
@@ -146,6 +144,8 @@ final def artifactsToPublish = [
         "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 ]
 
+final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/repository")
+
 task populateM2 {
     doLast {
         artifactsToPublish.each { gav ->
@@ -153,9 +153,7 @@ task populateM2 {
 
             // detached configuration with exclusions
             def dep = dependencies.create("${group}:${name}:${ver}") {
-                if (group == 'com.google.code.gson') {
-                    exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
-                }
+                exclude group: 'com.google.errorprone', module: 'error_prone_annotations' // e.g. from gson
             }
 
             // force resolution
