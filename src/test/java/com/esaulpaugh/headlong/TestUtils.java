@@ -394,7 +394,7 @@ public final class TestUtils {
         void run() throws Throwable;
     }
 
-    public static void assertThrown(Class<? extends Throwable> clazz, CustomRunnable r) throws Throwable {
+    public static <T extends Throwable> void assertThrown(Class<T> clazz, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
@@ -406,7 +406,7 @@ public final class TestUtils {
         throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
-    public static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
+    public static <T extends Throwable> void assertThrown(Class<T> clazz, String substr, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
@@ -418,7 +418,7 @@ public final class TestUtils {
         throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
-    public static void assertThrownWithAnySubstring(Class<? extends Throwable> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
+    public static <T extends Throwable> void assertThrownWithAnySubstring(Class<T> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
         Objects.requireNonNull(substrings);
         try {
             r.run();
