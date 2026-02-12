@@ -83,7 +83,26 @@ sourceSets {
 }
 
 repositories {
-    mavenCentral()
+    maven {
+        url = "https://repo.maven.apache.org/maven2/"
+        if (gradleMajorVersion >= 5 && gradle.gradleVersion != "5.0") {
+            System.out.println("filtering by group")
+            content {
+                includeGroup "com.google.code.gson"
+                includeGroup "org.junit.platform"
+                includeGroup "org.junit.jupiter"
+                includeGroup "org.junit"
+                includeGroup "org.opentest4j"
+                includeGroup "org.apiguardian"
+                includeGroup "org.bouncycastle"
+                includeGroup "org.openjdk.jmh"
+                includeGroup "net.sf.jopt-simple"
+                includeGroup "org.apache"
+                includeGroup "org.apache.commons"
+                includeGroup "org.sonatype.oss"
+            }
+        }
+    }
 }
 
 ext {
