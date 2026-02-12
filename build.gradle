@@ -168,6 +168,7 @@ def copyWithHash(File sourceFile, File targetFile) {
     return false
 }
 
+// run with option --no-configuration-cache
 task populateM2 {
     group = "publishing"
     description = "Copies selected artifacts (JAR + POM + SHA-1) into local Maven repository"
