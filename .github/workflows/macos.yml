@@ -33,5 +33,5 @@ jobs:
         run: |
           java -version
           gradle -version
-          gradle build populateM2 --no-daemon --no-configuration-cache
+          gradle build populateM2 --no-daemon
           ant -noinput -buildfile build.xml clean all
