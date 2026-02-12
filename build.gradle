@@ -131,7 +131,11 @@ task consoleTest(type: JavaExec) {
     description = "Run tests via junit-platform-console-standalone"
 
     classpath = sourceSets.test.runtimeClasspath
-    main = "org.junit.platform.console.ConsoleLauncher"
+    if (gradleMajorVersion < 6) {
+        main = "org.junit.platform.console.ConsoleLauncher"
+    } else {
+        mainClass = "org.junit.platform.console.ConsoleLauncher"
+    }
 
     args "--scan-classpath", "--disable-banner"
 }
