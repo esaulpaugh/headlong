@@ -371,6 +371,9 @@
             <artifact name="junit-platform-console-standalone-1.11.4.pom">
                 <sha256 value="f44619c18edb94360cc382e6baf943e9300625d1a0a949ee158977eace5713d1" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-platform-console-standalone-1.11.4-sources.jar">
+                <sha256 value="33a9aaaf7c7ae8177d4dfeaf245ad58e564677311802256bbe8104eef47b61e7" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
     </components>
 </verification-metadata>
