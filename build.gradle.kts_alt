@@ -109,7 +109,7 @@ val consoleTest by tasks.creating(JavaExec::class) {
     description = "Run tests via junit-platform-console-standalone"
 
     classpath = sourceSets["test"].runtimeClasspath
-    mainClass.set("org.junit.platform.console.ConsoleLauncher")
+    setMainCompat("org.junit.platform.console.ConsoleLauncher")
 
     args("--scan-classpath", "--disable-banner")
 }
