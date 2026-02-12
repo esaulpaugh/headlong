@@ -157,6 +157,18 @@ val artifactsToPublish = listOf(
     "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 )
 
+fun computeSha1(f: File): String {
+    val md = MessageDigest.getInstance("SHA-1")
+    f.inputStream().use { input ->
+        val buffer = ByteArray(8192)
+        var read: Int = 0
+        while (input.read(buffer).also { read = it } != -1) {
+            md.update(buffer, 0, read)
+        }
+    }
+    return md.digest().joinToString("") { "%02x".format(it) }
+}
+
 fun copyWithHash(sourceFile: File, targetFile: File): Boolean {
     if (!targetFile.exists()) {
         project.copy {
@@ -164,16 +176,14 @@ fun copyWithHash(sourceFile: File, targetFile: File): Boolean {
             into(targetFile.parentFile)
         }
 
-        val md = MessageDigest.getInstance("SHA-1")
-        targetFile.inputStream().use { inputStream ->
-            val buffer = ByteArray(8192)
-            var read: Int
-            while (inputStream.read(buffer).also { read = it } != -1) {
-                md.update(buffer, 0, read)
-            }
+        val sourceHash = computeSha1(sourceFile)
+        val targetHash = computeSha1(targetFile)
+
+        if (targetHash != sourceHash) {
+            throw IllegalStateException("copy corrupted")
         }
-        val sha1 = md.digest().joinToString("") { "%02x".format(it) }
-        File(targetFile.parentFile, targetFile.name + ".sha1").writeText(sha1)
+
+        File(targetFile.parentFile, targetFile.name + ".sha1").writeText(targetHash)
 
         return true
     }

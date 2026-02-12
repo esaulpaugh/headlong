@@ -170,6 +170,18 @@ final def artifactsToPublish = [
 
 final def localMavenRepo = new File(System.getProperty("user.home"), ".m2/repository")
 
+static def computeSha1(File f) {
+    final MessageDigest md = MessageDigest.getInstance("SHA-1")
+    f.withInputStream { is ->
+        byte[] buffer = new byte[8192]
+        int read
+        while ((read = is.read(buffer)) != -1) {
+            md.update(buffer, 0, read)
+        }
+    }
+    return md.digest().collect { String.format("%02x", it) }.join()
+}
+
 def copyWithHash(File sourceFile, File targetFile) {
     if (!targetFile.exists()) {
         copy {
@@ -177,14 +189,14 @@ def copyWithHash(File sourceFile, File targetFile) {
             into targetFile.parentFile
         }
 
-        MessageDigest md = MessageDigest.getInstance("SHA-1")
-        sourceFile.withInputStream { is ->
-            byte[] buffer = new byte[8192]
-            int read
-            while ((read = is.read(buffer)) != -1) md.update(buffer, 0, read)
+        final String sourceHash = computeSha1(sourceFile)
+        final String targetHash = computeSha1(targetFile)
+
+        if (targetHash != sourceHash) {
+            throw new IllegalStateException("copy corrupted")
         }
-        def sha1 = md.digest().collect { String.format("%02x", it) }.join()
-        new File(targetFile.parentFile, targetFile.name + ".sha1").text = sha1
+
+        new File(targetFile.parentFile, targetFile.name + ".sha1").text = targetHash
 
         return true
     }
