@@ -109,7 +109,7 @@ val consoleTest by tasks.creating(JavaExec::class) {
     description = "Run tests via junit-platform-console-standalone"
 
     classpath = sourceSets["test"].runtimeClasspath
-    setMainCompat("org.junit.platform.console.ConsoleLauncher")
+    setMainCompat(this, "org.junit.platform.console.ConsoleLauncher")
 
     args("--scan-classpath", "--disable-banner")
 }
@@ -120,21 +120,21 @@ tasks.named<Test>("test") {
 }
 
 // Reflection helper for JavaExec main class (Gradle <7 / >=7 compatibility)
-fun JavaExec.setMainCompat(mainValue: String) {
+fun setMainCompat(javaExec: JavaExec, mainValue: String) {
     try {
-        val mainClassProp = this::class.java.getMethod("getMainClass")
-        val provider = mainClassProp.invoke(this)
+        val mainClassProp = javaExec::class.java.getMethod("getMainClass")
+        val provider = mainClassProp.invoke(javaExec)
         val setMethod = provider::class.java.getMethod("set", Any::class.java)
         setMethod.invoke(provider, mainValue)
     } catch (_: Exception) {
-        val mainMethod = this::class.java.getMethod("setMain", String::class.java)
-        mainMethod.invoke(this, mainValue)
+        val mainMethod = javaExec::class.java.getMethod("setMain", String::class.java)
+        mainMethod.invoke(javaExec, mainValue)
     }
 }
 
 val jmh by tasks.creating(JavaExec::class) {
     dependsOn("jmhClasses")
-    setMainCompat("org.openjdk.jmh.Main")
+    setMainCompat(this, "org.openjdk.jmh.Main")
     classpath = sourceSets["jmh"].compileClasspath + sourceSets["jmh"].runtimeClasspath
 }
 
