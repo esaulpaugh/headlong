@@ -174,12 +174,9 @@ static def computeSha1(File f) {
     final MessageDigest md = MessageDigest.getInstance("SHA-1")
     f.withInputStream { is ->
         byte[] buffer = new byte[8192]
-        int read
-        while ((read = is.read(buffer)) != -1) {
-            md.update(buffer, 0, read)
-        }
+        for (int read; (read = is.read(buffer)) != -1; md.update(buffer, 0, read));
     }
-    return md.digest().collect { String.format("%02x", it) }.join()
+    return md.digest().collect { Byte it -> String.format("%02x", it) }.join()
 }
 
 def copyWithHash(File sourceFile, File targetFile) {
