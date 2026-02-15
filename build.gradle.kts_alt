@@ -159,9 +159,9 @@ val artifactsToPublish = listOf(
 
 fun computeSha1(f: File): String {
     val md = MessageDigest.getInstance("SHA-1")
-    f.inputStream().use { input ->
+    f.inputStream().use { input: InputStream ->
         val buffer = ByteArray(8192)
-        var read: Int = 0
+        var read: Int
         while (input.read(buffer).also { read = it } != -1) {
             md.update(buffer, 0, read)
         }
