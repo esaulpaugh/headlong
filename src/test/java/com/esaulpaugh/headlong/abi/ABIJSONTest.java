@@ -29,7 +29,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -766,14 +770,20 @@ public class ABIJSONTest {
                 : Stream.of(type);
     }
 
+    private static final int TUPLE_SPLITERATOR_FLAGS =
+            Spliterator.ORDERED
+                    | Spliterator.NONNULL
+                    | Spliterator.IMMUTABLE
+                    | Spliterator.SIZED
+                    | Spliterator.SUBSIZED;
+
     @Test
     public void testSpliteratorMetadata() {
         final TupleType<?> tuple = TupleType.parse("(uint256,bool,string)");
         final Spliterator<ABIType<?>> spliterator = tuple.spliterator();
 
-        final int expectedFlags = Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.SIZED | Spliterator.SUBSIZED;
-        assertTrue(spliterator.hasCharacteristics(expectedFlags));
-        assertEquals(expectedFlags, spliterator.characteristics());
+        assertTrue(spliterator.hasCharacteristics(TUPLE_SPLITERATOR_FLAGS));
+        assertEquals(TUPLE_SPLITERATOR_FLAGS, spliterator.characteristics());
 
         assertEquals(3, spliterator.getExactSizeIfKnown());
     }
@@ -795,6 +805,7 @@ public class ABIJSONTest {
         final TupleType<?> emptyTuple = TupleType.of();
         final Spliterator<ABIType<?>> spliterator = emptyTuple.spliterator();
 
+        assertEquals(0, spliterator.estimateSize());
         assertEquals(0, spliterator.getExactSizeIfKnown());
         assertFalse(spliterator.tryAdvance((ABIType<?> element) -> {
             throw new AssertionError();
@@ -808,8 +819,7 @@ public class ABIJSONTest {
 
         final Spliterator<ABIType<?>> spliterator = params.spliterator();
 
-        final int expectedFlags = Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.SIZED | Spliterator.SUBSIZED;
-        assertEquals(expectedFlags, spliterator.characteristics());
+        assertEquals(TUPLE_SPLITERATOR_FLAGS, spliterator.characteristics());
         assertEquals(params.size(), spliterator.getExactSizeIfKnown());
 
         final List<ABIType<?>> streamedTypes = StreamSupport.stream(spliterator, false)
@@ -822,6 +832,74 @@ public class ABIJSONTest {
             assertSame(e, streamedTypes.get(i), "" + i);
             assertInstanceOf(e.clazz, test.argsTuple.get(i));
             i++;
+        }
+    }
+
+    @Test
+    public void testSingleSplit() {
+        final MonteCarloTestCase test = MonteCarloTest.newComplexTestCase(new Random(), new Keccak(256));
+
+        final TupleType<?> params = test.function.getInputs();
+        final Spliterator<ABIType<?>> spliterator = params.spliterator();
+        final Spliterator<ABIType<?>> prefix = spliterator.trySplit();
+
+        assertNotNull(prefix);
+
+        final int flags = Spliterator.ORDERED
+                | Spliterator.NONNULL
+                | Spliterator.IMMUTABLE
+                | Spliterator.SIZED
+                | Spliterator.SUBSIZED;
+
+        assertTrue(prefix.hasCharacteristics(flags));
+        assertTrue(spliterator.hasCharacteristics(flags));
+
+        assertEquals(params.size(), prefix.estimateSize() + spliterator.estimateSize());
+        assertEquals(params.size(),
+                prefix.getExactSizeIfKnown() + spliterator.getExactSizeIfKnown());
+
+        final List<ABIType<?>> combined = new ArrayList<>(params.size());
+
+        prefix.forEachRemaining(combined::add);
+        spliterator.forEachRemaining(combined::add);
+
+        assertEquals(params.size(), combined.size());
+
+        for (int i = 0; i < params.size(); i++) {
+            assertSame(params.get(i), combined.get(i), "element " + i);
+        }
+    }
+
+    @Test
+    public void testRecursiveSplit() {
+        final MonteCarloTestCase test = MonteCarloTest.newComplexTestCase(new Random(), new Keccak(256));
+        final TupleType<?> params = test.function.getInputs();
+
+        final Deque<Spliterator<ABIType<?>>> workList = new ArrayDeque<>();
+        workList.add(params.spliterator());
+
+        final List<Spliterator<ABIType<?>>> leaves = new ArrayList<>();
+
+        while (!workList.isEmpty()) {
+            Spliterator<ABIType<?>> current = workList.pollFirst();
+            Spliterator<ABIType<?>> prefix = current.trySplit();
+
+            if (prefix != null) {
+                workList.addFirst(current);
+                workList.addFirst(prefix);
+            } else {
+                leaves.add(current);
+            }
+        }
+
+        final List<ABIType<?>> result = new ArrayList<>(params.size());
+        for (Spliterator<ABIType<?>> leaf : leaves) {
+            leaf.forEachRemaining(result::add);
+        }
+
+        assertEquals(params.size(), result.size());
+        for (int i = 0; i < params.size(); i++) {
+            assertSame(params.get(i), result.get(i), "" + i);
         }
     }
 
