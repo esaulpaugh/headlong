@@ -770,12 +770,11 @@ public class ABIJSONTest {
                 : Stream.of(type);
     }
 
-    private static final int TUPLE_SPLITERATOR_FLAGS =
-            Spliterator.ORDERED
-                    | Spliterator.NONNULL
-                    | Spliterator.IMMUTABLE
-                    | Spliterator.SIZED
-                    | Spliterator.SUBSIZED;
+    private static final int TUPLE_SPLITERATOR_FLAGS = Spliterator.ORDERED
+                                                        | Spliterator.NONNULL
+                                                        | Spliterator.IMMUTABLE
+                                                        | Spliterator.SIZED
+                                                        | Spliterator.SUBSIZED;
 
     @Test
     public void testSpliteratorMetadata() {
@@ -845,14 +844,8 @@ public class ABIJSONTest {
 
         assertNotNull(prefix);
 
-        final int flags = Spliterator.ORDERED
-                | Spliterator.NONNULL
-                | Spliterator.IMMUTABLE
-                | Spliterator.SIZED
-                | Spliterator.SUBSIZED;
-
-        assertTrue(prefix.hasCharacteristics(flags));
-        assertTrue(spliterator.hasCharacteristics(flags));
+        assertTrue(prefix.hasCharacteristics(TUPLE_SPLITERATOR_FLAGS));
+        assertTrue(spliterator.hasCharacteristics(TUPLE_SPLITERATOR_FLAGS));
 
         assertEquals(params.size(), prefix.estimateSize() + spliterator.estimateSize());
         assertEquals(params.size(),
