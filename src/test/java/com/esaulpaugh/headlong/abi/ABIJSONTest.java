@@ -33,7 +33,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -50,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ABIJSONTest {
@@ -761,6 +764,65 @@ public class ABIJSONTest {
                 ? StreamSupport.stream(((TupleType<?>) type).spliterator(), false)
                     .flatMap(ABIJSONTest::flatten)
                 : Stream.of(type);
+    }
+
+    @Test
+    public void testSpliteratorMetadata() {
+        final TupleType<?> tuple = TupleType.parse("(uint256,bool,string)");
+        final Spliterator<ABIType<?>> spliterator = tuple.spliterator();
+
+        final int expectedFlags = Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.SIZED | Spliterator.SUBSIZED;
+        assertTrue(spliterator.hasCharacteristics(expectedFlags));
+        assertEquals(expectedFlags, spliterator.characteristics());
+
+        assertEquals(3, spliterator.getExactSizeIfKnown());
+    }
+
+    @Test
+    public void testSpliteratorStreamOutput() {
+        final TupleType<?> tuple = TupleType.parse("(address,uint256)");
+
+        final List<ABIType<?>> typeNames = StreamSupport.stream(tuple.spliterator(), false)
+                .collect(Collectors.toList());
+
+        assertEquals(2, typeNames.size());
+        assertSame(AddressType.INSTANCE, typeNames.get(0));
+        assertSame(TypeFactory.create("uint"), typeNames.get(1));
+    }
+
+    @Test
+    public void testEmptyTupleSpliterator() {
+        final TupleType<?> emptyTuple = TupleType.of();
+        final Spliterator<ABIType<?>> spliterator = emptyTuple.spliterator();
+
+        assertEquals(0, spliterator.getExactSizeIfKnown());
+        assertFalse(spliterator.tryAdvance((ABIType<?> element) -> {
+            throw new AssertionError();
+        }));
+    }
+
+    @Test
+    public void testComplexSpliterate() {
+        final MonteCarloTestCase test = MonteCarloTest.newComplexTestCase(new Random(), new Keccak(256));
+        final TupleType<?> params = test.function.getInputs();
+
+        final Spliterator<ABIType<?>> spliterator = params.spliterator();
+
+        final int expectedFlags = Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.SIZED | Spliterator.SUBSIZED;
+        assertEquals(expectedFlags, spliterator.characteristics());
+        assertEquals(params.size(), spliterator.getExactSizeIfKnown());
+
+        final List<ABIType<?>> streamedTypes = StreamSupport.stream(spliterator, false)
+                .collect(Collectors.toList());
+
+        assertEquals(params.size(), streamedTypes.size());
+
+        int i = 0;
+        for (final ABIType<?> e : params) {
+            assertSame(e, streamedTypes.get(i), "" + i);
+            assertInstanceOf(e.clazz, test.argsTuple.get(i));
+            i++;
+        }
     }
 
     @Test

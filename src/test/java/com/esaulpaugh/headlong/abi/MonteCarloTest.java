@@ -278,7 +278,7 @@ public class MonteCarloTest {
         );
     }
 
-    private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
+    static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
         long seed = TestUtils.getSeed();
         final long origSeed = seed;
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(4, 4, 2, 2);

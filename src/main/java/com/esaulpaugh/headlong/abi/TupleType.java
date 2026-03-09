@@ -20,6 +20,8 @@ import com.esaulpaugh.headlong.util.FastHex;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -550,5 +552,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 : flags == ABIType.FLAG_LEGACY_DECODE
                     ? EMPTY_LEGACY
                     : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
+    }
+
+    @Override
+    public Spliterator<ABIType<?>> spliterator() {
+        return Spliterators.spliterator(iterator(), elementTypes.length, Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
     }
 }
