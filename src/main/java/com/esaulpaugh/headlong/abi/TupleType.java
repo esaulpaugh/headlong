@@ -340,6 +340,11 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return Arrays.asList(elementTypes).iterator();
     }
 
+    @Override
+    public Spliterator<ABIType<?>> spliterator() {
+        return Spliterators.spliterator(elementTypes, Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+    }
+
     /**
      * Returns a new {@link TupleType} containing elements on interval [start, end). This is a convenience wrapper around
      * {@link #select(boolean...)}.
@@ -552,10 +557,5 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 : flags == ABIType.FLAG_LEGACY_DECODE
                     ? EMPTY_LEGACY
                     : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
-    }
-
-    @Override
-    public Spliterator<ABIType<?>> spliterator() {
-        return Spliterators.spliterator(iterator(), elementTypes.length, Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
     }
 }
