@@ -32,6 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FunctionTest {
 
     @Test
+    public void testConstructors() {
+        final String SIG = "(bool)";
+
+        assertEquals(TupleType.EMPTY, Function.parse(SIG).getOutputs());
+        assertEquals(TupleType.EMPTY, Function.parse(SIG, null).getOutputs());
+        assertEquals(TupleType.EMPTY, Function.parse(ABIType.FLAGS_NONE, SIG, null).getOutputs());
+
+        assertEquals(TupleType.EMPTY, new Function(SIG).getOutputs());
+        assertEquals(TupleType.EMPTY, new Function(SIG, null).getOutputs());
+    }
+
+    @Test
     public void testFixedLeadingZeroes() throws Throwable {
         TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed8x011\"", () -> Function.parse("foo(fixed8x011)"));
         TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed8x0011\"", () -> Function.parse("foo(fixed8x0011)"));
