@@ -33,7 +33,7 @@ public class FunctionTest {
 
     @Test
     public void testConstructors() {
-        final String SIG = "(bool)";
+        final String SIG = "foo(int)";
 
         assertEquals(TupleType.EMPTY, Function.parse(SIG).getOutputs());
         assertEquals(TupleType.EMPTY, Function.parse(SIG, null).getOutputs());

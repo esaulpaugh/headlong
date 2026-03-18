@@ -57,22 +57,18 @@ public final class Function implements ABIObject {
     private final byte[] selector = new byte[SELECTOR_LEN];
 
     public Function(String signature) {
-        this(signature, signature.indexOf('('), TupleType.EMPTY, ABIType.FLAGS_NONE);
+        this(signature, TupleType.EMPTY, ABIType.FLAGS_NONE);
     }
 
     public Function(String signature, String outputs) {
-        this(ABIType.FLAGS_NONE, signature, outputs);
+        this(signature, outputs == null ? TupleType.EMPTY : TupleType.parse(outputs), ABIType.FLAGS_NONE);
     }
 
-    private Function(int flags, String signature, String outputs) {
-        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
-    }
-
-    private Function(final String signature, final int nameLength, final TupleType<?> outputs, final int flags) {
+    private Function(final String signature, final TupleType<?> outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
-                signature.substring(0, nameLength),
-                TupleType.parse(flags, signature.substring(nameLength)),
+                signature.substring(0, signature.indexOf('(')),
+                TupleType.parse(flags, signature.substring(signature.indexOf('('))),
                 outputs,
                 null,
                 Function.newDefaultDigest()
@@ -375,7 +371,7 @@ public final class Function implements ABIObject {
     }
 
     public static Function parse(int flags, String signature, String outputs) {
-        return new Function(flags, signature, outputs);
+        return new Function(signature, outputs == null ? TupleType.empty(flags) : TupleType.parse(flags, outputs), flags);
     }
 
     /**
