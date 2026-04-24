@@ -287,7 +287,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 }
                 return;
             }
-            offset += elementType.dynamicByteLength(values[i]); // return next offset
+            offset += elementType.dynamicByteLength(values[i]); // calculate next offset
         }
     }
 

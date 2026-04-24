@@ -96,7 +96,7 @@ public final class Address {
 
     public Address withLabel(final String label) {
         if (this.label != null) {
-            throw new IllegalArgumentException("labeling aborted because existing label not null");
+            throw new IllegalArgumentException("label already set");
         }
         return new Address(this.value, label);
     }
