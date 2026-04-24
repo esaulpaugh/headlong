@@ -270,6 +270,16 @@ public final class ABIJSON {
         }
     }
 
+    private static final int SEEN_TYPE             = 1;
+    private static final int SEEN_NAME             = 1 << 1;
+    private static final int SEEN_INPUTS           = 1 << 2;
+    private static final int SEEN_OUTPUTS          = 1 << 3;
+    private static final int SEEN_STATE_MUTABILITY = 1 << 4;
+    private static final int SEEN_ANONYMOUS        = 1 << 5;
+    private static final int SEEN_COMPONENTS       = 1 << 6;
+    private static final int SEEN_INTERNAL_TYPE    = 1 << 7;
+    private static final int SEEN_INDEXED          = 1 << 8;
+
     @SuppressWarnings("unchecked")
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
@@ -279,10 +289,11 @@ public final class ABIJSON {
         TupleType<?> outputs = null;
         String stateMutability = null;
         Boolean anonymous = null;
+        int seen = 0;
         do {
             switch (reader.nextName()) {
             case TYPE:
-                requireNull(t, TYPE);
+                seen |= requireUnseen(SEEN_TYPE, seen, TYPE);
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
                     // skip this JSON object. for best performance, "type" should be declared first
@@ -293,11 +304,11 @@ public final class ABIJSON {
                     return null;
                 }
                 continue;
-            case NAME: requireNull(name, NAME); name = reader.nextString(); continue;
-            case INPUTS: requireNull(inputs, INPUTS); inputs = parseTupleType(reader, flags); continue;
-            case OUTPUTS: requireNull(outputs, OUTPUTS); outputs = parseTupleType(reader, flags); continue;
-            case STATE_MUTABILITY: requireNull(stateMutability, STATE_MUTABILITY); stateMutability = reader.nextString(); continue;
-            case ANONYMOUS: requireNull(anonymous, ANONYMOUS); anonymous = reader.nextBoolean(); continue;
+            case NAME: seen |= requireUnseen(SEEN_NAME, seen, NAME); name = reader.nextString(); continue;
+            case INPUTS: seen |= requireUnseen(SEEN_INPUTS, seen, INPUTS); inputs = parseTupleType(reader, flags); continue;
+            case OUTPUTS: seen |= requireUnseen(SEEN_OUTPUTS, seen, OUTPUTS); outputs = parseTupleType(reader, flags); continue;
+            case STATE_MUTABILITY: seen |= requireUnseen(SEEN_STATE_MUTABILITY, seen, STATE_MUTABILITY); stateMutability = reader.nextString(); continue;
+            case ANONYMOUS: seen |= requireUnseen(SEEN_ANONYMOUS, seen, ANONYMOUS); anonymous = reader.nextBoolean(); continue;
             default: reader.skipValue();
             }
         } while (reader.peek() != JsonToken.END_OBJECT);
@@ -322,10 +333,11 @@ public final class ABIJSON {
         }
     }
 
-    private static void requireNull(Object val, String key) {
-        if (val != null) {
+    private static int requireUnseen(int val, int seen, String key) {
+        if ((seen & val) != 0) {
             throw new IllegalStateException("duplicate field: " + key);
         }
+        return val;
     }
 
     private static TupleType<?> parseTupleType(final JsonReader reader, final int flags) throws IOException {
@@ -352,15 +364,15 @@ public final class ABIJSON {
             TupleType<?> components = null;
             String internalType = null;
             Boolean indexed = null;
-
             reader.beginObject();
+            int seen = 0;
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
-                case TYPE: requireNull(type, TYPE); type = reader.nextString(); continue;
-                case COMPONENTS: requireNull(components, COMPONENTS); components = parseTupleType(reader, flags); continue;
-                case NAME: requireNull(names[i], NAME); names[i] = reader.nextString(); continue;
-                case INTERNAL_TYPE: requireNull(internalType, INTERNAL_TYPE); internalType = reader.nextString(); continue;
-                case INDEXED: requireNull(indexed, INDEXED); indexed = reader.nextBoolean(); continue;
+                case TYPE: seen |= requireUnseen(SEEN_TYPE, seen, TYPE); type = reader.nextString(); continue;
+                case COMPONENTS: seen |= requireUnseen(SEEN_COMPONENTS, seen, COMPONENTS); components = parseTupleType(reader, flags); continue;
+                case NAME: seen |= requireUnseen(SEEN_NAME, seen, NAME); names[i] = reader.nextString(); continue;
+                case INTERNAL_TYPE: seen |= requireUnseen(SEEN_INTERNAL_TYPE, seen, INTERNAL_TYPE); internalType = reader.nextString(); continue;
+                case INDEXED: seen |= requireUnseen(SEEN_INDEXED, seen, INDEXED); indexed = reader.nextBoolean(); continue;
                 default: reader.skipValue();
                 }
             }
