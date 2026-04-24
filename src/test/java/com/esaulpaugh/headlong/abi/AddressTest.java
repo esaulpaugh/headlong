@@ -280,7 +280,7 @@ public class AddressTest {
         Address someAddr = Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606", "Cafe Babe's hot wallet");
         assertEquals("Cafe Babe's hot wallet", someAddr.getLabel());
         assertThrown(IllegalArgumentException.class,
-                "labeling aborted because existing label not null",
+                "label already set",
                 () -> someAddr.withLabel("Cafe Joe's wallet"));
         Address joesAddr = Address.wrap(someAddr.toString(), "Cafe Joe's wallet");
         assertEquals("Cafe Joe's wallet", joesAddr.getLabel());
