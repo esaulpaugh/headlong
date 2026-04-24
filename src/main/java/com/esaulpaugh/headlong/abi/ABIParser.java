@@ -98,6 +98,7 @@ public final class ABIParser {
         return readField(reader(objectJson), key, true);
     }
 
+    /** Does not close the given {@code objectStream}. */
     public <T extends ABIObject> List<T> parseField(String key, InputStream objectStream) {
         return readField(reader(objectStream), key, true);
     }
@@ -192,7 +193,7 @@ public final class ABIParser {
 
         @Override
         public Spliterator<T> trySplit() {
-            return null; // alternatively, throw new ConcurrentModificationException();
+            return null; // no splitting allowed
         }
 
         @Override

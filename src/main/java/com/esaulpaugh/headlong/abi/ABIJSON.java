@@ -174,10 +174,11 @@ public final class ABIJSON {
 
     private static void writeObject(ABIObject o, JsonWriter out, boolean minify) throws IOException {
         out.beginObject();
+        // "type" key written first, so streaming API can skip non-matching items quickly
         if (o.isFunction()) {
             final Function f = o.asFunction();
             final TypeEnum t = o.getType();
-            type(out, t.toString()); // "type" key should be first, so streaming API can skip non-matching items quickly
+            type(out, t.toString());
             if (t != TypeEnum.FALLBACK) {
                 name(out, o.getName());
                 if (t != TypeEnum.RECEIVE) {
