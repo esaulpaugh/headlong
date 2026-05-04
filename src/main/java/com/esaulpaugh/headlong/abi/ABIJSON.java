@@ -294,6 +294,7 @@ public final class ABIJSON {
         do {
             switch (reader.nextName()) {
             case TYPE:
+                seen |= requireUnseen(SEEN_TYPE, seen, TYPE);
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
                     // skip this JSON object. for best performance, "type" should be declared first
@@ -303,7 +304,6 @@ public final class ABIJSON {
                     reader.endObject();
                     return null;
                 }
-                seen |= requireUnseen(SEEN_TYPE, seen, TYPE);
                 continue;
             case NAME: seen |= requireUnseen(SEEN_NAME, seen, NAME); name = reader.nextString(); continue;
             case INPUTS: seen |= requireUnseen(SEEN_INPUTS, seen, INPUTS); inputs = parseTupleType(reader, flags); continue;
