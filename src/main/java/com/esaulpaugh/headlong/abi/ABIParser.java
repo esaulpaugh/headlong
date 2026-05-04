@@ -128,10 +128,8 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        Stream<T> stream = stream(reader);
-        List<T> result = stream.collect(Collectors.toList());
-        stream.close();
-        return result;
+        // stream never escapes, reader gets closed by tryAdvance on throw or if END_ARRAY reached
+        return this.<T>stream(reader).collect(Collectors.toList());
     }
 
     <T extends ABIObject> Stream<T> stream(JsonReader reader) {
@@ -197,7 +195,7 @@ public final class ABIParser {
 
         @Override
         public long estimateSize() {
-            return 0;
+            return Long.MAX_VALUE;
         }
 
         @Override
