@@ -122,8 +122,8 @@ public final class ABIParser {
                 reader.skipValue();
             }
             throw new IllegalArgumentException("key not found");
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
+        } catch (Exception e) {
+            throw closeWithException(e, reader);
         }
     }
 
@@ -143,13 +143,21 @@ public final class ABIParser {
                                     }
                                 });
         } catch (Exception e) {
-            try {
-                reader.close();
-            } catch (IOException io) {
-                e.addSuppressed(io);
-            }
-            throw new IllegalStateException(e);
+            throw closeWithException(e, reader);
         }
+    }
+
+    private static RuntimeException closeWithException(Exception e, JsonReader reader) {
+        try {
+            reader.close();
+        } catch (IOException io) {
+            e.addSuppressed(io);
+        }
+        return e instanceof IllegalStateException
+                ? (IllegalStateException) e
+                : e instanceof IllegalArgumentException
+                    ? (IllegalArgumentException) e
+                    : new IllegalStateException(e);
     }
 
     private final class JsonSpliterator<T extends ABIObject> implements Spliterator<T> {
@@ -176,15 +184,7 @@ public final class ABIParser {
                 reader.close();
                 return false;
             } catch (Exception e) {
-                try {
-                    reader.close();
-                } catch (IOException io) {
-                    e.addSuppressed(io);
-                }
-                if (e instanceof IllegalStateException) {
-                    throw (IllegalStateException) e;
-                }
-                throw new IllegalStateException(e);
+                throw closeWithException(e, reader);
             }
         }
 
