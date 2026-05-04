@@ -1163,9 +1163,9 @@ public class ABIJSONTest {
         assertThrown(IllegalStateException.class, "END_OBJECT", () -> new ABIParser().streamField("", bais("{\"\":[{}]}")).findAny());
         assertThrown(IllegalStateException.class, "END_OBJECT", () -> new ABIParser().parseField("", bais("{\"\":[{}]}")));
 
-        try (Stream<ABIObject> s = new ABIParser().streamField("abi", bais("{\"abi\":[]}"))) {
-            assertEquals(0, s.count());
-        }
+        Stream<ABIObject> s = new ABIParser().streamField("abi", bais("{\"abi\":[]}"));
+        assertEquals(0, s.count()); // stream fully consumed, automatically closes underlying InputStream
+
         assertThrown(IllegalArgumentException.class, "key not found", () -> {
             try (Stream<ABIObject> ignored = new ABIParser().streamField("abi", bais("{\"\":\"\"}"))) {
                 throw new AssertionError();
@@ -1219,9 +1219,8 @@ public class ABIJSONTest {
         assertEquals(1, new ABIParser(EnumSet.of(TypeEnum.FUNCTION)).parse("[{\"name\":\"\"}]").size());
         assertEquals(1, new ABIParser(EnumSet.of(TypeEnum.FUNCTION, TypeEnum.RECEIVE, TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR)).parse("[{\"name\":\"\"}]").size());
 
-        try (Stream<Event<Tuple>> s = new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]"))) {
-            assertEquals(0L, s.count());
-        }
+        Stream<Event<Tuple>> s = new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]"));
+        assertEquals(0L, s.count()); // stream fully consumed, automatically closes underlying InputStream
 
 //        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(-1));
 //        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(2));
