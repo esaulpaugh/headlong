@@ -81,7 +81,7 @@ public final class ABIParser {
         return stream(reader(arrayJson));
     }
 
-    /** Use via try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
+    /** If the stream may not be fully consumed, use in a try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
     public <T extends ABIObject> Stream<T> stream(InputStream arrayStream) {
         return stream(reader(arrayStream));
     }
@@ -98,7 +98,6 @@ public final class ABIParser {
         return readField(reader(objectJson), key, true);
     }
 
-    /** Does not close the given {@code objectStream}. */
     public <T extends ABIObject> List<T> parseField(String key, InputStream objectStream) {
         return readField(reader(objectStream), key, true);
     }
@@ -107,7 +106,7 @@ public final class ABIParser {
         return readField(reader(objectJson), key, false);
     }
 
-    /** Use via try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
+    /** If the stream may not be fully consumed, use in a try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
     public <T extends ABIObject> Stream<T> streamField(String key, InputStream objectStream) {
         return readField(reader(objectStream), key, false);
     }
