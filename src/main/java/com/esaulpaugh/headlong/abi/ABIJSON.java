@@ -328,7 +328,7 @@ public final class ABIJSON {
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
         case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs != null ? outputs : TupleType.empty(flags), stateMutability, digest); // digest != null ? digest : Function.newDefaultDigest()
-        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous == Boolean.TRUE, inputs, inputs.indexed);
+        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous == Boolean.TRUE, inputs, inputs.indexed); // default anonymous to false
         case TypeEnum.ORDINAL_ERROR: return (T) new ContractError<>(name, inputs);
         default: throw new AssertionError();
         }
@@ -416,7 +416,7 @@ public final class ABIJSON {
     }
 
     private static ABIType<?> resolveElement(String type, TupleType<?> components, int flags, int i) {
-        if (type == null || type.charAt(0) == '(') {
+        if (type == null || type.isEmpty() || type.charAt(0) == '(') {
             throw new IllegalArgumentException("bad type at tuple index " + i);
         }
         if (components != null) {
