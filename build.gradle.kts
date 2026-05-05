@@ -75,12 +75,12 @@
 //}
 //
 //val junitVersion = "5.11.4"
-//val bcVersion = "1.83"
+//val bcVersion = "1.84"
 //
 //dependencies {
 //    implementation("com.google.code.gson:gson:") {
 //        version {
-//            require("[2.1, 2.13.2]") // published in "dependencies"
+//            require("[2.1, 2.14.0]") // published in "dependencies"
 //        }
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }

@@ -87,11 +87,11 @@ repositories {
 
 val junitVersion = "5.11.4"
 val junitPlatformVersion = "1.11.4"
-val bcVersion = "1.83"
+val bcVersion = "1.84"
 val jmhVersion = "1.37"
 
 dependencies {
-    implementation("com.google.code.gson:gson:[2.1,2.13.2]") {
+    implementation("com.google.code.gson:gson:[2.1,2.14.0]") {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
 
@@ -149,10 +149,10 @@ tasks.withType<AbstractArchiveTask> {
 
 // ------------------ Populate Maven Local Task ------------------
 val artifactsToPublish = listOf(
-    "com.google.code.gson:gson:2.13.2",
+    "com.google.code.gson:gson:2.14.0",
     "org.junit.platform:junit-platform-console-standalone:1.11.4",
     "org.junit.jupiter:junit-jupiter-api:5.11.4",
-    "org.bouncycastle:bcprov-jdk14:1.83",
+    "org.bouncycastle:bcprov-jdk14:1.84",
     "org.openjdk.jmh:jmh-core:1.37",
     "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 )
