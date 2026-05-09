@@ -104,7 +104,7 @@ public final class FastHex {
     private static final int[] DECODE_TABLE = new int[256];
 
     static {
-        Arrays.fill(DECODE_TABLE, -(0xF << BITS_PER_CHAR) - 1);
+        Arrays.fill(DECODE_TABLE, -1 - (0xF << BITS_PER_CHAR));
         for (int i = '0'; i <= '9'; i++) DECODE_TABLE[i] = i - '0' + 0x0;
         for (int i = 'A'; i <= 'F'; i++) DECODE_TABLE[i] = i - 'A' + 0xA;
         for (int i = 'a'; i <= 'f'; i++) DECODE_TABLE[i] = i - 'a' + 0xA;
