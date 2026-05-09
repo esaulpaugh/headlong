@@ -97,6 +97,7 @@ public final class FasterHex {
             throw illegalHex(offset, extractor, lim);
         }
         while (k < dest.length) {
+//            dest[k++] = (byte) DECODE_TABLE[(extractor.applyAsInt(offset++) << 7) | extractor.applyAsInt(offset++)];
             int _0 = decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset++);
             dest[k++] = (byte) _0;
         }
