@@ -85,7 +85,7 @@ sourceSets {
 repositories {
     maven {
         url = "https://repo.maven.apache.org/maven2/"
-        if (gradleMajorVersion >= 5 && gradle.gradleVersion != "5.0") {
+        if (gradleMajorVersion >= 5 && gradle.gradleVersion.startsWith("5.0")) {
             System.out.println("filtering by group")
             content {
                 includeGroup "com.google.code.gson"
