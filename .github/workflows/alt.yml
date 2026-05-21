@@ -11,8 +11,12 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2025, ubuntu-22.04 ]
-        version: [ '25.0.0' ]
-        distribution: [ 'jetbrains', 'microsoft' ]
+        distribution: [ 'microsoft', 'jetbrains' ]
+        include:
+          - distribution: 'microsoft'
+            version: '25.0.0'
+          - distribution: 'jetbrains'
+            version: '25.0.3'
 
     runs-on: ${{ matrix.os }}
 
