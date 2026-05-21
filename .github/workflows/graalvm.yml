@@ -2,6 +2,9 @@ name: Java CI GraalVM Maven
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
