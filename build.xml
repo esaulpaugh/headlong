@@ -228,10 +228,9 @@
   <property name="classes.dir" value="${build.dir}/classes"/>
   <property name="generated.dir" value="${build.dir}/generated-sources"/>
 
-  <mkdir dir="${classes.dir}"/>
-  <mkdir dir="${generated.dir}"/>
-
   <target name="compile-jmh">
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${generated.dir}"/>
     <javac destdir="${classes.dir}" includeantruntime="false" debug="true">
       <src path="src/main/java"/>
       <src path="src/jmh/java"/>
