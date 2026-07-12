@@ -394,31 +394,34 @@ public final class TestUtils {
         void run() throws Throwable;
     }
 
-    public static <T extends Throwable> void assertThrown(Class<T> clazz, CustomRunnable r) throws Throwable {
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T assertThrown(Class<T> clazz, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
             if (clazz.isInstance(t)) {
-                return;
+                return (T) t;
             }
             throw t;
         }
         throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
-    public static <T extends Throwable> void assertThrown(Class<T> clazz, String substr, CustomRunnable r) throws Throwable {
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T assertThrown(Class<T> clazz, String substr, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
             if (clazz.isInstance(t) && substringMatch(t.getMessage(), substr)) {
-                return;
+                return (T) t;
             }
             throw t;
         }
         throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
-    public static <T extends Throwable> void assertThrownWithAnySubstring(Class<T> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T assertThrownWithAnySubstring(Class<T> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
         Objects.requireNonNull(substrings);
         try {
             r.run();
@@ -427,7 +430,7 @@ public final class TestUtils {
                 final String msg = t.getMessage();
                 for (String substr : substrings) {
                     if (substringMatch(msg, substr)) {
-                        return;
+                        return (T) t;
                     }
                 }
             }
