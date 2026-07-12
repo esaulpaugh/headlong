@@ -25,7 +25,9 @@ import java.io.ByteArrayInputStream;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ReadOnlyBufferException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -1237,5 +1239,66 @@ public class RLPDecoderTest {
 
         assertEquals(ordinals, ordinalsBuilder.toString());
         assertEquals(singleBytes, singleBytesBuilder.toString());
+    }
+
+    @Test
+    void testBufferViews() throws Throwable {
+        final RLPItem item = RLP_STRICT.wrap(RLPEncoder.string(Strings.decode("k0WZ\0", UTF_8)));
+        final int dataLen = item.dataLength;
+
+        final ByteBuffer data = item.dataBuffer();
+
+        assertEquals(0, data.position());
+
+        assertEquals(dataLen, data.remaining());
+        assertEquals('k', data.get());
+        assertEquals('0', data.get());
+        assertEquals('W', data.get());
+        assertEquals('Z', data.get());
+        assertEquals('\0', data.get());
+
+        final ByteBuffer enc = item.encodingBuffer();
+        assertEquals(item.encodingLength(), enc.remaining());
+        assertEquals((byte) (0x80 + dataLen), enc.get());
+        assertEquals('k', enc.get());
+
+        assertEquals(dataLen, data.position());
+        assertEquals(dataLen, data.limit());
+        assertEquals('k', data.get(0));
+        assertThrown(BufferUnderflowException.class, () -> {
+            data.rewind();
+            for(int i = 0; i <= dataLen; i++) {
+                data.get();
+            }
+        });
+        assertThrown(IndexOutOfBoundsException.class, () -> data.get(dataLen));
+    }
+
+    @Test
+    void testReadOnlyBufs() throws Throwable {
+        final RLPItem item = RLP_STRICT.wrap(RLPEncoder.string(Strings.decode("%+", UTF_8)));
+        testReadOnlyBuf(item.dataBuffer());
+        testReadOnlyBuf(item.encodingBuffer());
+    }
+
+    private static void testReadOnlyBuf(final ByteBuffer data) throws Throwable {
+        data.clear();
+        assertEquals(0, data.position());
+        data.limit(1).flip();
+        assertEquals(0, data.limit());
+
+        assertThrown(IndexOutOfBoundsException.class, () -> data.get(-1));
+        assertThrown(BufferUnderflowException.class, () -> data.get(new byte[1]));
+        assertThrown(ReadOnlyBufferException.class, () -> data.put((byte) 0xff));
+        assertThrown(ReadOnlyBufferException.class, data::compact);
+        assertThrown(ReadOnlyBufferException.class, data::array);
+        assertThrown(ReadOnlyBufferException.class, () -> data.put(0, (byte) 0));
+
+        final ByteBuffer slice = data.slice();
+        assertTrue(slice.isReadOnly());
+        assertThrown(ReadOnlyBufferException.class, () -> slice.put((byte) 0));
+        assertTrue(slice.isReadOnly());
+
+        assertTrue(data.isReadOnly());
     }
 }
