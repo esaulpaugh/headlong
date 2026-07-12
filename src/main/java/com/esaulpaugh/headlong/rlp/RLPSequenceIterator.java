@@ -60,7 +60,7 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPSequenceIterator */
         try {} finally {
-            super.finalize();
+//            super.finalize();
         }
     }
 }

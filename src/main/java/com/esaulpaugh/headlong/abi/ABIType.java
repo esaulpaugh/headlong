@@ -371,7 +371,7 @@ public abstract class ABIType<J> {
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class ABIType */
         try {} finally {
-            super.finalize();
+//            super.finalize();
         }
     }
 }

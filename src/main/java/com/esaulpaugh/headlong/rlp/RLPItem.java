@@ -341,7 +341,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPItem */
         try {} finally {
-            super.finalize();
+//            super.finalize();
         }
     }
 }

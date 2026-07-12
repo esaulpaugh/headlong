@@ -253,7 +253,7 @@ public class Tuple implements Iterable<Object> {
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class Tuple */
         try {} finally {
-            super.finalize();
+//            super.finalize();
         }
     }
 }
