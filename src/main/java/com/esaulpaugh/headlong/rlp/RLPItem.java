@@ -113,6 +113,16 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return Arrays.copyOfRange(buffer, dataIndex, endIndex);
     }
 
+    public final ByteBuffer dataBuffer() {
+        return ByteBuffer.wrap(buffer, dataIndex, dataLength)
+                .asReadOnlyBuffer();
+    }
+
+    public final ByteBuffer encodingBuffer() {
+        return ByteBuffer.wrap(buffer, index, encodingLength())
+                .asReadOnlyBuffer();
+    }
+
     /**
      * Inserts this item's RLP encoding into the specified buffer, starting at {@code destIndex} (inclusive) and ending
      * at {@code destIndex} plus {@link RLPItem#encodingLength()} (exclusive).
