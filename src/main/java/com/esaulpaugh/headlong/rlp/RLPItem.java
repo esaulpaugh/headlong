@@ -115,11 +115,13 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     public final ByteBuffer dataBuffer() {
         return ByteBuffer.wrap(buffer, dataIndex, dataLength)
+                .slice()
                 .asReadOnlyBuffer();
     }
 
     public final ByteBuffer encodingBuffer() {
         return ByteBuffer.wrap(buffer, index, encodingLength())
+                .slice()
                 .asReadOnlyBuffer();
     }
 
