@@ -37,7 +37,7 @@ public final class RLPEncoder {
         for (KVP pair : sorted) {
             sum += pair.rlp.length;
         }
-        return requireNoOverflow(sum);
+        return Math.toIntExact(sum);
     }
 
     static byte[] encodeRecordContent(byte[] seqBytes, Iterable<KVP> sorted, int dataLen) {
@@ -66,13 +66,6 @@ public final class RLPEncoder {
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static int requireNoOverflow(long length) {
-        if (length >= 0L && length <= Integer.MAX_VALUE) {
-            return (int) length;
-        }
-        throw new ArithmeticException("integer overflow");
-    }
-
     private static boolean isShort(int dataLen) {
         return dataLen < MIN_LONG_DATA_LEN;
     }
@@ -82,7 +75,7 @@ public final class RLPEncoder {
         for (Object raw : rawItems) {
             sum += encodedLen(raw);
         }
-        return requireNoOverflow(sum);
+        return Math.toIntExact(sum);
     }
 
     private static int encodedLen(Object raw) {

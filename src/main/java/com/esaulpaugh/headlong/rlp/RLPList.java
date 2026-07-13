@@ -47,10 +47,11 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
      * @return the list
      */
     public static RLPList wrap(Iterable<RLPItem> elements) {
-        int dataLen = 0;
+        long dataLenLong = 0L;
         for (RLPItem e : elements) {
-            dataLen += e.encodingLength();
+            dataLenLong += e.encodingLength();
         }
+        final int dataLen = Math.toIntExact(dataLenLong);
         return RLPDecoder.RLP_STRICT.wrapList(
                 dataLen < DataType.MIN_LONG_DATA_LEN
                         ? encodeListShort(dataLen, elements)
