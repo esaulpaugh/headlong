@@ -25,7 +25,7 @@
   <property name="compiler.encoding" value="UTF-8" />
   <property name="compiler.debug" value="true" />
   <property name="compiler.deprecation" value="false" />
-  <property name="compiler.max.memory" value="700m" />
+  <property name="compiler.max.memory" value="96m" />
 
   <!-- Dependency Versions -->
   <property name="gson.version" value="2.14.0" />
