@@ -548,7 +548,7 @@ public class TupleTest {
         TupleType<Triple<Boolean, Tuple[], String>> tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
         Triple<Boolean, Tuple[], String> args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
-        System.out.println(Strings.encode(bb));
+        System.out.println(TestUtils.encode(bb));
         String ya = tt.decode(bb, 2);
         assertEquals("ya", ya);
     }
@@ -558,7 +558,7 @@ public class TupleTest {
         TupleType<Triple<Boolean, boolean[][], String[][]>> tt = TupleType.parse("(bool,bool[3][2],string[][])");
         Triple<Boolean, boolean[][], String[][]> args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
-        System.out.println(Strings.encode(bb));
+        System.out.println(TestUtils.encode(bb));
         String[][] s = tt.decode(bb, 2);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "wooo", "moo" } }, s));
     }

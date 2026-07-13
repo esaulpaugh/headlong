@@ -61,7 +61,7 @@ public class StringsTest {
         final int len = bb.capacity();
         final int pos = RAND.nextInt(len + 1);
         bb.position(pos);
-        final String hex = Strings.encode(bb);
+        final String hex = TestUtils.encode(bb);
         assertEquals(pos, bb.position());
         assertEquals(len * 2, hex.length());
         for (int i = 0; i < len; i += 2) {

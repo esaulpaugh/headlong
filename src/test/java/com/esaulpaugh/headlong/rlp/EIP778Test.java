@@ -52,6 +52,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -482,7 +483,7 @@ public class EIP778Test {
                 new KVP(ID, "v4", UTF_8),
                 new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX));
 
-        assertEquals(RECORD_HEX, Strings.encode(bb));
+        assertEquals(RECORD_HEX, TestUtils.encode(bb));
     }
 
     @Test

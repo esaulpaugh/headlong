@@ -530,9 +530,9 @@ public class EncodeTest {
 
         final String xorStr = Strings.encode(xor);
 
-        System.out.println(Strings.encode(full));
+        System.out.println(TestUtils.encode(full));
         System.out.println("^");
-        System.out.println(Strings.encode(empty));
+        System.out.println(TestUtils.encode(empty));
         System.out.println("=");
         System.out.println(xorStr);
 
@@ -557,7 +557,7 @@ public class EncodeTest {
         assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
         assertEquals(
                 "0000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
-                Strings.encode(ee)
+                TestUtils.encode(ee)
         );
     }
 

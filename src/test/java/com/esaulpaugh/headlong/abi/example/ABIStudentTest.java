@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi.example;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.Quintuple;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -38,8 +39,8 @@ public class ABIStudentTest {
         final ByteBuffer reencoded = TYPE.encode(tuple);
         assertArrayEquals(studentAbi.array(), reencoded.array());
 
-        System.out.println(Strings.encode(reencoded));
-        System.out.println(Strings.encode(TYPE.encodePacked(mikhail.toTuple())));
+        System.out.println(TestUtils.encode(reencoded));
+        System.out.println(TestUtils.encode(TYPE.encodePacked(mikhail.toTuple())));
         System.out.println(mikhail);
     }
 }

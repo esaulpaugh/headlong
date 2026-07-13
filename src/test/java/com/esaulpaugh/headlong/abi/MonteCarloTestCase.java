@@ -206,7 +206,7 @@ public class MonteCarloTestCase {
         jsonObject.add("name", new JsonPrimitive(name));
         jsonObject.add("types", Serializer.serializeTypes(f.getInputs(), gson));
         jsonObject.add("values", Serializer.serializeValues(this.argsTuple, gson));
-        jsonObject.add("result", new JsonPrimitive("0x" + Strings.encode(abi)));
+        jsonObject.add("result", new JsonPrimitive("0x" + TestUtils.encode(abi)));
         jsonObject.add("version", version);
 
         return jsonObject;

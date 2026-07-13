@@ -32,6 +32,7 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -612,5 +613,16 @@ public final class TestUtils {
     @FunctionalInterface
     public interface ParallelRun {
         void run() throws InterruptedException, ExecutionException, TimeoutException;
+    }
+
+    public static String encode(ByteBuffer buf) {
+        if (buf.hasArray()) {
+            return Strings.encode(buf.array());
+        } else {
+            final int pos = buf.position();
+            byte[] bytes = new byte[buf.position(0).limit()];
+            buf.get(bytes).position(pos);
+            return Strings.encode(bytes);
+        }
     }
 }
