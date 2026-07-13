@@ -56,6 +56,7 @@ public final class FastHex {
     }
 
     public static byte[] encodeToBytes(byte[] buffer, int offset, int len) {
+        if (offset < 0 || (long)offset + len > buffer.length) throw new IllegalArgumentException("out of bounds");
         byte[] bytes = new byte[len * CHARS_PER_BYTE];
         encodeBytes(buffer, offset, len, bytes, 0);
         return bytes;
