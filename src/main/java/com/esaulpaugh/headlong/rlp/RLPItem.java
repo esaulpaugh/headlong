@@ -95,32 +95,26 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return endIndex - index;
     }
 
-    /**
-     * Returns this item's RLP encoding.
-     *
-     * @return  this item's bytes, including prefix
-     */
+    /** Returns this item's RLP encoding (including prefix). */
     public final byte[] encoding() {
         return Arrays.copyOfRange(buffer, index, endIndex);
     }
 
-    /**
-     * Returns the payload portion of this item only, and not the prefix.
-     *
-     * @return  the data part of the encoding
-     */
-    public final byte[] data() {
-        return Arrays.copyOfRange(buffer, dataIndex, endIndex);
-    }
-
-    public final ByteBuffer dataBuffer() {
-        return ByteBuffer.wrap(buffer, dataIndex, dataLength)
+    /** Returns a zero-indexed read-only view of this item's RLP encoding. */
+    public final ByteBuffer encodingBuffer() {
+        return ByteBuffer.wrap(buffer, index, encodingLength())
                 .slice()
                 .asReadOnlyBuffer();
     }
 
-    public final ByteBuffer encodingBuffer() {
-        return ByteBuffer.wrap(buffer, index, encodingLength())
+    /** Returns the payload portion of this item (i.e. without prefix). */
+    public final byte[] data() {
+        return Arrays.copyOfRange(buffer, dataIndex, endIndex);
+    }
+
+    /** Returns a zero-indexed read-only view of this item's data. */
+    public final ByteBuffer dataBuffer() {
+        return ByteBuffer.wrap(buffer, dataIndex, dataLength)
                 .slice()
                 .asReadOnlyBuffer();
     }
