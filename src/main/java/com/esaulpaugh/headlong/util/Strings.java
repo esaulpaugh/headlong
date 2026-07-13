@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
