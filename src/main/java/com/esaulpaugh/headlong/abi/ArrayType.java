@@ -157,6 +157,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int byteCount(Object value) {
+//        return !isString() ? ((byte[]) value).length : ((String) value).encodedLength(StandardCharsets.UTF_8); // Java 27+
         return decodeIfString(value).length;
     }
 
