@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.nio.ByteBuffer;
+
 /** A tuple with four values. */
 public final class Quadruple<A, B, C, D> extends Tuple {
 
@@ -22,21 +24,25 @@ public final class Quadruple<A, B, C, D> extends Tuple {
         super(values);
     }
 
+    /** @return the element at index 0, or {@code null} if this tuple resulted from {@link TupleType#decode(ByteBuffer, int...)} and index 0 was omitted. */
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];
     }
 
+    /** @return the element at index 1, or {@code null} if this tuple resulted from {@link TupleType#decode(ByteBuffer, int...)} and index 1 was omitted. */
     @SuppressWarnings("unchecked")
     public B get1() {
         return (B) elements[1];
     }
 
+    /** @return the element at index 2, or {@code null} if this tuple resulted from {@link TupleType#decode(ByteBuffer, int...)} and index 2 was omitted. */
     @SuppressWarnings("unchecked")
     public C get2() {
         return (C) elements[2];
     }
 
+    /** @return the element at index 3, or {@code null} if this tuple resulted from {@link TupleType#decode(ByteBuffer, int...)} and index 3 was omitted. */
     @SuppressWarnings("unchecked")
     public D get3() {
         return (D) elements[3];

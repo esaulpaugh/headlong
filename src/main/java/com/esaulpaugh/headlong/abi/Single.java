@@ -29,6 +29,7 @@ public final class Single<A> extends Tuple {
         return new Single<>(new Object[] { Tuple.requireNotNull(a, 0) });
     }
 
+    /** @return the element at index 0, or {@code null} if this tuple resulted from {@link TupleType#decode(java.nio.ByteBuffer, int...)} and index 0 was omitted. */
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];
