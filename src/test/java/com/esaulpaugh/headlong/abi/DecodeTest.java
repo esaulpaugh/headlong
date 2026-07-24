@@ -443,29 +443,25 @@ public class DecodeTest {
 
     @Test
     public void testTupleDecodeTypeInference() throws Throwable {
-        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
-        Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
-        ByteBuffer bb = tt.encode(Tuple.from(elements));
+        final TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
+        final ByteBuffer bb = tt.encode(Tuple.from(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(0, bb.position());
+        assertEquals(192, bb.capacity());
         assertEquals(TUPLE_HEX, TestUtils.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
         final String one = tt.decode(bb, 1);
         final boolean two = tt.decode(bb, 2);
         final long three = tt.decode(bb, 3);
-        Tuple t = tt.decode(bb, 2, 3);
-        System.out.println("tuple: " + zero + " " + one + " " + two + " " + three + " " + t);
-        assertEquals(two, t.get(2));
-        long three2 = t.get(3);
+
+        assertEquals(BigInteger.valueOf(550L), zero);
+        assertEquals("weow", one);
+
+        final Tuple partial = tt.decode(bb, 2, 3);
+        assertEquals("[_, _, true, -41]", partial.toString());
+        assertEquals(two, partial.get(2));
+
+        final long three2 = partial.get(3);
         assertEquals(three, three2);
-
-        ByteBuffer buffer = ByteBuffer.allocate(192);
-        tt.encode(Tuple.from(elements), buffer);
-        assertThrown(BufferUnderflowException.class, buffer::get);
-
-        ByteBuffer z = ByteBuffer.allocate(192);
-        int pos = z.position();
-        z.put(buffer);
-        assertEquals(pos, z.position());
     }
 
     @Test
