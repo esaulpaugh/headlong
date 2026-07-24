@@ -442,9 +442,9 @@ public class DecodeTest {
             "77656f7700000000000000000000000000000000000000000000000000000000";
 
     @Test
-    public void testTupleDecodeTypeInference() throws Throwable {
-        final TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
-        final ByteBuffer bb = tt.encode(Tuple.from(BigInteger.valueOf(550L), "weow", true, -41L));
+    public void testTupleDecodeTypeInference() {
+        final TupleType<Quadruple<BigInteger, String, Boolean, Long>> tt = TupleType.parse("(int,string,bool,int64)");
+        final ByteBuffer bb = tt.encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(0, bb.position());
         assertEquals(192, bb.capacity());
         assertEquals(TUPLE_HEX, TestUtils.encode(bb));
@@ -458,32 +458,38 @@ public class DecodeTest {
 
         final Tuple partial = tt.decode(bb, 2, 3);
         assertEquals("[_, _, true, -41]", partial.toString());
-        assertEquals(two, partial.get(2));
-
+        final boolean two2 = partial.get(2);
+        assertEquals(two, two2);
         final long three2 = partial.get(3);
         assertEquals(three, three2);
     }
 
     @Test
     public void testFunctionDecodeTypeInference() {
-        Function f = Function.parse("f()", "(int,string,bool,int64)");
-        ByteBuffer bb = f.getOutputs().encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
+        final Function f = Function.parse("f()", "(int,string,bool,int64)");
+        final TupleType<Quadruple<BigInteger, String, Boolean, Long>> outputs = f.getOutputs();
+        final ByteBuffer bb = outputs.encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(TUPLE_HEX, TestUtils.encode(bb));
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);
         final boolean two = f.decodeReturn(bb, 2);
         final long three = f.decodeReturn(bb, 3);
-        Tuple t = f.decodeReturn(bb, 0, 3);
-        System.out.println("function: " + zero + " " + one + " " + two + " " + three + " " + t);
-        assertEquals(zero, t.get(0));
-        long three2 = t.get(3);
+
+        assertEquals("weow", one);
+        assertTrue(two);
+
+        final Tuple partial = f.decodeReturn(bb, 0, 3);
+        assertEquals("[550, _, _, -41]", partial.toString());
+        final BigInteger zero2 = partial.get(0);
+        assertEquals(zero, zero2);
+        final long three2 = partial.get(3);
         assertEquals(three, three2);
     }
 
     @Test
     public void testBadIndices() throws Throwable {
-        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
-        ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
+        final TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
+        final ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
