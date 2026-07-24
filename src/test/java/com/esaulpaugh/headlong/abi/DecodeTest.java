@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -488,30 +489,26 @@ public class DecodeTest {
 
     @Test
     public void testBadIndices() throws Throwable {
-        final TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
+        final TupleType<Quadruple<BigInteger, String, Boolean, Long>> tt = TupleType.parse("(int,string,bool,int64)");
         final ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
-        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
-        final Tuple decoded = tt.decode(bb, new int[0]);
+        final Quadruple<BigInteger, String, Boolean, Long> decoded = tt.decode(bb, new int[0]);
         assertEquals(new Tuple(null, null, null, null), decoded);
         assertEquals("[_, _, _, _]", decoded.toString());
         assertEquals("[_, _, \"_\", \\_]", new Tuple(null, null, "_", '_').toString());
         final int size = decoded.size();
         for (int i = 0; i < size; i++) {
             assertFalse(decoded.elementIsPresent(i));
+            assertNotNull(tt.decode(bb, i));
         }
-
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, -571));
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, -1));
-        for (int i = 0; i < 4; i++) {
-            tt.decode(bb, i);
-        }
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 4));
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 64));
 
-        Tuple t = tt.decode(bb, 1, 2);
-        assertEquals("[_, \"weow\", true, _]", t.toString());
+        final Tuple partial = tt.decode(bb, 1, 2);
+        assertEquals("[_, \"weow\", true, _]", partial.toString());
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
         assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }
