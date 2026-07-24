@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,7 +81,7 @@ public class DecodeTest {
           + "7730307400000000000000000000000000000000000000000000000000000001"
     );
 
-    private static final Tuple RETURN_VALS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+    private static final Pair<BigDecimal, String> RETURN_VALS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
     public void testLenient() {
@@ -443,7 +444,7 @@ public class DecodeTest {
             "77656f7700000000000000000000000000000000000000000000000000000000";
 
     @Test
-    public void testTupleDecodeTypeInference() {
+    public void testTupleDecodeTypeInference() throws Throwable {
         final TupleType<Quadruple<BigInteger, String, Boolean, Long>> tt = TupleType.parse("(int,string,bool,int64)");
         final ByteBuffer bb = tt.encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(0, bb.position());
@@ -457,7 +458,11 @@ public class DecodeTest {
         assertEquals(BigInteger.valueOf(550L), zero);
         assertEquals("weow", one);
 
-        final Tuple partial = tt.decode(bb, 2, 3);
+        final Quadruple<Void, Void, Boolean, Long> partial = tt.decode(bb, 2, 3);
+        assertNull(partial.get0());
+        assertNull(partial.get1());
+        assertThrown(NoSuchElementException.class, "0", () -> partial.get(0));
+        assertThrown(NoSuchElementException.class, "1", () -> partial.get(1));
         assertEquals("[_, _, true, -41]", partial.toString());
         final boolean two2 = partial.get(2);
         assertEquals(two, two2);
@@ -479,7 +484,7 @@ public class DecodeTest {
         assertEquals("weow", one);
         assertTrue(two);
 
-        final Tuple partial = f.decodeReturn(bb, 0, 3);
+        final Quadruple<BigInteger, Void, Void, Long> partial = f.decodeReturn(bb, 0, 3);
         assertEquals("[550, _, _, -41]", partial.toString());
         final BigInteger zero2 = partial.get(0);
         assertEquals(zero, zero2);
@@ -982,7 +987,7 @@ public class DecodeTest {
         assertEquals(f, f3);
         assertEquals(f, f4);
 
-        final Tuple args = Single.of(new byte[] { 9, 100 });
+        final Single<byte[]> args = Single.of(new byte[] { 9, 100 });
         final ByteBuffer bb = f.encodeCall(args);
         assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
 
