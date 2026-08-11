@@ -59,7 +59,7 @@ val sourcesJar by tasks.creating(Jar::class) {
     from(sourceSets["main"].allSource)
 }
 
-tasks.named("assemble") {
+tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(javadocJar, sourcesJar)
 }
 
@@ -139,7 +139,7 @@ val jmh by tasks.creating(JavaExec::class) {
     classpath = sourceSets["jmh"].compileClasspath + sourceSets["jmh"].runtimeClasspath
 }
 
-tasks.named("classes") {
+tasks.named(JavaPlugin.CLASSES_TASK_NAME) {
     finalizedBy("jmhClasses")
 }
 
