@@ -238,9 +238,9 @@ public final class RLPDecoder {
         };
     }
 
-    /** Iterator-based stream for single-threaded use only. */
+    /** Creates a sequential stream from an {@link Iterator}. */
     public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, ORDERED | NONNULL | IMMUTABLE), false);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, ORDERED | NONNULL), false);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) {
