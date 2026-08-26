@@ -45,8 +45,6 @@ import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
-import static java.util.Spliterator.NONNULL;
-import static java.util.Spliterator.ORDERED;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
@@ -237,12 +235,7 @@ public final class RLPDecoder {
         };
     }
 
-    /** Creates a sequential stream from the given channel's RLP sequence. */
-    public Stream<RLPItem> stream(ReadableByteChannel channel) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(sequenceIterator(channel), ORDERED | NONNULL), false);
-    }
-
-    /** Creates a sequential stream from an {@link Iterator}. */
+    /** Creates a sequential stream from an {@link Iterator}. No characteristics (e.g. {@code ORDERED}, {@code NONNULL}, {@code IMMUTABLE}) are assumed about the source. */
     public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, 0), false);
     }
