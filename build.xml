@@ -32,7 +32,7 @@
   <property name="junit.jupiter.version" value="5.11.4" />
   <property name="junit.standalone.version" value="1.11.4" />
   <property name="opentest4j.version" value="1.3.0" />
-  <property name="bcprov.version" value="1.84" />
+  <property name="bcprov.version" value="1.85.2" />
 
   <!-- Maven Repository Paths -->
   <property name="maven.repo" value="${user.home}/.m2/repository" />
@@ -54,7 +54,7 @@
 
   <!-- Bouncy Castle -->
   <property name="maven.bcprov" value="${maven.repo}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
-  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/f73db2404dcdaeaafe386497c7df7d5b743a6606/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/e5842aec46f81c4f2d7824390acb43e8bd18c283/bcprov-jdk14-${bcprov.version}.jar" />
 
   <!-- Standalone -->
   <property name="maven.standalone" value="${maven.repo}/org/junit/platform/junit-platform-console-standalone/${junit.standalone.version}/junit-platform-console-standalone-${junit.standalone.version}.jar" />

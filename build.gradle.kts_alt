@@ -88,7 +88,7 @@ repositories {
 
 val junitVersion = "5.11.4"
 val junitPlatformVersion = "1.11.4"
-val bcVersion = "1.84"
+val bcVersion = "1.85.2"
 val jmhVersion = "1.37"
 
 dependencies {
@@ -153,7 +153,7 @@ val artifactsToPublish = listOf(
     "com.google.code.gson:gson:2.14.0",
     "org.junit.platform:junit-platform-console-standalone:1.11.4",
     "org.junit.jupiter:junit-jupiter-api:5.11.4",
-    "org.bouncycastle:bcprov-jdk14:1.84",
+    "org.bouncycastle:bcprov-jdk14:1.85.2",
     "org.openjdk.jmh:jmh-core:1.37",
     "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 )
