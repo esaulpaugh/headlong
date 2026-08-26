@@ -240,7 +240,7 @@ public final class RLPDecoder {
 
     /** Creates a sequential stream from an {@link Iterator}. */
     public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, ORDERED | NONNULL), false);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, 0), false);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) {
