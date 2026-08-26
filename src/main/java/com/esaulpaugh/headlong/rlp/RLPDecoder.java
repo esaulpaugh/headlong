@@ -236,8 +236,8 @@ public final class RLPDecoder {
     }
 
     /** Creates a sequential stream from an {@link Iterator}. No characteristics (e.g. {@code ORDERED}, {@code NONNULL}, {@code IMMUTABLE}) are assumed about the source. */
-    public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, 0), false);
+    public static Stream<RLPItem> stream(Iterator<RLPItem> source) {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(source, 0), false);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) {
