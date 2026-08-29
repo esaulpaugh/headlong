@@ -218,7 +218,7 @@ public class Tuple implements Iterable<Object> {
      * @return  a shallow copy of the elements array
      */
     public final Object[] toArray() {
-        return Arrays.copyOf(elements, elements.length);
+        return elements.clone();
     }
 
     private static Object deepCopyElement(Object e) {
@@ -229,20 +229,16 @@ public class Tuple implements Iterable<Object> {
                 return copy(ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));
             }
             if (e instanceof byte[]) {
-                final byte[] bytes = (byte[]) e;
-                return Arrays.copyOf(bytes, bytes.length);
+                return ((byte[]) e).clone();
             }
             if (e instanceof int[]) {
-                final int[] ints = (int[]) e;
-                return Arrays.copyOf(ints, ints.length);
+                return ((int[]) e).clone();
             }
             if (e instanceof long[]) {
-                final long[] longs = (long[]) e;
-                return Arrays.copyOf(longs, longs.length);
+                return ((long[]) e).clone();
             }
             if (e instanceof boolean[]) {
-                final boolean[] booleans = (boolean[]) e;
-                return Arrays.copyOf(booleans, booleans.length);
+                return ((boolean[]) e).clone();
             }
             throw new IllegalArgumentException(); // float[], double[], char[], short[]
         }
