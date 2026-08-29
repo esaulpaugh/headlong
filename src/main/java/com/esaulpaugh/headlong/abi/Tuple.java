@@ -218,7 +218,7 @@ public class Tuple implements Iterable<Object> {
      * @return  a shallow copy of the elements array
      */
     public final Object[] toArray() {
-        return elements.clone();
+        return Arrays.copyOf(elements, elements.length);
     }
 
     private static Object deepCopyElement(Object e) {
