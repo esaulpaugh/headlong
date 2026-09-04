@@ -254,6 +254,8 @@ public class StringsTest {
         chars[0] = '0';
         chars[1] = 256;
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", r);
+
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 2", () -> FastHex.decode("ab", 0, 4));
     }
 
     private static boolean validHex(int c) {
