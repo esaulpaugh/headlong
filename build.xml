@@ -168,6 +168,7 @@
     <copy todir="${build.test.dir}">
       <fileset dir="${src.test.resources.dir}" >
         <patternset refid="ignored.files" />
+        <patternset refid="compiler.resources" />
       </fileset>
     </copy>
   </target>
@@ -175,11 +176,7 @@
   <target name="test" depends="compile-tests" description="Run unit tests" unless="skip.tests">
     <java classname="org.junit.platform.console.ConsoleLauncher" fork="true" failonerror="true">
         <classpath>
-            <pathelement location="${build.main.dir}" />
-            <pathelement location="${build.test.dir}" />
-            <pathelement location="${standalone}" />
-            <pathelement location="${gson}" />
-            <pathelement location="${bcprov}" />
+            <path refid="test.runtime.classpath" />
         </classpath>
         <arg value="--scan-classpath" />
         <arg value="--disable-banner" />
