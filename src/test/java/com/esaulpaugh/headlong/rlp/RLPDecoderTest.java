@@ -1056,16 +1056,24 @@ public class RLPDecoderTest {
     public void testSizeLimit() throws Throwable {
         final Random r = TestUtils.seededRandom();
         final CustomChannel channel = new CustomChannel();
-        final byte[] initialBuffer = new byte[8050];
-        TestUtils.seededRandom().nextBytes(initialBuffer);
-        for (int i = 0; i < 3; i++) {
-            final byte[] string = RLPEncoder.string(new byte[8192 + r.nextInt(10_000)]);
-            final int maxResize = r.nextInt(string.length);
+        for (int i = 0; i < 300; i++) {
+            final byte[] initialBuffer = new byte[r.nextInt(20)];
+            r.nextBytes(initialBuffer);
+
+            final byte[] string = RLPEncoder.string(new byte[20 + r.nextInt(8200)]);
+
+            final int shortfall = 1 + r.nextInt(8);
+            final int maxResize = string.length - shortfall;
+
             channel.setAvailableBytes(string);
-            final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, maxResize, 200_000L, false);
+            Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, maxResize, 200_000L, false);
             final String msg = "resize would exceed limit: " + string.length + " > " + maxResize;
             assertThrown(UncheckedIOException.class, msg, iter::hasNext);
             assertThrown(UncheckedIOException.class, msg, iter::next);
+
+            channel.setAvailableBytes(string);
+            iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, string.length, 200_000L, false);
+            assertNotNull(iter.next());
         }
     }
 
