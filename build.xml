@@ -88,7 +88,7 @@
 
   <path id="test.classpath">
     <pathelement location="${build.main.dir}" />
-    <pathelement location="${gson}" />
+    <path refid="compile.classpath" />
     <pathelement location="${junit-api}" />
     <pathelement location="${opentest4j}" />
     <pathelement location="${bcprov}" />
