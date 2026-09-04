@@ -121,7 +121,7 @@ public final class FastHex {
             if (b >= 0) {
                 return b;
             }
-        } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException c) {
+        } catch (IndexOutOfBoundsException c) { // AIOOBE | SIOOBE
             cause = c;
         }
         throw new IllegalArgumentException("illegal hex val @ " + (left < 0 ? offset : offset + 1), cause);

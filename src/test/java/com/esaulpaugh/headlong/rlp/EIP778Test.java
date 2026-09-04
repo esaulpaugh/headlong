@@ -405,10 +405,6 @@ public class EIP778Test {
                 new KVP(UDP, "0000", HEX)
         );
 
-        for (KVP p : pairs) {
-            System.out.println(p);
-        }
-
         assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(SIGNER, seq, pairs));
     }
 
