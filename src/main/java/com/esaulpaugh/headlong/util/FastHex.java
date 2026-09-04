@@ -116,8 +116,8 @@ public final class FastHex {
         int left = -1;
         try {
             left = DECODE_TABLE[extractor.applyAsInt(offset)];
-            int right = DECODE_TABLE[extractor.applyAsInt(offset + 1)];
-            int b = (left << BITS_PER_CHAR) + right;
+            final int right = DECODE_TABLE[extractor.applyAsInt(offset + 1)];
+            final int b = (left << BITS_PER_CHAR) + right;
             if (b >= 0) {
                 return b;
             }

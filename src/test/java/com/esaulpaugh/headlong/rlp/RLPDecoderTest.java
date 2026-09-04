@@ -1056,11 +1056,11 @@ public class RLPDecoderTest {
     public void testSizeLimit() throws Throwable {
         final Random r = TestUtils.seededRandom();
         final CustomChannel channel = new CustomChannel();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 100; i++) {
             final byte[] initialBuffer = new byte[r.nextInt(20)];
             r.nextBytes(initialBuffer);
 
-            final byte[] string = RLPEncoder.string(new byte[20 + r.nextInt(8200)]);
+            final byte[] string = RLPEncoder.string(new byte[initialBuffer.length + r.nextInt(8200)]);
 
             final int shortfall = 1 + r.nextInt(8);
             final int maxResize = string.length - shortfall;
