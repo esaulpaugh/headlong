@@ -208,7 +208,7 @@ public final class TestUtils {
     }
 
     public static void shuffle(Object[] arr, Random rand) {
-        for (int i = arr.length; i > 0; ) {
+        for (int i = arr.length; i > 1; ) {
             int idx = rand.nextInt(i);
             Object e = arr[idx];
             arr[idx] = arr[--i];
