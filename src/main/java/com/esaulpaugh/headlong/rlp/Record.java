@@ -125,7 +125,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
         checkRecordLen(bytes.length);
-        final RLPList rlpList = RLP_STRICT.wrapList(Arrays.copyOf(bytes, bytes.length)); // defensive copy
+        final RLPList rlpList = RLP_STRICT.wrapList(bytes.clone()); // defensive copy
         if (rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
