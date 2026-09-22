@@ -46,6 +46,10 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     }
 
     public static ByteBuffer encode(Signer signer, final long seq, List<KVP> pairs) {
+        return _encode(signer, seq, pairs).asReadOnlyBuffer();
+    }
+
+    private static ByteBuffer _encode(Signer signer, final long seq, List<KVP> pairs) {
         final int signatureLen = signer.signatureLength();
         if (signatureLen <= 1) {
             throw new InvalidParameterException("signer specifies bad signature length: " + signatureLen);
@@ -84,7 +88,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     }
 
     public Record(Signer signer, long seq, List<KVP> pairs) {
-        this(seq, RLP_STRICT.wrapList(encode(signer, seq, pairs).array()));
+        this(seq, RLP_STRICT.wrapList(_encode(signer, seq, pairs).array()));
     }
 
     private Record(long seq, RLPList recordRLP) { // validate before calling
