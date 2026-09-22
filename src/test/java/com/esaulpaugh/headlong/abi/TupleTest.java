@@ -57,7 +57,7 @@ public class TupleTest {
 
     @Test
     public void metaTest1() throws InterruptedException, ExecutionException, TimeoutException {
-        final int parallelism = 24;
+        final int parallelism = 12;
         final boolean unsigned = true;
 
         for (int bitLen = 0; bitLen < 22; bitLen++) {
@@ -710,7 +710,7 @@ public class TupleTest {
 
     @Test
     public void testTupleEquals() {
-        assertEquals(Tuple.EMPTY, new Tuple());
+        testEquals(Tuple.EMPTY, new Tuple());
 
         final Single<byte[]> s = Single.of(new byte[0]);
         final Pair<byte[], String> p = Tuple.of(new byte[1], "75");
@@ -756,11 +756,13 @@ public class TupleTest {
 
     private static void testEquals(Tuple a, Tuple b) {
         assertEquals(a.hashCode(), b.hashCode());
-        assertEquals(a, b);
         assertEquals(a.toString(), b.toString());
-        assertEquals(a.deepCopy(), b.deepCopy());
-        assertNotSame(a, a.deepCopy());
-        assertNotSame(b, b.deepCopy());
+        assertEquals(a, b);
+        Tuple a_ = a.deepCopy();
+        Tuple b_ = b.deepCopy();
+        assertEquals(a_, b_);
+        assertNotSame(a, a_);
+        assertNotSame(b, b_);
     }
 
     @Test
