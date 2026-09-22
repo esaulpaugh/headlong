@@ -56,16 +56,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TupleTest {
 
     @Test
-    public void metaTest1() throws InterruptedException, ExecutionException, TimeoutException {
-        final int parallelism = 12;
-        final boolean unsigned = true;
+    public void metaTest1() throws ExecutionException, InterruptedException, TimeoutException {
+        final boolean unsigned = (TestUtils.getSeed() & (1L << 60)) != 0;
+        testUniformLong(12, unsigned);
+        testUniformLong(12, !unsigned);
+    }
 
-        for (int bitLen = 0; bitLen < 22; bitLen++) {
+    private static void testUniformLong(final int parallelism, final boolean unsigned) throws ExecutionException, InterruptedException, TimeoutException {
+        for (int bitLen = 0; bitLen < 21; bitLen++) {
             final long pow = (long) Math.pow(2.0, bitLen);
             final long powMinus1 = pow - 1;
             final long samples = pow * (bitLen / 2 + 14);
             final long taskSamples = 1 + samples / parallelism;
-            System.out.println("bitLen=" + bitLen + ", samples=" + samples);
+//            System.out.println("bitLen=" + bitLen + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             {
                 final long[] b = new long[a.length];
