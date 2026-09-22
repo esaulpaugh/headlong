@@ -466,7 +466,7 @@ public class TupleTest {
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(2));
     }
 
-    private static void testNameOverwrite(String typeStr, String aName, String cName) {
+    private static void testNameOverwrite(final String typeStr, final String aName, final String cName) {
         assertNotEquals(aName, cName);
 
         final TupleType<?> a = TypeFactory.createTupleTypeWithNames(typeStr, aName);
@@ -481,37 +481,23 @@ public class TupleTest {
         assertNull(b.getElementName(0));
         assertEquals(cName, c.getElementName(0));
 
-        assertNotEquals(aName, cName);
+        final TupleType<?> _x = TypeFactory.createTupleTypeWithNames(typeStr, aName);
+        assertEquals(aName, _x.getElementName(0));
 
-        final TupleType<?> x = wrap(new String[] { aName }, a.get(0));
-        assertEquals(aName, x.getElementName(0));
-
-        final TupleType<?> y = wrap(null, b.get(0));
-        assertEquals(aName, x.getElementName(0));
-        assertNull(y.getElementName(0));
-
-        final TupleType<?> z = wrap(new String[] { cName }, c.get(0));
-        assertEquals(aName, x.getElementName(0));
-        assertNull(y.getElementName(0));
-        assertEquals(cName, z.getElementName(0));
-    }
-
-    private static TupleType<?> wrap(String[] elementNames, ABIType<?>... elements) {
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
-        boolean dynamic = false;
-        int flags = ABIType.FLAGS_UNSET;
-        for (ABIType<?> e : elements) {
-            canonicalBuilder.append(e.canonicalType).append(',');
-            dynamic |= e.isDynamic();
-            if (e.getFlags() != flags) {
-                if (flags == ABIType.FLAGS_UNSET) {
-                    flags = e.getFlags();
-                } else {
-                    throw new IllegalArgumentException();
-                }
-            }
+        final TupleType<?> _y = TypeFactory.createTupleTypeWithNames(typeStr, (String[])null);
+        {
+            assertEquals(aName, _x.getElementName(0));
         }
-        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, null, flags);
+        assertNull(_y.getElementName(0));
+
+        final TupleType<?> _z = TypeFactory.createTupleTypeWithNames(typeStr, cName);
+        {
+            assertEquals(aName, _x.getElementName(0));
+        }
+        {
+            assertNull(_y.getElementName(0));
+        }
+        assertEquals(cName, _z.getElementName(0));
     }
 
     @Test
