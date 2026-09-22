@@ -1089,7 +1089,7 @@ public class RLPDecoderTest {
         // zero-length buffer + maxBufferResize=0 → buffer exhausted (sentinel path)
         channel.setAvailableBytes(RLPEncoder.string(new byte[10]));
         Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, new byte[0], 0, 200_000L, false);
-        assertThrown(UncheckedIOException.class, "buffer exhausted; resize would be 0", iter::hasNext);
+        assertThrown(UncheckedIOException.class, "buffer exhausted; resize would be of size 0", iter::hasNext);
     }
 
     private static byte[] rlpList(Random r) {
