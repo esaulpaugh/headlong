@@ -54,13 +54,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
             throw new IllegalArgumentException("negative seq");
         }
 
-        pairs.sort((a, b) -> {
-            int cmp = a.key.compareTo(b.key);
-            if (cmp == 0) {
-                throw duplicateKeyErr(a.key);
-            }
-            return cmp;
-        });
+        sort(pairs);
 
         final byte[] seqBytes = Integers.toBytes(seq);
         final int payloadLen = RLPEncoder.payloadLen(seqBytes, pairs); // content list prefix not included
@@ -241,6 +235,27 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         final byte[] arr = bb.array();
         System.arraycopy(rlpList.buffer, index, arr, bb.position(), contentDataLen);
         return arr;
+    }
+
+    static void sort(List<KVP> list) {
+        final int len = list.size();
+        for (int j = 1; j < len; j++) {
+            KVP v = list.get(j), v2;
+            int i = j - 1;
+            for ( ; i >= 0; i--) {
+                v2 = list.get(i);
+                int cmp = v.compareTo(v2);
+                if (cmp < 0) {
+                    list.set(i + 1, v2);
+                    continue;
+                }
+                if (cmp == 0) {
+                    throw duplicateKeyErr(v.key);
+                }
+                break;
+            }
+            list.set(i + 1, v);
+        }
     }
 
     private static IllegalArgumentException duplicateKeyErr(RLPString key) {
