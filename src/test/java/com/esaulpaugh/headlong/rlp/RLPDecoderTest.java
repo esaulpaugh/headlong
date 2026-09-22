@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.BufferOverflowException;
@@ -1057,13 +1058,13 @@ public class RLPDecoderTest {
         final Random r = TestUtils.seededRandom();
         final CustomChannel channel = new CustomChannel();
         for (int i = 0; i < 100; i++) {
-            final byte[] initialBuffer = new byte[r.nextInt(20)];
+            final byte[] initialBuffer = new byte[1 + r.nextInt(20)];
             r.nextBytes(initialBuffer);
 
-            final byte[] string = RLPEncoder.string(new byte[initialBuffer.length + r.nextInt(8200)]);
+            final byte[] string = RLPEncoder.string(new byte[initialBuffer.length + 1 + r.nextInt(8200)]);
 
             final int shortfall = 1 + r.nextInt(8);
-            final int maxResize = string.length - shortfall;
+            final int maxResize = Math.max(0, string.length - shortfall);
 
             channel.setAvailableBytes(string);
             Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, maxResize, 200_000L, false);
@@ -1075,6 +1076,20 @@ public class RLPDecoderTest {
             iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, string.length, 200_000L, false);
             assertNotNull(iter.next());
         }
+    }
+
+    @Test
+    public void testEdgeCases() throws Throwable {
+        final CustomChannel channel = new CustomChannel();
+
+        // negative maxBufferResize → fail fast at the API boundary
+        assertThrown(IllegalArgumentException.class, "negative maxBufferResize: -1",
+                () -> RLP_STRICT.sequenceIterator(channel, new byte[4], -1, 200_000L, false));
+
+        // zero-length buffer + maxBufferResize=0 → buffer exhausted (sentinel path)
+        channel.setAvailableBytes(RLPEncoder.string(new byte[10]));
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, new byte[0], 0, 200_000L, false);
+        assertThrown(UncheckedIOException.class, "buffer exhausted; resize would be 0", iter::hasNext);
     }
 
     private static byte[] rlpList(Random r) {

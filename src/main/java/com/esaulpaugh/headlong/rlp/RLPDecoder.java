@@ -155,6 +155,9 @@ public final class RLPDecoder {
      */
     public Iterator<RLPItem> sequenceIterator(final ReadableByteChannel channel, byte[] initialBuffer, final int maxBufferResize, final long maxDelayNanos, boolean interruptible) {
         Objects.requireNonNull(channel);
+        if (maxBufferResize < 0) {
+            throw new IllegalArgumentException("negative maxBufferResize: " + maxBufferResize);
+        }
         if (interruptible && !(channel instanceof InterruptibleChannel)) {
             throw new IllegalArgumentException("interruptible=true requires an InterruptibleChannel");
         }
@@ -203,7 +206,7 @@ public final class RLPDecoder {
                         }
                         // assert bytesRead == 0;
                         if (bytesRead != 0) {
-                            throw new IOException("misreported read result: " + bytesRead);
+                            throw new IOException(bytesRead == Integer.MAX_VALUE ? "buffer exhausted; resize would be of size " + maxBufferResize : "misreported read result: " + bytesRead);
                         }
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
