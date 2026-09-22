@@ -162,7 +162,7 @@ public final class TestUtils {
         if (unsigned) {
             if (bitLength >= Long.SIZE - 1) {
                 if (bitLength == Long.SIZE - 1) {
-                    return val < 0 ? ~val : val;
+                    return val ^ (val >> 63);
                 }
                 throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
             }
@@ -174,8 +174,8 @@ public final class TestUtils {
             }
             throw new IllegalArgumentException("too many bits for signed: " + bitLength);
         }
-        final long maskedUnsigned = val & ((1L << (bitLength - 1)) - 1); // r.nextLong(1L << (bitLength - 1));
-        return r.nextBoolean() ? ~maskedUnsigned : maskedUnsigned;
+        final long mag = val & ((1L << (bitLength - 1)) - 1);
+        return mag ^ (val >> 63);
     }
 
     public static long uniformLong(Random r, final long limit) {
