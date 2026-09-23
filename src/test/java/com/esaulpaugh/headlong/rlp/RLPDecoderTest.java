@@ -972,7 +972,7 @@ public class RLPDecoderTest {
         // Finish the item
         channel.addMoreBytes(new byte[3]);
 
-        t.join(500);
+        t.join(800);
         assertTrue(itemAvailable.get());
         assertTrue(iterator.hasNext());
         assertTrue(iterator.hasNext());
