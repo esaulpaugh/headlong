@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 import java.util.function.IntConsumer;
 import java.util.function.LongSupplier;
@@ -1067,7 +1066,7 @@ public class DecodeTest {
     @Test
     public void testDecodeLong() throws InterruptedException, ExecutionException, TimeoutException {
         final IntConsumer task = (int id) -> {
-            final Random r = ThreadLocalRandom.current();
+            final Random r = TestUtils.seededRandom();
             final BigIntegerType writer256 = TypeFactory.create("int256");
             for (int bitWidth = 8; bitWidth <= 64; bitWidth += 8) {
                 final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;

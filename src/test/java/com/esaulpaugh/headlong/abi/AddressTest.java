@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -57,7 +56,7 @@ public class AddressTest {
 
     @Test
     public void testGeneratedChecksums() {
-        final ThreadLocalRandom r = ThreadLocalRandom.current();
+        final Random r = TestUtils.seededRandom();
         testAddress(new Address(BigInteger.valueOf(TestUtils.wildLong(r, true, 63))).toString(), null);
         testAddress(new Address(BigInteger.valueOf(TestUtils.uniformLong(r, true, 63))).toString(), null);
         testAddress(new Address(TestUtils.wildBigInteger(r, true, 160)).toString(), null);

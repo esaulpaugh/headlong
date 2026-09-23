@@ -324,14 +324,15 @@ public class EIP778Test {
 
     @Test
     public void testSortRecords() {
-        final String sorted = "0,1,50,52,99,101,";
+        final String sorted = "0,1,3,50,52,99,101,";
         final Record[] records = new Record[] {
                 VECTOR.with(SIGNER, 101L),
                 VECTOR.with(SIGNER, 52L, new KVP(UDP, EMPTY_BYTE_ARRAY)),
                 VECTOR.with(SIGNER, 50L, new KVP("ÜDP", EMPTY_BYTE_ARRAY)),
-                VECTOR,
+                VECTOR, // seq 1
                 VECTOR.with(SIGNER, 99L),
-                VECTOR.with(SIGNER, 0L)
+                VECTOR.with(SIGNER, 0L),
+                VECTOR.with(SIGNER, 3L, new KVP(UDP, EMPTY_BYTE_ARRAY))
         };
         assertNotEquals(sorted, toSeqString(records));
 
@@ -339,7 +340,7 @@ public class EIP778Test {
         assertEquals(sorted, toSeqString(records));
 
         TestUtils.shuffle(records, TestUtils.seededRandom());
-        assertNotEquals(sorted, toSeqString(records));
+        assertNotEquals(sorted, toSeqString(records)); // may fail once in 5040 runs
 
         Arrays.sort(records);
         assertEquals(sorted, toSeqString(records));

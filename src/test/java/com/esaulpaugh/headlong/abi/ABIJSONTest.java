@@ -1312,6 +1312,9 @@ public class ABIJSONTest {
         assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":false,\"anonymous\":true}"));
         assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":true,\"anonymous\":false}"));
         assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":true,\"anonymous\":true}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":true,\"anonymous\":null}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":false,\"anonymous\":null}"));
+        assertThrown(IllegalStateException.class, "Expected a boolean but was NULL", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":null,\"anonymous\":null}"));
 
         assertThrown(IllegalStateException.class, "duplicate field: type", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"\",\"inputs\":[{\"type\":\"string\",\"type\":\"bool\"}]}"));
         assertThrown(IllegalStateException.class, "duplicate field: components", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"type\":\"tuple\",\"components\":[],\"components\":[]}]}"));
