@@ -162,11 +162,11 @@ public final class TestUtils {
             }
             throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
         }
-        if (bitLength > Long.SIZE) {
-            throw new IllegalArgumentException("too many bits for signed: " + bitLength);
+        if (bitLength <= Long.SIZE) {
+            final int shift = Long.SIZE - bitLength;
+            return (val << shift) >> shift;
         }
-        final int shift = Long.SIZE - bitLength;
-        return (val << shift) >> shift;
+        throw new IllegalArgumentException("too many bits for signed: " + bitLength);
     }
 
     public static long uniformLong(Random r, final long limit) {
