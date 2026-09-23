@@ -135,7 +135,7 @@ public class TupleTest {
     public void metaTest2() throws Throwable {
         final Random r = new Random();
         assertEquals(0L, uniformLong(null, false, 0));
-        assertEquals(0L, uniformLong(null, true, 0));
+        assertEquals(0L, uniformLong(r, true, 0));
         assertEquals(0L, wildLong(r, false, 0));
         assertEquals(0L, wildLong(r, true, 0));
 

@@ -152,19 +152,18 @@ public final class TestUtils {
     }
 
     public static long uniformLong(Random r, boolean unsigned, int bitLength) {
-        if (bitLength == 0) {
-            return 0L;
-        }
-        final long val = r.nextLong();
         if (unsigned) {
             if (bitLength < Long.SIZE) {
-                return val & ((1L << bitLength) - 1);
+                return r.nextLong() & ((1L << bitLength) - 1);
             }
             throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
         }
         if (bitLength <= Long.SIZE) {
+            if (bitLength == 0) {
+                return 0L;
+            }
             final int shift = Long.SIZE - bitLength;
-            return (val << shift) >> shift;
+            return (r.nextLong() << shift) >> shift;
         }
         throw new IllegalArgumentException("too many bits for signed: " + bitLength);
     }
