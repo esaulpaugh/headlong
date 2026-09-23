@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.abi.Address;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.GsonBuilder;
@@ -38,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -107,16 +105,15 @@ public final class TestUtils {
     /**
      * Use {@link java.security.SecureRandom} instead.
      *
-     * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
+     * @param proto arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
      * @return  a short (64-bit), low-quality, non-deterministic seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
-    public static long getSeed(long protoseed) {
-        protoseed ^= 0x3636363636363636L;
+    public static long getSeed(long proto) {
+        final ThreadLocalRandom rand = ThreadLocalRandom.current();
         final Runtime runtime = Runtime.getRuntime();
         final Thread t = Thread.currentThread();
-        final ThreadLocalRandom rand = ThreadLocalRandom.current();
         final long[] vals = new long[] {
-                System.nanoTime(),          protoseed,                  Double.doubleToLongBits(rand.nextDouble()),
+                System.nanoTime(),          proto ^ 0x3636363636363636L,Double.doubleToLongBits(rand.nextDouble()),
                 System.currentTimeMillis(), rand.nextLong(),            Double.doubleToLongBits(Math.random()),
                 new Object().hashCode(),    runtime.freeMemory(),       System.identityHashCode(new String()),
                 t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt() >> 22),
@@ -272,7 +269,7 @@ public final class TestUtils {
 
     public static void printAndReset(StringBuilder sb) {
         System.out.println(sb.toString());
-        sb.delete(0, sb.length());
+        sb.setLength(0); //        sb.delete(0, sb.length());
     }
 
     public static String readFileResourceAsString(String resourceName) throws IOException {
