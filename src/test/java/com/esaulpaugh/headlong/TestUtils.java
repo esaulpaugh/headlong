@@ -180,7 +180,7 @@ public final class TestUtils {
         long sample;
         do {
             sample = r.nextLong();
-            sample ^= (sample >> 63);
+            sample ^= sample >> 63;
         } while (sample >= bound);
         return sample % limit;
     }
