@@ -138,11 +138,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     final long decodeSignedLong(ByteBuffer bb) {
         final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
-        if ((a | b | c) == 0L) {
-            if (Long.numberOfLeadingZeros(d) - (Long.SIZE - bitLength) > 0) {
-                return d;
-            }
-        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) - (Long.SIZE - bitLength) > 0) {
+        final long sign = d >> 63;
+        if (a == sign && b == sign && c == sign
+                && Long.numberOfLeadingZeros(d ^ sign) - (Long.SIZE - bitLength) > 0) {
             return d;
         }
         throw err(bb);
