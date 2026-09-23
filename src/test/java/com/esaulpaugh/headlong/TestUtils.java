@@ -239,12 +239,35 @@ public final class TestUtils {
     }
 
     @SuppressWarnings("deprecation")
-    public static String generateASCIIString(final int len, Random r) {
+    public static String generateASCIIString(int len, Random r) {
         byte[] bytes = new byte[len];
         for (int i = 0; i < len; i++) {
             bytes[i] = (byte) (r.nextInt(95) + 32);
         }
         return new String(bytes, 0, 0, len);
+    }
+
+    public static String generateUtf8String(int len, Random r) {
+        final StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            final int codePoint;
+            switch (1 + r.nextInt(4)) {
+            case 4: // 4-byte (U+10000..U+10FFFF)
+                codePoint = 0x10000 + r.nextInt(0x10FFFF - 0x10000 + 1);
+                break;
+            case 3: // 3-byte (U+0800..U+FFFF, excluding surrogates)
+                int offset = r.nextInt(61440); // 0x0800..0xD7FF (53,248) + 0xE000..0xFFFF (8,192)
+                codePoint = (offset < 53248) ? (0x0800 + offset) : (0xE000 + (offset - 53248));
+                break;
+            case 2: // 2-byte (U+0080..U+07FF)
+                codePoint = 0x80 + r.nextInt(0x800 - 0x80);
+                break;
+            default: // ASCII
+                codePoint = r.nextInt(0x80); // 0..127
+            }
+            sb.appendCodePoint(codePoint);
+        }
+        return sb.toString();
     }
 
     public static void printAndReset(StringBuilder sb) {

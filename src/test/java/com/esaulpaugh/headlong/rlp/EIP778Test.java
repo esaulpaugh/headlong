@@ -507,7 +507,7 @@ public class EIP778Test {
     @Test
     public void testWithValue() {
         final Random r = TestUtils.seededRandom();
-        final String keyStr = generateUtf8String(r.nextInt(128), r);
+        final String keyStr = TestUtils.generateUtf8String(r.nextInt(128), r);
         final KVP base = new KVP(keyStr, new byte[] { -2, (byte)keyStr.hashCode(), 77, 60 });
 
         final byte[] baseRLPCopy = Arrays.copyOf(base.rlp, base.rlp.length);

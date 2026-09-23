@@ -968,7 +968,7 @@ public class DecodeTest {
         checkLegacyFlags(f2.getInputs());
         checkLegacyFlags(f2.getOutputs());
 
-        final Function f3 = new ABIParser(ABIType.FLAG_LEGACY_DECODE)
+        final Function f3 = new ABIParser(ABIType.FLAG_LEGACY_DECODE, ABIJSON.FUNCTIONS)
                 .parse(arrayJson)
                 .get(0)
                 .asFunction();
@@ -1040,17 +1040,11 @@ public class DecodeTest {
         checkLegacyFlags(leg.getInputs());
         checkLegacyFlags(leg.getOutputs());
 
-        class StringGenerator {
-            public String generateUtf8String(int len, Random r) {
-                return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
-            }
-        }
-
-        final Random r = ThreadLocalRandom.current();
+        final Random r = TestUtils.seededRandom();
 
         for (int i = 0; i < 20; i++) {
 
-            final String inputStr = new StringGenerator().generateUtf8String(r.nextInt(550), r);
+            final String inputStr = TestUtils.generateUtf8String(r.nextInt(260), r);
 
             final ByteBuffer encoded = norm.encodeCallWithArgs(inputStr);
 
