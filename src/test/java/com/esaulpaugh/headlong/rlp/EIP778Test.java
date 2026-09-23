@@ -24,15 +24,19 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.KVP.CLIENT;
@@ -52,6 +56,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -187,54 +192,139 @@ public class EIP778Test {
         );
     }
 
-    private static String generateUtf8String(final int len, Random r) {
-        final StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            final int codePoint;
-            switch (r.nextInt(3)) {
-            case 0: // ASCII
-                codePoint = r.nextInt(0x80); // 0..127
-                break;
-            case 1: // 2-byte (U+0080..U+07FF)
-                codePoint = 0x80 + r.nextInt(0x800 - 0x80);
-                break;
-            default: // 3-byte (U+0800..U+FFFF, excluding surrogates)
-                codePoint = 0x0800 + r.nextInt(0xFFFF - 0x0800 + 1);
-                if (Character.isSurrogate((char) codePoint)) {
-                    sb.appendCodePoint(0x0800); // replace surrogate with valid code point
-                    continue;
+    @Test
+    public void testComparePairs() {
+        final Random r = TestUtils.seededRandom();
+        testCompare(16, j -> TestUtils.generateASCIIString(j, r));
+        testCompare(16, j -> TestUtils.generateUtf8String(j, r));
+
+        assertCompare("\uFFFF\ud800\udc00", "\ud800\udc00\uFFFF");
+        assertCompare("\uFFFF", "\ud800\udc00");
+
+        String a = "\uFFFF";
+        String b = "\uD800\uDC00";
+
+        final KVP pairA = new KVP(a, a.getBytes(StandardCharsets.UTF_8));
+        final KVP pairB = new KVP(b, b.getBytes(StandardCharsets.UTF_8));
+
+        assertNotEquals(Integer.signum(a.compareTo(b)), Integer.signum(pairA.compareTo(pairB)));
+    }
+
+    private static void testCompare(final int maxLen, IntFunction<String> generator) {
+        for (int lenA = 0; lenA <= maxLen; lenA++) {
+            for (int lenB = 0; lenB <= maxLen; lenB++) {
+                for (int sample = 0; sample < 4; sample++) {
+                    final String a = generator.apply(lenA);
+                    final String b = generator.apply(lenB);
+                    assertCompare(a, b);
                 }
-                break;
             }
-            sb.appendCodePoint(codePoint);
         }
-        return sb.toString();
+    }
+
+    private static void assertCompare(String a, String b) {
+        final KVP pairA = new KVP(a, a.getBytes(StandardCharsets.UTF_8));
+        final KVP pairB = new KVP(b, b.getBytes(StandardCharsets.UTF_8));
+        byte[] ba = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bb = b.getBytes(StandardCharsets.UTF_8);
+        int expectedA = codePointOrderSignum(a, b);
+        int expectedB = Integer.signum(utf8LexicographicComp(ba, bb));
+        int actual    = Integer.signum(pairA.compareTo(pairB));
+        assertEquals(expectedA, actual, "Failed for a='" + a + "' [" + debug(a) + "], b='" + b + "' [" + debug(b) + "]");
+        assertEquals(expectedB, actual, "Failed for a='" + a + "' [" + debug(a) + "], b='" + b + "' [" + debug(b) + "]");
+    }
+
+    private static String debug(String s) {
+        StringBuilder sb = new StringBuilder();
+        s.codePoints().forEach(cp -> sb.append(String.format("U+%04X ", cp)));
+        return sb.toString().trim();
+    }
+
+    private static int codePointOrderSignum(String a, String b) {
+        PrimitiveIterator.OfInt ia = a.codePoints().iterator();
+        PrimitiveIterator.OfInt ib = b.codePoints().iterator();
+        while (true) {
+            boolean ea = ia.hasNext(), eb = ib.hasNext();
+            if (!ea && !eb) return 0;
+            if (!ea) return -1;
+            if (!eb) return 1;
+            int ix = ia.next(), bx = ib.next();
+//            int d = ix - bx;
+            int e = Integer.compare(ix, bx);
+            if (e != 0) return e;
+        }
+    }
+
+    private static int utf8LexicographicComp(byte[] a, byte[] b) {
+        final int n = Math.min(a.length, b.length);
+        for (int i = 0; i < n; i++) {
+            int d = (a[i] & 0xFF) - (b[i] & 0xFF);  // unsigned
+            if (d != 0) {
+                return d;
+            }
+        }
+        return a.length - b.length;
     }
 
     @Test
-    public void testSortPairs() {
+    public void testSortKVPList() {
         final Random r = TestUtils.seededRandom();
-        testSort(50, j -> TestUtils.generateASCIIString(j, r));
-        testSort(50, j -> generateUtf8String(j, r));
+
+        List<KVP> empty = new ArrayList<>();
+        Record.sort(empty);
+        assertTrue(empty.isEmpty());
+
+        List<KVP> single = new ArrayList<>();
+        single.add(new KVP("Ü", "", ASCII));
+        Record.sort(single);
+        assertEquals("Ü", single.get(0).key().asString(UTF_8));
+        final int[] sizes = new int[] { 2, 3, 10, 30, 50, 100 };
+        for (int size : sizes) {
+            List<KVP> list = randomKVPs(size, () -> TestUtils.generateASCIIString(1 + r.nextInt(10), r));
+            Record.sort(list);
+            assertStrictlySorted(list);
+        }
+        for (int size : sizes) {
+            List<KVP> list = randomKVPs(size, () -> TestUtils.generateUtf8String(1 + r.nextInt(10), r));
+            Record.sort(list);
+            assertStrictlySorted(list);
+        }
     }
 
-    private static void testSort(final int n, IntFunction<String> generator) {
-        for (int len = 0; len < n; len++) {
-            for (int i = 0; i < n; i++) {
-                final String a = generator.apply(len);
-                final String b = generator.apply(len);
-                if (!a.equals(b)) {
-                    final KVP pairA = new KVP(a, a.getBytes(StandardCharsets.UTF_8));
-                    final KVP pairB = new KVP(b, b.getBytes(StandardCharsets.UTF_8));
-                    assertEquals(Integer.signum(a.compareTo(b)), Integer.signum(pairA.compareTo(pairB)), "Failed for a='" + a + "', b='" + b + "'");
-                }
+    @Test
+    public void testSortListRejectsDuplicates() throws Throwable {
+        List<KVP> list = new ArrayList<>();
+        list.add(new KVP("k", new byte[]{1}));
+        list.add(new KVP("k", new byte[]{2}));
+        assertThrown(IllegalArgumentException.class, "duplicate key: k", () -> Record.sort(list));
+    }
+
+    private static List<KVP> randomKVPs(final int size, Supplier<String> ss) {
+        final Set<String> used = new HashSet<>(size * 2);
+        final List<KVP> list = new ArrayList<>(size);
+        while (list.size() < size) {
+            String key = ss.get();
+            if (used.add(key)) {
+                list.add(new KVP(key, "\0VAL" + size, UTF_8));
             }
         }
+        return list;
+    }
+
+    private static void assertStrictlySorted(final List<KVP> list) {
+        for (int i = 1; i < list.size(); i++) {
+            assertTrue(list.get(i - 1).compareTo(list.get(i)) < 0,
+                    "out of order at index " + i + ": '"
+                            + list.get(i - 1).key() + "' >= '" + list.get(i).key() + "'");
+        }
+        List<KVP> copy = new ArrayList<>(list);
+        Collections.sort(copy);
+        assertEquals(list, copy);
     }
 
     @Test
     public void testSortRecords() {
-        final Random r = TestUtils.seededRandom();
+        final String sorted = "0,1,50,52,99,101,";
         final Record[] records = new Record[] {
                 VECTOR.with(SIGNER, 101L),
                 VECTOR.with(SIGNER, 52L, new KVP(UDP, EMPTY_BYTE_ARRAY)),
@@ -243,13 +333,24 @@ public class EIP778Test {
                 VECTOR.with(SIGNER, 99L),
                 VECTOR.with(SIGNER, 0L)
         };
-        TestUtils.shuffle(records, r);
+        assertNotEquals(sorted, toSeqString(records));
+
         Arrays.sort(records);
-        final StringBuilder sb = new StringBuilder();
+        assertEquals(sorted, toSeqString(records));
+
+        TestUtils.shuffle(records, TestUtils.seededRandom());
+        assertNotEquals(sorted, toSeqString(records));
+
+        Arrays.sort(records);
+        assertEquals(sorted, toSeqString(records));
+    }
+
+    private static String toSeqString(Record[] records) {
+        StringBuilder sb = new StringBuilder();
         for (Record e : records) {
             sb.append(e.getSeq()).append(',');
         }
-        assertEquals("0,1,50,52,99,101,", sb.toString());
+        return sb.toString();
     }
 
     @Test
@@ -326,6 +427,7 @@ public class EIP778Test {
 
     private static void testEqual(KVP a, KVP b) {
         assertNotSame(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
         assertTrue(a.equals(b));
         assertTrue(b.equals(a));
     }
@@ -406,6 +508,9 @@ public class EIP778Test {
         );
 
         assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(SIGNER, seq, pairs));
+
+        Record with = VECTOR.with(SIGNER, 808L, new KVP(UDP, "0009", HEX));
+        assertEquals(4, with.orderedMap().size());
     }
 
     @Test
@@ -416,6 +521,9 @@ public class EIP778Test {
             assertEquals(4, map.size());
             assertEquals(808L, with.getSeq());
             assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP).asBytes());
+            LinkedHashMap<String, RLPItem> vectorMap = VECTOR.orderedMap();
+            assertEquals(4, vectorMap.size());
+            assertArrayEquals(Strings.decode("765f", HEX), vectorMap.get(UDP).asBytes());
         }
 
         Record with = VECTOR.with(SIGNER, 4L, new KVP(TCP6, "656934", HEX));
@@ -423,6 +531,9 @@ public class EIP778Test {
         LinkedHashMap<String, RLPItem> map = with.orderedMap();
         assertEquals(5, map.size());
         assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6).asBytes());
+        LinkedHashMap<String, RLPItem> vectorMap = VECTOR.orderedMap();
+        assertEquals(4, vectorMap.size());
+        assertArrayEquals(Strings.decode("765f", HEX), vectorMap.get(UDP).asBytes());
     }
 
     @Test
@@ -434,6 +545,7 @@ public class EIP778Test {
         assertEquals(6, map.size());
         assertEquals(Long.MAX_VALUE, with.getSeq());
         assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6).asBytes());
+        assertArrayEquals(Strings.decode("ff00ff00", HEX), map.get(IP6).asBytes());
 
         TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key: tcp", () -> with.with(SIGNER, 0L, new KVP(TCP, "blah", ASCII), new KVP(TCP, "bleh", ASCII)));
     }
@@ -519,17 +631,30 @@ public class EIP778Test {
         assertEquals(base.key, RLPDecoder.RLP_STRICT.wrapString(baseRLPCopy));
         assertEquals(base.value(), RLPDecoder.RLP_STRICT.wrap(baseRLPCopy, baseKeyCopy.endIndex));
 
+        final int[] rlpBoundaries = {
+                0, 1, DataType.MIN_LONG_DATA_LEN - 1, DataType.MIN_LONG_DATA_LEN, DataType.MIN_LONG_DATA_LEN + 1,
+                (1 << 8) - 1, (1 << 8), (1 << 8) + 1,
+                1024,
+                (1 << 16) - 1, (1 << 16), (1 << 16) + 1
+        };
+
         KVP newBase = base;
-        for (int i = 0; i < 128; i++) {
+        for (int len : rlpBoundaries) {
             for (int j = 0; j < 8; j++) {
-                byte[] val = new byte[i];
+                byte[] val = new byte[len];
                 r.nextBytes(val);
                 final byte[] valCopy = Arrays.copyOf(val, val.length);
                 KVP with = newBase.withValue(val);
+
+                // mutation test
+                if (len > 0) {
+                    val[0]++;
+                    assertNotEquals(val[0], with.value().asBytes()[0]);
+                }
                 val = null;
+                assertArrayEquals(valCopy, with.value().asBytes());
 
                 assertArrayEquals(baseRLPCopy, base.rlp);
-                assertArrayEquals(valCopy, with.value().asBytes());
                 assertEquals(keyStr, base.key().asString(Strings.UTF_8));
                 assertEquals(keyStr, with.key().asString(Strings.UTF_8));
                 assertEquals(baseKeyCopy, with.key());
@@ -544,5 +669,8 @@ public class EIP778Test {
                 newBase = with;
             }
         }
+        assertEquals(keyStr, newBase.key().asString(Strings.UTF_8));
+        assertNotSame(base, newBase);
+        assertArrayEquals(baseRLPCopy, base.rlp);
     }
 }
