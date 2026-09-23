@@ -157,13 +157,10 @@ public final class TestUtils {
         }
         final long val = r.nextLong();
         if (unsigned) {
-            if (bitLength >= Long.SIZE - 1) {
-                if (bitLength == Long.SIZE - 1) {
-                    return val ^ (val >> 63);
-                }
-                throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
+            if (bitLength < Long.SIZE) {
+                return val & ((1L << bitLength) - 1);
             }
-            return val & ((1L << bitLength) - 1);
+            throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
         }
         if (bitLength >= Long.SIZE) {
             if (bitLength == Long.SIZE) {
