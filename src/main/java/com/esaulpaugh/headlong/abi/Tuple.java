@@ -176,6 +176,7 @@ public class Tuple implements Iterable<Object> {
 
     @Override
     public final String toString() {
+        if (isEmpty()) return "[]";
         return Arrays.deepToString(copy(new Object[elements.length], i -> {
             Object element = elements[i];
             if (element == null) return "_";

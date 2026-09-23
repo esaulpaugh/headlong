@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -74,7 +73,7 @@ public class TupleTest {
                 final long[] b = new long[a.length];
                 final int bits = bitLen;
                 TestUtils.parallelRun(parallelism, 1_000L, (int i) -> {
-                    final ThreadLocalRandom r = ThreadLocalRandom.current();
+                    final Random r = TestUtils.seededRandom();
                     final long[] dest = i % 2 == 0 ? a : b;
                     for (long s = 0; s < taskSamples; s++) {
                         final long z = uniformLong(r, unsigned, bits) & powMinus1;
@@ -740,10 +739,11 @@ public class TupleTest {
         testEquals(q5, t5);
         testEquals(s6, t6);
         testEquals(n, t7);
-        testEquals(z, t8);
+        assertSame(z, t8);
     }
 
     private static void testEquals(Tuple a, Tuple b) {
+        assertNotSame(a, b);
         assertEquals(a.hashCode(), b.hashCode());
         assertEquals(a.toString(), b.toString());
         assertEquals(a, b);
@@ -752,6 +752,54 @@ public class TupleTest {
         assertEquals(a_, b_);
         assertNotSame(a, a_);
         assertNotSame(b, b_);
+    }
+
+    @Test
+    public void toStringUnderscoreEscaping() {
+        abstract class U {
+            @Override public String toString() { return "_"; }
+        }
+        final Tuple t = new Tuple(new U(){}, new Object() {@Override public String toString() { return "\\_"; }}, "_", "\\_", null);
+        final String five = "[\\_, \\_, \"_\", \"\\_\", _]";
+        assertEquals(five, t.toString());
+        assertEquals("[" + five + "]", new Tuple(new Tuple(t.toArray())).toString());
+        assertEquals("[[" + five + "]]", new Tuple(new Tuple(new Tuple(t.toArray()))).toString());
+        assertEquals("[_]", new Tuple((Object)null).toString());
+    }
+
+    @Test
+    public void testToString() throws Throwable {
+        assertSame("[]", Tuple.EMPTY.toString());
+        assertSame("[]", new Tuple().toString());
+        assertEquals("[[[1, -2147483648], [], [2147483647]]]", new Tuple((Object) new int[][]{{1, Integer.MIN_VALUE}, {}, {Integer.MAX_VALUE}}).toString());
+        assertEquals("[\"a\", _]", new Tuple("a", null).toString());
+        assertEquals("[[a, null]]", new Tuple((Object) new String[]{"a", null}).toString());
+        assertEquals("[[[], [null]]]", new Tuple((Object) new Object[]{new Object[0], new Object[]{null}}).toString());
+        assertEquals("[[], [], [], []]", new Tuple(new int[0], new boolean[0], new long[0], new byte[0]).toString());
+        assertEquals("[[2.1, -1.0], [1.5, 2.0], [a, b], [1, 2]]",
+                new Tuple(new float[]{2.1f, -1.0f}, new double[]{1.5, 2.0}, new char[]{'a', 'b'}, new short[]{1, 2}).toString());
+        {
+            final Tuple t = new Tuple(
+                    new int[]{0, -1, 2, 5, 99, 100, 101},
+                    "_",
+                    null,
+                    "",
+                    new boolean[]{true, false},
+                    new BigInteger[]{BigInteger.ONE, BigInteger.valueOf(999L)},
+                    new long[]{-1L, Long.MIN_VALUE, 0L, 10L},
+                    new byte[]{0, '1', ' '},
+                    new BigDecimal[]{new BigDecimal(BigInteger.ZERO, 6)});
+            String exp = "[[0, -1, 2, 5, 99, 100, 101], \"_\", _, \"\", [true, false], [1, 999], [-1, -9223372036854775808, 0, 10], [0, 49, 32], [0.000000]]";
+            assertEquals(exp, t.toString());
+        }
+
+        Object[] a = new Object[1];
+        a[0] = a; // add cycle
+        Tuple cyclic = Tuple.of(a, "x");
+
+        assertEquals("[[[...]], \"x\"]", cyclic.toString()); // test no StackOverflowError
+        final Tuple invalid = new Tuple((Object[])null);
+        assertThrown(NullPointerException.class, invalid::toString);
     }
 
     @Test
