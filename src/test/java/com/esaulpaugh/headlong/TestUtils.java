@@ -318,89 +318,12 @@ public final class TestUtils {
         return url;
     }
 
-    public static byte[] parsePrimitiveToBytes(JsonElement in) {
-        try {
-            return Integers.toBytes(parseLong(in));
-        } catch (NumberFormatException | IllegalStateException e) {
-            String inString = in.getAsString();
-            if (inString.startsWith("#")) {
-                return parseBigInteger(in).toByteArray();
-            } else {
-                return parseBytes(inString);
-            }
-        }
-    }
-
-    public static List<Object> parseArrayToBytesHierarchy(final JsonArray array) {
-        List<Object> arrayList = new ArrayList<>();
-        for (JsonElement element : array) {
-            if (element.isJsonArray()) {
-                arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
-            } else if (element.isJsonPrimitive()) {
-                arrayList.add(parsePrimitiveToBytes(element));
-            } else {
-                throw new Error("unexpected element type");
-            }
-        }
-        return arrayList;
-    }
-
-    public static long[] parseLongArray(final JsonArray array) {
-        final int size = array.size();
-        long[] longs = new long[size];
-        for (int i = 0; i < size; i++) {
-            JsonElement element = array.get(i);
-            if (element.isJsonPrimitive()) {
-                longs[i] = parseLong(element);
-            } else {
-                throw new Error("unexpected element type");
-            }
-        }
-        return longs;
-    }
-
-    public static byte[] parseBytes(String utf8) {
-        return Strings.decode(utf8, Strings.UTF_8);
-    }
-
-    public static byte[] parseBytesX(String string, int x) {
-        if (string.length() == x) {
-            byte[] bytesX = new byte[x];
-            for (int i = 0; i < x; i++) {
-                bytesX[i] = (byte) string.charAt(i);
-            }
-            return bytesX;
-        } else {
-            return Strings.decode(string);
-        }
-    }
-
     public static JsonObject parseObject(String json) {
         return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonObject();
     }
 
     public static JsonArray parseArray(String json) {
         return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonArray();
-    }
-
-    public static String parseString(JsonElement in) {
-        return in.getAsString();
-    }
-
-    public static BigInteger parseBigInteger(JsonElement in) {
-        return new BigInteger(parseString(in), 10);
-    }
-
-    public static BigInteger parseBigIntegerStringPoundSign(JsonElement in) {
-        return new BigInteger(parseString(in).substring(1), 10);
-    }
-
-    public static long parseLong(JsonElement in) {
-        return in.getAsLong();
-    }
-
-    public static Address parseAddress(JsonElement in) {
-        return Address.wrap(Address.toChecksumAddress(parseString(in)));
     }
 
     /** Asserts that the arguments are either both true or both false. */
@@ -577,13 +500,6 @@ public final class TestUtils {
 
     public static String toPrettyPrint(JsonElement element) {
         return new GsonBuilder().setPrettyPrinting().create().toJson(element);
-    }
-
-    public static String completeTupleTypeString(StringBuilder sb) {
-        final int len = sb.length();
-        if (len == 1) return "()";
-        sb.setCharAt(len - 1, ')'); // replace trailing comma
-        return sb.toString();
     }
 
     public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {

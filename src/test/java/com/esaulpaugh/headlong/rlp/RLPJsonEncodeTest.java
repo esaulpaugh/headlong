@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
@@ -27,13 +28,12 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.esaulpaugh.headlong.TestUtils.parseArrayToBytesHierarchy;
-import static com.esaulpaugh.headlong.TestUtils.parseBigIntegerStringPoundSign;
-import static com.esaulpaugh.headlong.TestUtils.parseLong;
-import static com.esaulpaugh.headlong.TestUtils.parseString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class RLPJsonEncodeTest {
@@ -61,12 +61,12 @@ public class RLPJsonEncodeTest {
             return RLPEncoder.list(parseArrayToBytesHierarchy(in.getAsJsonArray()));
         } else if(in.isJsonPrimitive()) {
             try {
-                return RLPEncoder.string(Integers.toBytes(parseLong(in)));
+                return RLPEncoder.string(Integers.toBytes(in.getAsLong()));
             } catch (NumberFormatException nfe) {
                 return RLPEncoder.string(
                         in.getAsString().startsWith("#")
-                                ? parseBigIntegerStringPoundSign(in).toByteArray()
-                                : Strings.decode(parseString(in), Strings.UTF_8)
+                                ? new BigInteger(in.getAsString().substring(1), 10).toByteArray()
+                                : Strings.decode(in.getAsString(), Strings.UTF_8)
                 );
             }
         } else if(in.isJsonObject()) {
@@ -85,5 +85,32 @@ public class RLPJsonEncodeTest {
         return outString.startsWith("0x")
                 ? FastHex.decode(outString, 2, outString.length() - 2)
                 : FastHex.decode(outString);
+    }
+
+    public static byte[] parsePrimitiveToBytes(JsonElement in) {
+        try {
+            return Integers.toBytes(in.getAsLong());
+        } catch (NumberFormatException | IllegalStateException e) {
+            String inUtf8 = in.getAsString();
+            if (inUtf8.startsWith("#")) {
+                return new BigInteger(inUtf8, 10).toByteArray();
+            } else {
+                return Strings.decode(inUtf8, Strings.UTF_8);
+            }
+        }
+    }
+
+    public static List<Object> parseArrayToBytesHierarchy(final JsonArray array) {
+        List<Object> arrayList = new ArrayList<>();
+        for (JsonElement element : array) {
+            if (element.isJsonArray()) {
+                arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
+            } else if (element.isJsonPrimitive()) {
+                arrayList.add(parsePrimitiveToBytes(element));
+            } else {
+                throw new Error("unexpected element type");
+            }
+        }
+        return arrayList;
     }
 }

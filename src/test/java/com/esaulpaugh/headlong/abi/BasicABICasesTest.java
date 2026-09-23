@@ -23,10 +23,9 @@ import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -34,11 +33,11 @@ public class BasicABICasesTest {
 
     private static final String RESOURCE = "tests/ethereum/ABITests/basic_abi_tests.json";
 
-    static final Set<Map.Entry<String, JsonElement>> TESTS;
+    static final JsonObject TESTS;
 
     static {
         try {
-            TESTS = TestUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
+            TESTS = TestUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -61,28 +60,17 @@ public class BasicABICasesTest {
         }
 
         static ABITestCase forKey(String key) {
-            JsonObject jsonObject = null;
-            for (Map.Entry<String, JsonElement> e : TESTS) {
-                if (key.equals(e.getKey())) {
-                    jsonObject = e.getValue().getAsJsonObject();
-                    System.out.println(jsonObject);
-                    break;
-                }
-            }
-            if (jsonObject == null) {
-                throw new RuntimeException(key + " not found");
-            }
+            final JsonObject jsonObject = TESTS.get(key).getAsJsonObject();
 
             JsonArray args = jsonObject.getAsJsonArray("args");
             String result = jsonObject.get("result").getAsString();
             JsonArray types = jsonObject.getAsJsonArray("types");
 
-            final int size = types.size();
-            final ABIType<?>[] arr = new ABIType<?>[size];
-            for (int i = 0; i < arr.length; i++) {
-                arr[i] = TypeFactory.create(types.get(i).getAsString());
+            final String[] typeStrings = new String[types.size()];
+            for (int i = 0; i < types.size(); i++) {
+                typeStrings[i] = types.get(i).getAsString();
             }
-            TupleType<?> tt = wrap(arr);
+            TupleType<?> tt = TupleType.of(typeStrings);
 
             System.out.println(tt.canonicalType);
 
@@ -101,33 +89,16 @@ public class BasicABICasesTest {
         }
     }
 
-    private static TupleType<?> wrap(ABIType<?>... elements) {
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
-        boolean dynamic = false;
-        int flags = ABIType.FLAGS_UNSET;
-        for (ABIType<?> e : elements) {
-            canonicalBuilder.append(e.canonicalType).append(',');
-            dynamic |= e.isDynamic();
-            if (e.getFlags() != flags) {
-                if (flags != ABIType.FLAGS_UNSET) {
-                    throw new IllegalArgumentException();
-                }
-                flags = e.getFlags();
-            }
-        }
-        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, null, flags);
-    }
-
     @Test
     public void testGithubWikiTest() {
 
         ABITestCase testCase = ABITestCase.forKey("GithubWikiTest");
 
         Object[] argsArray = new Object[testCase.args.size()];
-        argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
-        argsArray[1] = TestUtils.parseLongArray(testCase.args.get(1).getAsJsonArray());
-        argsArray[2] = TestUtils.parseBytesX(testCase.args.get(2).getAsString(), 10);
-        argsArray[3] = TestUtils.parseBytes(testCase.args.get(3).getAsString());
+        argsArray[0] = parseBigInteger(testCase.args.get(0));
+        argsArray[1] = parseLongArray(testCase.args.get(1).getAsJsonArray());
+        argsArray[2] = parseBytesX(testCase.args.get(2).getAsString(), 10);
+        argsArray[3] = Strings.decode(testCase.args.get(3).getAsString(), Strings.UTF_8);
 
         testCase.test(argsArray);
     }
@@ -138,7 +109,7 @@ public class BasicABICasesTest {
         ABITestCase testCase = ABITestCase.forKey("SingleInteger");
 
         Object[] argsArray = new Object[testCase.args.size()];
-        argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
+        argsArray[0] = parseBigInteger(testCase.args.get(0));
 
         testCase.test(argsArray);
     }
@@ -149,9 +120,39 @@ public class BasicABICasesTest {
         ABITestCase testCase = ABITestCase.forKey("IntegerAndAddress");
 
         Object[] argsArray = new Object[testCase.args.size()];
-        argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
-        argsArray[1] = TestUtils.parseAddress(testCase.args.get(1));
+        argsArray[0] = parseBigInteger(testCase.args.get(0));
+        argsArray[1] = Address.wrap(Address.toChecksumAddress(testCase.args.get(1).getAsString()));
 
         testCase.test(argsArray);
+    }
+
+    public static long[] parseLongArray(final JsonArray array) {
+        final int size = array.size();
+        long[] longs = new long[size];
+        for (int i = 0; i < size; i++) {
+            JsonElement element = array.get(i);
+            if (element.isJsonPrimitive()) {
+                longs[i] = element.getAsLong();
+            } else {
+                throw new Error("unexpected element type");
+            }
+        }
+        return longs;
+    }
+
+    public static byte[] parseBytesX(String string, int x) {
+        if (string.length() == x) {
+            byte[] bytesX = new byte[x];
+            for (int i = 0; i < x; i++) {
+                bytesX[i] = (byte) string.charAt(i);
+            }
+            return bytesX;
+        } else {
+            return Strings.decode(string);
+        }
+    }
+
+    private static BigInteger parseBigInteger(JsonElement in) {
+        return new BigInteger(in.getAsString(), 10);
     }
 }
