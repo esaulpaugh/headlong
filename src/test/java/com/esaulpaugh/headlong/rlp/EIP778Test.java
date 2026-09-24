@@ -270,14 +270,12 @@ public class EIP778Test {
     public void testSortKVPList() {
         final Random r = TestUtils.seededRandom();
 
-        List<KVP> empty = new ArrayList<>();
-        Record.sort(empty);
-        assertTrue(empty.isEmpty());
-
         List<KVP> single = new ArrayList<>();
-        single.add(new KVP("Ü", "", ASCII));
+        single.add(new KVP("0123456789ABCDEFGHIJabcdefghiABCDEFGHIj0123456789Ü23456", "", UTF_8));
+        single.add(new KVP("0123456789ABCDEFGHIJabcdefghiABCDEFGHIj012345678912345Ü", "", UTF_8));
         Record.sort(single);
-        assertEquals("Ü", single.get(0).key().asString(UTF_8));
+        assertEquals("0123456789ABCDEFGHIJabcdefghiABCDEFGHIj012345678912345Ü", single.get(0).key().asString(UTF_8));
+        assertEquals("0123456789ABCDEFGHIJabcdefghiABCDEFGHIj0123456789Ü23456", single.get(1).key().asString(UTF_8));
         final int[] sizes = new int[] { 2, 3, 10, 30, 50, 100 };
         for (int size : sizes) {
             List<KVP> list = randomKVPs(size, () -> TestUtils.generateASCIIString(1 + r.nextInt(10), r));
@@ -289,6 +287,10 @@ public class EIP778Test {
             Record.sort(list);
             assertStrictlySorted(list);
         }
+
+        List<KVP> empty = new ArrayList<>();
+        Record.sort(empty);
+        assertTrue(empty.isEmpty());
     }
 
     @Test

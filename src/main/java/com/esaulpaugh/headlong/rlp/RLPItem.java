@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.Arrays;
 
 /**
@@ -330,15 +331,34 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     @Override
     public final int compareTo(RLPItem othr) {
         // Arrays.compareUnsigned // Java 9+
-        int thisOffset = this.dataIndex;
-        int othrOffset = othr.dataIndex;
-        final int end = thisOffset + Math.min(this.dataLength, othr.dataLength);
-        while (thisOffset < end) {
-            int t = this.buffer[thisOffset++];
-            int o = othr.buffer[othrOffset++];
-            if (t != o) {
-                return (t & 0xFF) - (o & 0xFF); // unsigned difference (required for sorting utf-8)
+        final int commonLen = Math.min(this.dataLength, othr.dataLength);
+        if (commonLen < DataType.MIN_LONG_DATA_LEN) {
+            int i = this.dataIndex, j = othr.dataIndex;
+            final int end = i + commonLen;
+            while (i < end) {
+                int t = this.buffer[i++];
+                int o = othr.buffer[j++];
+                if (t != o) return Integer.compareUnsigned(t, o);
             }
+            return this.dataLength - othr.dataLength;
+        }
+
+        // inherits big-endianness from HeapByteBuffer
+        final LongBuffer thisLongBuf = ByteBuffer.wrap(this.buffer, this.dataIndex, this.dataLength).asLongBuffer();
+        final LongBuffer othrLongBuf = ByteBuffer.wrap(othr.buffer, othr.dataIndex, othr.dataLength).asLongBuffer();
+
+        final int chunks = commonLen >>> 3;
+        for (int k = 0; k < chunks; k++) {
+            long t = thisLongBuf.get(k);
+            long o = othrLongBuf.get(k);
+            if (t != o) return Long.compareUnsigned(t, o);
+        }
+        final int base = chunks << 3;
+        final int end = commonLen & 7;
+        for (int i = 0; i < end; i++) {
+            int t = this.buffer[this.dataIndex + base + i];
+            int o = othr.buffer[othr.dataIndex + base + i];
+            if (t != o) return Integer.compareUnsigned(t, o);
         }
         return this.dataLength - othr.dataLength;
     }
