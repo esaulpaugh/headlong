@@ -340,25 +340,24 @@ public abstract class RLPItem implements Comparable<RLPItem> {
                 int o = othr.buffer[j++];
                 if (t != o) return Integer.compareUnsigned(t, o);
             }
-            return this.dataLength - othr.dataLength;
-        }
+        } else {
+            // inherits big-endianness from HeapByteBuffer
+            final LongBuffer thisLongBuf = ByteBuffer.wrap(this.buffer, this.dataIndex, this.dataLength).asLongBuffer();
+            final LongBuffer othrLongBuf = ByteBuffer.wrap(othr.buffer, othr.dataIndex, othr.dataLength).asLongBuffer();
 
-        // inherits big-endianness from HeapByteBuffer
-        final LongBuffer thisLongBuf = ByteBuffer.wrap(this.buffer, this.dataIndex, this.dataLength).asLongBuffer();
-        final LongBuffer othrLongBuf = ByteBuffer.wrap(othr.buffer, othr.dataIndex, othr.dataLength).asLongBuffer();
-
-        final int chunks = commonLen >>> 3;
-        for (int k = 0; k < chunks; k++) {
-            long t = thisLongBuf.get(k);
-            long o = othrLongBuf.get(k);
-            if (t != o) return Long.compareUnsigned(t, o);
-        }
-        final int base = chunks << 3;
-        final int end = commonLen & 7;
-        for (int i = 0; i < end; i++) {
-            int t = this.buffer[this.dataIndex + base + i];
-            int o = othr.buffer[othr.dataIndex + base + i];
-            if (t != o) return Integer.compareUnsigned(t, o);
+            final int chunks = commonLen >>> 3;
+            for (int k = 0; k < chunks; k++) {
+                long t = thisLongBuf.get(k);
+                long o = othrLongBuf.get(k);
+                if (t != o) return Long.compareUnsigned(t, o);
+            }
+            final int base = chunks << 3;
+            final int end = base + (commonLen & 7);
+            for (int a = base; a < end; a++) {
+                int t = this.buffer[this.dataIndex + a];
+                int o = othr.buffer[othr.dataIndex + a];
+                if (t != o) return Integer.compareUnsigned(t, o);
+            }
         }
         return this.dataLength - othr.dataLength;
     }
