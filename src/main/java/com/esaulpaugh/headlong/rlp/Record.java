@@ -248,7 +248,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
             int i = j - 1;
             for ( ; i >= 0; i--) {
                 v2 = list.get(i);
-                int cmp = v.compareTo(v2);
+                int cmp = v.key.compareTo(v2.key); // v.compareTo(v2);
                 if (cmp < 0) {
                     list.set(i + 1, v2);
                     continue;
