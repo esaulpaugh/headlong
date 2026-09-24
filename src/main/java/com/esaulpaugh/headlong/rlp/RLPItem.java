@@ -338,7 +338,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
             while (i < end) {
                 int t = this.buffer[i++];
                 int o = othr.buffer[j++];
-                if (t != o) return Integer.compareUnsigned(t, o);
+                if (t != o) return (t & 0xFF) - (o & 0xFF);
             }
         } else {
             // inherits big-endianness from HeapByteBuffer
@@ -356,10 +356,10 @@ public abstract class RLPItem implements Comparable<RLPItem> {
             for (int a = base; a < end; a++) {
                 int t = this.buffer[this.dataIndex + a];
                 int o = othr.buffer[othr.dataIndex + a];
-                if (t != o) return Integer.compareUnsigned(t, o);
+                if (t != o) return (t & 0xFF) - (o & 0xFF);
             }
         }
-        return this.dataLength - othr.dataLength;
+        return Integer.compare(this.dataLength, othr.dataLength);
     }
 
     @SuppressWarnings({"deprecation", "removal"})
