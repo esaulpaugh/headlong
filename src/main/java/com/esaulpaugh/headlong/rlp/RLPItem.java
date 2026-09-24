@@ -332,7 +332,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     public final int compareTo(RLPItem othr) {
         // Arrays.compareUnsigned // Java 9+
         final int commonLen = Math.min(this.dataLength, othr.dataLength);
-        if (commonLen < DataType.MIN_LONG_DATA_LEN) {
+        if (commonLen < Long.BYTES * 2) {
             int i = this.dataIndex, j = othr.dataIndex;
             final int end = i + commonLen;
             while (i < end) {
