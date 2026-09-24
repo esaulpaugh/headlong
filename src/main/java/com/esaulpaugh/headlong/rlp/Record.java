@@ -244,21 +244,18 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     static void sort(List<KVP> list) {
         final int len = list.size();
         for (int j = 1; j < len; j++) {
-            KVP v = list.get(j), v2;
-            int i = j - 1;
-            for ( ; i >= 0; i--) {
-                v2 = list.get(i);
-                int cmp = v.key.compareTo(v2.key); // v.compareTo(v2);
-                if (cmp < 0) {
-                    list.set(i + 1, v2);
-                    continue;
+            final KVP p = list.get(j);
+            int i = j;
+            while (i > 0) {
+                KVP pp = list.get(i - 1);
+                int cmp = p.key.compareTo(pp.key);
+                if (cmp >= 0) {
+                    if (cmp == 0) throw duplicateKeyErr(p.key);
+                    break;
                 }
-                if (cmp == 0) {
-                    throw duplicateKeyErr(v.key);
-                }
-                break;
+                list.set(i--, pp);
             }
-            list.set(i + 1, v);
+            list.set(i, p);
         }
     }
 
