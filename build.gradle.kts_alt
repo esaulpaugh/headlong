@@ -193,6 +193,7 @@ fun copyWithHash(sourceFile: File, targetFile: File): Boolean {
 
 val localMavenRepo = File(System.getProperty("user.home"), ".m2/repository")
 
+// run with option --no-configuration-cache
 tasks.register("populateM2") {
     group = "publishing"
     description = "Copies selected artifacts (JAR + POM + SHA-1) into local Maven repository"
