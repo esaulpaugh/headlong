@@ -359,7 +359,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
                 if (t != o) return (t & 0xFF) - (o & 0xFF);
             }
         }
-        return Integer.compare(this.dataLength, othr.dataLength);
+        return Integer.compareUnsigned(this.dataLength, othr.dataLength);
     }
 
     @SuppressWarnings({"deprecation", "removal"})
