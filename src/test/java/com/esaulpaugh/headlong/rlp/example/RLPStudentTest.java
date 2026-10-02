@@ -58,7 +58,11 @@ public class RLPStudentTest {
 
         byte[] rlp = adapter.encode(plato);
 
+        final ByteBuffer dest = ByteBuffer.allocate(rlp.length);
+        adapter.encode(plato, dest);
+
         assertArrayEquals(studentRlp, rlp);
+        assertArrayEquals(studentRlp, dest.array());
     }
 
     @Test
