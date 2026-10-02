@@ -1081,14 +1081,15 @@ public class RLPDecoderTest {
     public void testEdgeCases() throws Throwable {
         final CustomChannel channel = new CustomChannel();
 
-        // negative maxBufferResize → fail fast at the API boundary
         assertThrown(IllegalArgumentException.class, "negative maxBufferResize: -1",
                 () -> RLP_STRICT.sequenceIterator(channel, new byte[4], -1, 200_000L, false));
 
-        // zero-length buffer + maxBufferResize=0 → buffer exhausted (sentinel path)
         channel.setAvailableBytes(RLPEncoder.string(new byte[10]));
         Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, new byte[0], 0, 200_000L, false);
-        assertThrown(UncheckedIOException.class, "buffer exhausted; resize would be of size 0", iter::hasNext);
+        assertThrown(UncheckedIOException.class, "buffer exhausted; resize would be of size zero", iter::hasNext);
+
+        iter = RLP_STRICT.sequenceIterator(channel, new byte[0], 1, 20_000L, false);
+        assertThrown(UncheckedIOException.class, "resize would exceed limit: 11 > 1", iter::hasNext);
     }
 
     private static byte[] rlpList(Random r) {

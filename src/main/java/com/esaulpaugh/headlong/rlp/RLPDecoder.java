@@ -197,8 +197,8 @@ public final class RLPDecoder {
                         if (!channelClosed && bytesRead > 0) {
                             delayNanos = INITIAL_DELAY_NANOS;
                             if (bytesRead == Integer.MAX_VALUE) {
-                                if (ex == null) {
-                                    throw new IOException("buffer exhausted; resize would be of size " + maxBufferResize);
+                                if (maxBufferResize == 0) {
+                                    throw new IOException("buffer exhausted; resize would be of size zero");
                                 }
                                 resize(calculateResize(ex.encodingLen, DEFAULT_BUFFER_SIZE), end - index); // end == bb.pos,bb.lim,bb.cap
                             }
