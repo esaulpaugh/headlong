@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
-
 import java.nio.ByteBuffer;
 
 /**

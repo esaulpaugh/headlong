@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeoutException;
-import java.util.function.ToIntBiFunction;
-import java.util.function.ToIntFunction;
+import java.util.function.LongToIntFunction;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.insertBytes;
@@ -303,7 +302,12 @@ public class IntegersTest {
         testReturnValues(Integers::len, Integers::putLong);
     }
 
-    public static void testReturnValues(ToIntFunction<Long> getLen, ToIntBiFunction<Long, ByteBuffer> put) {
+    @FunctionalInterface
+    public interface PutLongFunction {
+        int apply(long lo, ByteBuffer bb);
+    }
+
+    public static void testReturnValues(LongToIntFunction getLen, PutLongFunction putLong) {
         Random r = TestUtils.seededRandom();
         ByteBuffer bb = ByteBuffer.allocate(Long.BYTES + r.nextInt(35));
         final int offsetBound = 1 + bb.capacity() - Long.BYTES;
@@ -312,7 +316,7 @@ public class IntegersTest {
             bb.position(offset);
             final long val = TestUtils.wildLong(r);
             int len0 = getLen.applyAsInt(val);
-            int len1 = put.applyAsInt(val, bb);
+            int len1 = putLong.apply(val, bb);
             int len2 = bb.position() - offset;
             assertEquals(len0, len1);
             assertEquals(len1, len2);
