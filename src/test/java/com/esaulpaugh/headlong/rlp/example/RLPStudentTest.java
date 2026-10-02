@@ -18,11 +18,13 @@ package com.esaulpaugh.headlong.rlp.example;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class RLPStudentTest {
 
@@ -56,5 +58,31 @@ public class RLPStudentTest {
         byte[] rlp = adapter.encode(plato);
 
         assertArrayEquals(studentRlp, rlp);
+    }
+
+    @Test
+    public void testFloatEqualsHashCode() {
+        final byte[] bytes = new byte[1];
+        final RLPStudent a = new RLPStudent("a", 0.0f, bytes, BigDecimal.ONE);
+
+        final RLPStudent a_ = new RLPStudent("a",   0.0f, bytes, BigDecimal.ONE);
+
+        assertEquals(a_.hashCode(), a.hashCode());
+        assertEquals(a_, a);
+        assertNotEquals(new RLPStudent("a",  -0.0f, bytes, BigDecimal.ONE), a);
+
+        final RLPStudent b = new RLPStudent("a", 0.00004f, bytes, BigDecimal.ONE);
+        final RLPStudent c = new RLPStudent("a", 0.00008f, bytes, BigDecimal.ONE);
+
+        assertNotEquals(a, b);
+        assertNotEquals(b, c);
+        assertNotEquals(a, c);
+
+        RLPStudent x = new RLPStudent("a", 0.00004f, new byte[]{2, 2}, BigDecimal.valueOf(0.1d));
+        RLPStudent y = new RLPStudent("a", 0.00004f, new byte[]{2, 2}, BigDecimal.valueOf(0.1d));
+
+        assertEquals(x.hashCode(), y.hashCode());
+        assertEquals(x, y);
+        assertEquals(y, x);
     }
 }

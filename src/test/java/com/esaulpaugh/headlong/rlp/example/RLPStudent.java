@@ -81,17 +81,18 @@ public class RLPStudent implements RLPEncodeable {
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(new Object[] { name, gpa, publicKey, balance });
+        int h = Objects.hash(name, Float.floatToIntBits(gpa), balance);
+        return 31 * h + Arrays.hashCode(publicKey);
     }
 
     @Override
     public boolean equals(Object o) {
         if(!getClass().isInstance(o)) return false;
         RLPStudent other = (RLPStudent) o;
-        return Objects.equals(other.name, this.name)
-                && Math.abs(other.gpa - this.gpa) < 0.00005f
-                && Arrays.equals(other.publicKey, this.publicKey)
-                && Objects.equals(other.balance, this.balance);
+        return Float.floatToIntBits(gpa) == Float.floatToIntBits(other.gpa)
+                && Arrays.equals(publicKey, other.publicKey)
+                && Objects.equals(name, other.name)
+                && Objects.equals(balance, other.balance);
     }
 
     @Override

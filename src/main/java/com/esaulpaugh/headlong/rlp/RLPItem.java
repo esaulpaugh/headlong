@@ -341,7 +341,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
                 if (t != o) return (t & 0xFF) - (o & 0xFF);
             }
         } else {
-            // inherits big-endianness from HeapByteBuffer
+            // inherits big-endianness from HeapByteBuffer via ByteBuffer
             final LongBuffer thisLongBuf = ByteBuffer.wrap(this.buffer, this.dataIndex, this.dataLength).asLongBuffer();
             final LongBuffer othrLongBuf = ByteBuffer.wrap(othr.buffer, othr.dataIndex, othr.dataLength).asLongBuffer();
 
