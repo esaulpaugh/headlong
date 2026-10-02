@@ -983,7 +983,7 @@ public class RLPDecoderTest {
         channel.addMoreBytes(new byte[] { (byte)0x81 });
 
         // Partial item + timeout -> throws EOF
-        assertThrown(UncheckedIOException.class, "stream ended mid-item", iterator::hasNext);
+        assertThrown(UncheckedIOException.class, "partial undecoded item and maxDelayNanos exceeded: 12000000", iterator::hasNext);
 
         // channel EOF: -1
         channel.close();
