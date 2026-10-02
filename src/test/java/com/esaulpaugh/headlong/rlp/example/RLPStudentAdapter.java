@@ -24,6 +24,8 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,7 +57,16 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
 
     @Override
     public byte[] encode(RLPStudent student) {
-        return RLPEncoder.list(
+        return RLPEncoder.list(toObjectIterable(student));
+    }
+
+    @Override
+    public void encode(RLPStudent student, ByteBuffer dest) {
+        RLPEncoder.putList(toObjectIterable(student), dest);
+    }
+
+    private static Iterable<Object> toObjectIterable(RLPStudent student) {
+        return Arrays.asList(
                 Strings.decode(student.getName(), UTF_8),
                 FloatingPoint.toBytes(student.getGpa()),
                 student.getPublicKey(),

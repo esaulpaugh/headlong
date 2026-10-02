@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp.example;
 
+import java.nio.ByteBuffer;
+
 public interface RLPAdapter<T> {
 
     // default interface methods not supported on Android except Android N+
@@ -25,4 +27,6 @@ public interface RLPAdapter<T> {
     T decode(byte[] rlp, int index);
 
     byte[] encode(T t);
+
+    void encode(T t, ByteBuffer dest);
 }
