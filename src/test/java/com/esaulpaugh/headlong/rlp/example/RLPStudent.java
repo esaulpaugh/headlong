@@ -51,7 +51,8 @@ public class RLPStudent implements RLPEncodeable {
         this.name = iter.next().asString(UTF_8);
         this.gpa = iter.next().asFloat(false);
         this.publicKey = iter.next().asBytes();
-        this.balance = new BigDecimal(iter.next().asBigInt(false), iter.next().asInt());
+        byte[] unscaled = iter.next().asBytes();
+        this.balance = new BigDecimal(new BigInteger(unscaled), iter.next().asInt());
     }
 
     public RLPStudent(byte[] rlp, int index) {

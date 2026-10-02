@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -84,5 +85,20 @@ public class RLPStudentTest {
         assertEquals(x.hashCode(), y.hashCode());
         assertEquals(x, y);
         assertEquals(y, x);
+    }
+
+    @Test
+    public void rlpRoundTrip() {
+        RLPStudent scaleZero  = new RLPStudent("a", 0.0f, new byte[]{0, 0}, BigDecimal.ONE);
+        RLPStudent zeroBal    = new RLPStudent("Z", 1.0f, new byte[]{0, 1}, BigDecimal.ZERO);
+        RLPStudent negScale   = new RLPStudent("U", 1.0f, new byte[]{1, 0}, new BigDecimal("1.5E+3"));
+        RLPStudent negUnscaled   = new RLPStudent("r", 1.0f, new byte[]{1, 1}, new BigDecimal(new BigInteger("-2"), 1));
+        RLPStudent negUnscaled2   = new RLPStudent("3", 1.0f, new byte[]{2, 0}, new BigDecimal(new BigInteger("-129"), -1));
+
+        assertEquals(scaleZero, new RLPStudent(scaleZero.toRLP()));
+        assertEquals(zeroBal,   new RLPStudent(zeroBal.toRLP()));
+        assertEquals(negScale,  new RLPStudent(negScale.toRLP()));
+        assertEquals(negUnscaled,  new RLPStudent(negUnscaled.toRLP()));
+        assertEquals(negUnscaled2,  new RLPStudent(negUnscaled2.toRLP()));
     }
 }
