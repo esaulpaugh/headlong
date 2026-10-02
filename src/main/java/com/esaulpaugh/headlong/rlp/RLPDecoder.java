@@ -133,10 +133,10 @@ public final class RLPDecoder {
     }
 
     /**
-     * Returns a blocking iterator that buffers semi-lazily. {@link Iterator#hasNext()} may block until a full RLP item is
-     * available. If EOF reached, the channel has been closed, or the next wait in the exponential backoff would exceed
-     * {@code maxDelayNanos}, {@link Iterator#hasNext()} will return false when there is no partial item already buffered. If a
-     * partial item is already buffered, an {@link UncheckedIOException} will be thrown.
+     * Returns an iterator that buffers semi-lazily. {@link Iterator#hasNext()} may block until a full RLP item is available.
+     * The channel is read only when no complete, buffered item exists. If EOF is reached, the channel has been closed,
+     * or the next wait in the exponential backoff would exceed {@code maxDelayNanos}, {@link Iterator#hasNext()} will return
+     * false when there is no partial item already buffered.
      * <p>
      * It is the responsibility of the caller to close the channel; the returned iterator itself never
      * calls {@link java.nio.channels.Channel#close()}. Consider iterating within a virtual thread to avoid
@@ -144,10 +144,11 @@ public final class RLPDecoder {
      *
      * @param channel   input channel containing the RLP sequence data
      * @param initialBuffer  initial buffer to use (contents ignored); if null, a default-sized buffer is allocated
-     * @param maxBufferResize   iterator throws {@link UncheckedIOException} if an item would exceed this length in bytes
-     * @param maxDelayNanos highest delay interval before read retries are considered failed
+     * @param maxBufferResize   when initial buffer is exhausted, iterator throws {@link UncheckedIOException} if an item would
+     *                          exceed this length in bytes
+     * @param maxDelayNanos largest single delay before read retries are considered failed; has no effect on blocking channels
      * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
-     *                      throw {@link UncheckedIOException} prior to waiting for more data; if true, requires channel to
+     *                      throw {@link UncheckedIOException} before attempting another read; if true, requires channel to
      *                      implement InterruptibleChannel
      * @throws UncheckedIOException if a partial item cannot be completed due to EOF, channel closure, or exceeding
      *                              {@code maxDelayNanos}, or if another I/O error occurs while reading from the channel
@@ -178,25 +179,30 @@ public final class RLPDecoder {
                         if (index == capacity) {
                             resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
                         }
-                        final int bytesRead = (channelClosed || !bb.hasRemaining()) ? Integer.MAX_VALUE : channel.read(bb);
                         final int end = bb.position();
+                        ShortInputException ex = null;
                         if (index < end) {
                             try {
                                 next = decoder.wrap(buffer, index, end);
                                 delayNanos = INITIAL_DELAY_NANOS;
                                 return true;
                             } catch (ShortInputException sie) {
-                                if (!channelClosed && bytesRead > 0) {
-                                    delayNanos = INITIAL_DELAY_NANOS;
-                                    if (bytesRead == Integer.MAX_VALUE) {
-                                        resize(calculateResize(sie.encodingLen, DEFAULT_BUFFER_SIZE), end - index); // end == bb.pos,bb.lim,bb.cap
-                                    }
-                                    continue;
-                                }
+                                ex = sie;
                             }
                         }
                         if (interruptible && Thread.interrupted()) {
                             throw new InterruptedIOException("sequenceIterator interrupted");
+                        }
+                        final int bytesRead = (channelClosed || !bb.hasRemaining()) ? Integer.MAX_VALUE : channel.read(bb);
+                        if (!channelClosed && bytesRead > 0) {
+                            delayNanos = INITIAL_DELAY_NANOS;
+                            if (bytesRead == Integer.MAX_VALUE) {
+                                if (ex == null) {
+                                    throw new IOException("buffer exhausted; resize would be of size " + maxBufferResize);
+                                }
+                                resize(calculateResize(ex.encodingLen, DEFAULT_BUFFER_SIZE), end - index); // end == bb.pos,bb.lim,bb.cap
+                            }
+                            continue;
                         }
                         if (channelClosed || bytesRead < 0 || delayNanos > maxDelayNanos) {
                             if (index < end) {
@@ -206,10 +212,6 @@ public final class RLPDecoder {
                                 throw new UncheckedIOException(io);
                             }
                             return false;
-                        }
-                        // assert bytesRead == 0;
-                        if (bytesRead != 0) {
-                            throw new IOException(bytesRead == Integer.MAX_VALUE ? "buffer exhausted; resize would be of size " + maxBufferResize : "misreported read result: " + bytesRead);
                         }
                         delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
