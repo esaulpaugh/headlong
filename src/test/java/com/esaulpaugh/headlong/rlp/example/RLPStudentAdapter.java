@@ -17,9 +17,15 @@ package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.util.FloatingPoint;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -34,14 +40,14 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
         return new RLPStudent(iter.next().asString(UTF_8),
                 iter.next().asFloat(false),
                 iter.next().asBytes(),
-                new BigDecimal(iter.next().asBigInt(false), iter.next().asInt())
+                new BigDecimal(new BigInteger(iter.next().asBytes()), iter.next().asInt())
         );
 
 //        RLPList rlpList = RLP_STRICT.wrapList(rlp, index);
 //        List<RLPItem> elements = rlpList.elements(RLP_STRICT);
 //        return new RLPStudent(
 //                elements.get(0).asString(UTF_8),
-//                elements.get(1).asFloat(),
+//                elements.get(1).asFloat(false),
 //                elements.get(2).asBytes(),
 //                new BigDecimal(elements.get(3).asBigInt(), elements.get(4).asInt())
 //        );
@@ -49,6 +55,12 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
 
     @Override
     public byte[] encode(RLPStudent student) {
-        return RLPEncoder.list(student.toObjectArray());
+        return RLPEncoder.list(
+                Strings.decode(student.getName(), UTF_8),
+                FloatingPoint.toBytes(student.getGpa()),
+                student.getPublicKey(),
+                student.getBalance().unscaledValue().toByteArray(),
+                Integers.toBytes(student.getBalance().scale())
+        );
     }
 }

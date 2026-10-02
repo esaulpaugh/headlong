@@ -19,8 +19,6 @@ import java.nio.ByteBuffer;
 
 public interface RLPEncodeable {
 
-    Object[] toObjectArray();
-
     byte[] toRLP();
 
     void toRLP(ByteBuffer dest);

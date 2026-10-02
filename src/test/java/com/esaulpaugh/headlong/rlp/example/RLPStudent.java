@@ -101,8 +101,7 @@ public class RLPStudent implements RLPEncodeable {
         return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
     }
 
-    @Override
-    public Object[] toObjectArray() {
+    private Object[] toObjectArray() {
         return new Object[] {
                 Strings.decode(name, UTF_8),
                 FloatingPoint.toBytes(gpa),
