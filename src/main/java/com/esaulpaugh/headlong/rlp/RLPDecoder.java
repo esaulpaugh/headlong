@@ -200,7 +200,10 @@ public final class RLPDecoder {
                         }
                         if (channelClosed || bytesRead < 0 || delayNanos > maxDelayNanos) {
                             if (index < end) {
-                                throw new UncheckedIOException(new EOFException("stream ended mid-item"));
+                                IOException io = channelClosed || bytesRead < 0
+                                        ? new EOFException("stream ended mid-item")
+                                        : new IOException("partial undecoded item and maxDelayNanos exceeded: " + maxDelayNanos);
+                                throw new UncheckedIOException(io);
                             }
                             return false;
                         }
