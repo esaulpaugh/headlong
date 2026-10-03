@@ -124,12 +124,13 @@ public final class RLPDecoder {
         };
     }
 
-    private static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int DEFAULT_INITIAL_BUFFER_LEN = 32;
+    private static final int DEFAULT_BUFFER_LEN = 8192;
     private static final int DEFAULT_MAX_BUFFER_RESIZE = 384 * 1024;
     private static final long DEFAULT_MAX_DELAY_NANOS = 640_000L;
 
     public Iterator<RLPItem> sequenceIterator(ReadableByteChannel channel) {
-        return sequenceIterator(channel, Strings.EMPTY_BYTE_ARRAY, DEFAULT_MAX_BUFFER_RESIZE, DEFAULT_MAX_DELAY_NANOS, false);
+        return sequenceIterator(channel, null, DEFAULT_MAX_BUFFER_RESIZE, DEFAULT_MAX_DELAY_NANOS, false);
     }
 
     /**
@@ -143,13 +144,15 @@ public final class RLPDecoder {
      * blocking a platform thread. Not thread-safe.
      *
      * @param channel   input channel containing the RLP sequence data
-     * @param initialBuffer  initial buffer to use (contents ignored); if null, a default-sized buffer is allocated
+     * @param initialBuffer  initial buffer to use (contents ignored); if null, a default initial buffer is allocated
      * @param maxBufferResize   when initial buffer is exhausted, iterator throws {@link UncheckedIOException} if an item would
      *                          exceed this length in bytes
      * @param maxDelayNanos largest single delay before read retries are considered failed; has no effect on blocking channels
      * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
      *                      throw {@link UncheckedIOException} before attempting another read; if true, requires channel to
      *                      implement InterruptibleChannel
+     * @throws IllegalArgumentException if {@code maxBufferResize} is negative, or if {@code interruptible} is {@code true} but
+     *                                  {@code channel} does not implement {@link InterruptibleChannel}
      * @throws UncheckedIOException if a partial item cannot be completed due to EOF, channel closure, or exceeding
      *                              {@code maxDelayNanos}, or if another I/O error occurs while reading from the channel
      * @return  an iterator over the items in the stream
@@ -162,7 +165,7 @@ public final class RLPDecoder {
         if (interruptible && !(channel instanceof InterruptibleChannel)) {
             throw new IllegalArgumentException("interruptible=true requires an InterruptibleChannel");
         }
-        return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_BUFFER_SIZE] : initialBuffer, 0) {
+        return new RLPSequenceIterator(RLPDecoder.this, initialBuffer == null ? new byte[DEFAULT_INITIAL_BUFFER_LEN] : initialBuffer, 0) {
             private static final long INITIAL_DELAY_NANOS = 5_000L;
             private ByteBuffer bb = ByteBuffer.wrap(buffer);
             private long delayNanos = INITIAL_DELAY_NANOS;
@@ -177,7 +180,7 @@ public final class RLPDecoder {
                     while (true) {
                         final int capacity = bb.capacity();
                         if (index == capacity) {
-                            resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_SIZE || capacity > DEFAULT_BUFFER_SIZE << 3) ? DEFAULT_BUFFER_SIZE : capacity), 0);
+                            resize(calculateResize(0L, (capacity < DEFAULT_BUFFER_LEN || capacity > DEFAULT_BUFFER_LEN << 3) ? DEFAULT_BUFFER_LEN : capacity), 0);
                         }
                         final int end = bb.position();
                         ShortInputException ex = null;
@@ -200,7 +203,7 @@ public final class RLPDecoder {
                                 if (maxBufferResize == 0) {
                                     throw new IOException("buffer exhausted; resize would be of size zero");
                                 }
-                                resize(calculateResize(ex.encodingLen, DEFAULT_BUFFER_SIZE), end - index); // end == bb.pos,bb.lim,bb.cap
+                                resize(calculateResize(ex.encodingLen, DEFAULT_BUFFER_LEN), end - index); // end == bb.pos,bb.lim,bb.cap
                             }
                             continue;
                         }
