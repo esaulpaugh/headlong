@@ -47,6 +47,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.nio.channels.ClosedChannelException;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -973,6 +974,8 @@ public class RLPDecoderTest {
         channel.addMoreBytes(new byte[3]);
 
         t.join(800);
+        assertFalse(t.isAlive());
+
         assertTrue(itemAvailable.get());
         assertTrue(iterator.hasNext());
         assertTrue(iterator.hasNext());
@@ -1056,7 +1059,7 @@ public class RLPDecoderTest {
     public void testSizeLimit() throws Throwable {
         final Random r = TestUtils.seededRandom();
         final CustomChannel channel = new CustomChannel();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 150; i++) {
             final byte[] initialBuffer = new byte[1 + r.nextInt(20)];
             r.nextBytes(initialBuffer);
 
@@ -1067,7 +1070,9 @@ public class RLPDecoderTest {
 
             channel.setAvailableBytes(string);
             Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(channel, initialBuffer, maxResize, 200_000L, false);
-            final String msg = "resize would exceed limit: " + string.length + " > " + maxResize;
+            final String zeroMsg    = "buffer exhausted; resize would be of size zero";
+            final String nonZeroMsg = "resize would exceed limit: " + string.length + " > " + maxResize;
+            final String msg = maxResize == 0 ? zeroMsg : nonZeroMsg;
             assertThrown(UncheckedIOException.class, msg, iter::hasNext);
             assertThrown(UncheckedIOException.class, msg, iter::next);
 
@@ -1210,8 +1215,11 @@ public class RLPDecoderTest {
         }
 
         @Override
-        public synchronized int read(ByteBuffer dst) {
-            if (!open.get()) return -1;
+        public synchronized int read(ByteBuffer dst) throws ClosedChannelException {
+            if (!open.get()) {
+//                return -1;
+                throw new ClosedChannelException();
+            }
             if (shouldReturnZero.get() || data.isEmpty()) return 0;
 
             final long available = len - pos;
