@@ -147,7 +147,7 @@ public final class RLPDecoder {
      * @param initialBuffer  initial buffer to use (contents ignored); if null, a default initial buffer is allocated
      * @param maxBufferResize   when initial buffer is exhausted, iterator throws {@link UncheckedIOException} if an item would
      *                          exceed this length in bytes
-     * @param maxDelayNanos largest single delay before read retries are considered failed; has no effect on blocking channels
+     * @param maxDelayNanos maximum backoff delay; retries are considered failed when the backoff reaches this value
      * @param interruptible whether to check/clear the interrupted status of the thread calling {@link Iterator#hasNext} and
      *                      throw {@link UncheckedIOException} before attempting another read; if true, requires channel to
      *                      implement InterruptibleChannel
