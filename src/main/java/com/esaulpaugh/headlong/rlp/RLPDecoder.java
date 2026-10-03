@@ -204,7 +204,8 @@ public final class RLPDecoder {
                             }
                             continue;
                         }
-                        if (channelClosed || bytesRead < 0 || delayNanos > maxDelayNanos) {
+                        delayNanos = Math.min(delayNanos * 2, maxDelayNanos);
+                        if (channelClosed || bytesRead < 0 || delayNanos >= maxDelayNanos) {
                             if (index < end) {
                                 IOException io = channelClosed || bytesRead < 0
                                         ? new EOFException("stream ended mid-item")
@@ -213,7 +214,6 @@ public final class RLPDecoder {
                             }
                             return false;
                         }
-                        delayNanos = Math.min(delayNanos * 2, maxDelayNanos + 1);
                         LockSupport.parkNanos(delayNanos);
                     }
                 } catch (ClosedChannelException ignored) {
