@@ -362,11 +362,16 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return Integer.compareUnsigned(this.dataLength, othr.dataLength);
     }
 
+//    private static final int NON_ZERO_WHP = System.identityHashCode(RLPItem.class); // no constant fold
+
     @SuppressWarnings({"deprecation", "removal"})
     @Override
-    protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPItem */
+    protected final void finalize() throws Throwable { /* empty final finalize helps prevent finalizer attacks on non-final class RLPItem */
+        // IMPORTANT: finalize bytecode can only contain a return opcode, else some JVMs will
+        // put the object in the finalizer queue, causing up to 50x slowdown in some programs!
         try {} finally {
-//            super.finalize();
+//            if (NON_ZERO_WHP == 0) super.finalize(); // do not uncomment
+//            if (NON_ZERO_WHP == 0) throw new Error(); // do not uncomment
         }
     }
 }

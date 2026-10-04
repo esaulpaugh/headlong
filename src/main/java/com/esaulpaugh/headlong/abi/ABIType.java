@@ -370,8 +370,7 @@ public abstract class ABIType<J> {
     @SuppressWarnings({"deprecation", "removal"})
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class ABIType */
-        try {} finally {
-//            super.finalize();
-        }
+        // IMPORTANT: finalize bytecode can only contain a return opcode, else some JVMs will
+        // put the object in the finalizer queue, causing up to 50x slowdown in some programs!
     }
 }
