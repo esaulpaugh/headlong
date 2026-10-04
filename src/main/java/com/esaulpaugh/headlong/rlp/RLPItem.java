@@ -380,10 +380,10 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 ///    >better than mussolini coffee anyway
 ///    >it's kimi in accounting's birthday
 ///    >big ass strawberry cake
-///    >gonna get fat working here
+///    >gonna get fat
 ///    >they give me my own laptop
 ///    >sweet
-///    >things are going well
+///    >going well
 ///    >settle in
 ///    >my japanese welcome lunch is in an hour
 ///    >open laptop
