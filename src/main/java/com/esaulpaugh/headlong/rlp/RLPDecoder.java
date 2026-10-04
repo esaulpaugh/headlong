@@ -189,10 +189,9 @@ public final class RLPDecoder {
                         }
                         final int end = bb.position();
                         long encodingLen = 0L /*unused sentinel*/;
-                        if (index < end) {
+                        if (delayNanos == INITIAL_DELAY_NANOS && index < end) {
                             try {
                                 next = decoder._wrap(buffer, index, end, flags | FLAG_INTERNAL);
-                                delayNanos = INITIAL_DELAY_NANOS;
                                 return true;
                             } catch (InternalShortInputException sie) {
                                 encodingLen = sie.encodingLen;
