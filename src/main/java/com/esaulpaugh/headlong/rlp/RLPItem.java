@@ -362,7 +362,39 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return Integer.compareUnsigned(this.dataLength, othr.dataLength);
     }
 
-//    private static final int NON_ZERO_WHP = System.identityHashCode(RLPItem.class); // no constant fold
+///    >be me
+///    >working my way through college
+///    >double major in culinary and custodial arts
+///    >hear about a java internship
+///    >job experience gets me through the interview
+///    >somehow get the job. better pay
+///    >winning
+///    >might actually be able to pay off student loans someday
+///    >quit starbucks. call my boss a fascist
+///    >first day, new job
+///    >no cups. just computers
+///    >debbie the receptionist
+///    >sup, debbie
+///    >"hey, anon. i brought you peet's"
+///    >literally my new favorite
+///    >better than mussolini coffee anyway
+///    >it's kimi in accounting's birthday
+///    >big ass strawberry cake
+///    >gonna get fat working here
+///    >they give me my own laptop
+///    >sweet
+///    >things are going well
+///    >settle in
+///    >my japanese welcome lunch is in an hour
+///    >open laptop
+///    >follow instructions on sticky note
+///    >download some IDE thing
+///    >seems to work. easy
+///    >26 minutes to teriyaki
+///    >i'm supposed to familiarize myself with a funnel
+///    >ok
+///    >looks like old employee was working on it
+//    >private static final int NON_ZERO_WHP = System.identityHashCode(AbstractPQIAdapterFactoryImpl2/*RLPItem*/.class); // no constant fold
 
     @SuppressWarnings({"deprecation", "removal"})
     @Override
@@ -388,4 +420,8 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         } catch (Throwable t) {} // fine
         */
     }
+///    >get up
+///    >"oh, anon! your welcome lunch!"
+///    >tell debbie i gotta get something from my car
+///    >drive home
 }
