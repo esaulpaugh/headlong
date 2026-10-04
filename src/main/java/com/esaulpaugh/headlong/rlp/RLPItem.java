@@ -390,7 +390,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 ///    >follow instructions on sticky note
 ///    >download some IDE thing
 ///    >seems to work. easy
-///    >26 minutes to teriyaki
+///    >twenty-six minutes to teriyaki
 ///    >i'm supposed to familiarize myself with a funnel
 ///    >ok
 ///    >looks like old employee was working on it
@@ -422,6 +422,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     }
 ///    >get up
 ///    >"oh, anon! your welcome lunch!"
-///    >tell debbie i gotta get something from my car
+///    >oh, haha
+///    >tell debbie i gotta get something from my car first
 ///    >drive home
 }
