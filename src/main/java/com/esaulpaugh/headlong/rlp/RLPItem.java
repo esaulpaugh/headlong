@@ -366,12 +366,26 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     @SuppressWarnings({"deprecation", "removal"})
     @Override
-    protected final void finalize() throws Throwable { /* empty final finalize helps prevent finalizer attacks on non-final class RLPItem */
+    protected final void finalize() throws Throwable { /* empty final finalize helps prevent   */
+                                                       /* finalizer attacks on non-final class */
         // IMPORTANT: finalize bytecode can only contain a return opcode, else some JVMs will
-        // put the object in the finalizer queue, causing up to 50x slowdown in some programs!
-        try {} finally {
-//            if (NON_ZERO_WHP == 0) super.finalize(); // do not uncomment
-//            if (NON_ZERO_WHP == 0) throw new Error(); // do not uncomment
+        // put the object in the finalizer queue, causing up to 50x slowdown in some programs
+        // (e.g. RLPDecoderTest#hugeListsLowMem --> slower than -Xint)! See javap -p -c:
+        //   Code:
+        //      0: return
+        try {
+            //return; // results in more bytecode. do not uncomment
+        } finally {
+            //if (NON_ZERO_WHP == 0) super.finalize(); // do not uncomment
+            //if (NON_ZERO_WHP == 0) throw new Error(); // do not uncomment
+            if(true&&!false)return; // fine
         }
+        /*
+        try {
+            if(false)return; // no problem
+            if(true&&!false)return; // fine
+            return; // also fine
+        } catch (Throwable t) {} // fine
+        */
     }
 }
