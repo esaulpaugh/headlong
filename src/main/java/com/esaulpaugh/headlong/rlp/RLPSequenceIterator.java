@@ -56,11 +56,13 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
         throw new NoSuchElementException();
     }
 
+    private static final int NON_ZERO_WHP = System.identityHashCode(RLPSequenceIterator.class); // no constant fold
+
     @SuppressWarnings({"deprecation", "removal"})
     @Override
-    protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPSequenceIterator */
+    protected final void finalize() throws Throwable {
         try {} finally {
-//            super.finalize();
+            if (NON_ZERO_WHP == 0) super.finalize(); // keep the call site but avoid associated GC overhead on some JVMs
         }
     }
 }
