@@ -139,7 +139,7 @@
            source="${java.source.version}"
            target="${java.target.version}"
            memorymaximumsize="${compiler.max.memory}"
-           fork="true">
+           fork="false">
       <classpath refid="compile.classpath" />
     </javac>
 
@@ -161,7 +161,7 @@
            source="${java.source.version}"
            target="${java.target.version}"
            memorymaximumsize="${compiler.max.memory}"
-           fork="true">
+           fork="false">
       <classpath refid="test.classpath" />
     </javac>
 
