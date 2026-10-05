@@ -228,7 +228,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <addClasspath>true</addClasspath>
+<!--                                    <addClasspath>true</addClasspath>-->
                                     <mainClass>org.openjdk.jmh.Main</mainClass>
                                 </manifest>
                             </archive>

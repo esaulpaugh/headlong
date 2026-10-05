@@ -28,19 +28,19 @@
                     <include>joptsimple/*.class</include>
                     <include>joptsimple/internal/*.class</include>
 
-                    <include>org/apache/commons/codec/BinaryDecoder.class</include>
-                    <include>org/apache/commons/codec/BinaryEncoder.class</include>
-                    <include>org/apache/commons/codec/CharEncoding.class</include>
-                    <include>org/apache/commons/codec/CodecPolicy.class</include>
-                    <include>org/apache/commons/codec/Decoder.class</include>
-                    <include>org/apache/commons/codec/DecoderException.class</include>
-                    <include>org/apache/commons/codec/Encoder.class</include>
-                    <include>org/apache/commons/codec/EncoderException.class</include>
-                    <include>org/apache/commons/codec/binary/Base64.class</include>
-                    <include>org/apache/commons/codec/binary/BaseNCodec.class</include>
-                    <include>org/apache/commons/codec/binary/BaseNCodec$Context.class</include>
-                    <include>org/apache/commons/codec/binary/Hex.class</include>
-                    <include>org/apache/commons/codec/binary/BinaryCodec.class</include>
+<!--                    <include>org/apache/commons/codec/BinaryDecoder.class</include>-->
+<!--                    <include>org/apache/commons/codec/BinaryEncoder.class</include>-->
+<!--                    <include>org/apache/commons/codec/CharEncoding.class</include>-->
+<!--                    <include>org/apache/commons/codec/CodecPolicy.class</include>-->
+<!--                    <include>org/apache/commons/codec/Decoder.class</include>-->
+<!--                    <include>org/apache/commons/codec/DecoderException.class</include>-->
+<!--                    <include>org/apache/commons/codec/Encoder.class</include>-->
+<!--                    <include>org/apache/commons/codec/EncoderException.class</include>-->
+<!--                    <include>org/apache/commons/codec/binary/Base64.class</include>-->
+<!--                    <include>org/apache/commons/codec/binary/BaseNCodec.class</include>-->
+<!--                    <include>org/apache/commons/codec/binary/BaseNCodec$Context.class</include>-->
+<!--                    <include>org/apache/commons/codec/binary/Hex.class</include>-->
+<!--                    <include>org/apache/commons/codec/binary/BinaryCodec.class</include>-->
 
                     <include>org/apache/commons/math3/analysis/UnivariateFunction.class</include>
                     <include>org/apache/commons/math3/analysis/solvers/AbstractUnivariateSolver.class</include>
