@@ -159,6 +159,12 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
+wrapper {
+    gradleVersion = '8.14.5'
+    distributionType = Wrapper.DistributionType.BIN
+    distributionSha256Sum = '6f74b601422d6d6fc4e1f9a1ab6522f642c2fdcbc15ae33ebd30ba3d7198e854'
+}
+
 final def artifactsToPublish = [
         "com.google.code.gson:gson:2.14.0",
         "org.junit.platform:junit-platform-console-standalone:1.11.4",
