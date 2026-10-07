@@ -471,7 +471,7 @@ public final class ABIJSON {
         final JsonReader reader = new JsonReader(r);
         switch (STRICTNESS) {
         case 2: reader.setNestingLimit(50); /* fall through */
-        case 1: reader.setStrictness(Strictness.STRICT); break;
+        case 1: reader.setStrictness(Strictness.STRICT); break; // break to avoid setting LEGACY_STRICT below
         default: reader.setLenient(false);
         }
         return reader;
