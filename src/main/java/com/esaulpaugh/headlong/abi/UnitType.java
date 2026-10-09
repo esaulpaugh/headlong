@@ -129,25 +129,28 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     final long decodeUnsignedLong(ByteBuffer bb) {
-        final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
+        final int pos = bb.position();
+        final long a = bb.getLong(pos), b = bb.getLong(pos+8), c = bb.getLong(pos+16), d = bb.getLong(pos+24);
         if ((a | b | c | (d & (-1L << bitLength))) == 0L) {
+            bb.position(pos + UNIT_LENGTH_BYTES);
             return d;
         }
         throw err(bb);
     }
 
     final long decodeSignedLong(ByteBuffer bb) {
-        final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
+        final int pos = bb.position();
+        final long a = bb.getLong(pos), b = bb.getLong(pos+8), c = bb.getLong(pos+16), d = bb.getLong(pos+24);
         final long sign = d >> 63;
         if (a == sign && b == sign && c == sign
                 && Long.numberOfLeadingZeros(d ^ sign) - (Long.SIZE - bitLength) > 0) {
+            bb.position(pos + UNIT_LENGTH_BYTES);
             return d;
         }
         throw err(bb);
     }
 
     final IllegalArgumentException err(ByteBuffer bb) {
-        bb.position(bb.position() - UNIT_LENGTH_BYTES);
         decodeValid(bb, ABIType.newUnitBuffer());
         throw new AssertionError();
     }

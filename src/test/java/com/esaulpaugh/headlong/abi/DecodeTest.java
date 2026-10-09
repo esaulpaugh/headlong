@@ -135,7 +135,8 @@ public class DecodeTest {
         final Tuple args = Single.of(strings);
         final ByteBuffer bb = tt.encode(args);
         final ByteBuffer tooShort = ByteBuffer.wrap(Arrays.copyOf(bb.array(), 32 + 32 + (32 * strings.length)));
-        assertThrown(BufferUnderflowException.class, () -> tt.decode(tooShort));
+//        assertThrown(BufferUnderflowException.class, () -> tt.decode(tooShort));
+        assertThrown(IndexOutOfBoundsException.class, () -> tt.decode(tooShort));
         assertEquals(0, tooShort.remaining());
         assertEquals(tooShort.limit(), tooShort.position());
         tooShort.flip();

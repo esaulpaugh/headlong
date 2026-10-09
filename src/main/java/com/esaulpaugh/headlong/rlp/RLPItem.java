@@ -341,14 +341,13 @@ public abstract class RLPItem implements Comparable<RLPItem> {
                 if (t != o) return (t & 0xFF) - (o & 0xFF);
             }
         } else {
-            // inherits big-endianness from HeapByteBuffer via ByteBuffer
-            final LongBuffer thisLongBuf = ByteBuffer.wrap(this.buffer, this.dataIndex, this.dataLength).asLongBuffer();
-            final LongBuffer othrLongBuf = ByteBuffer.wrap(othr.buffer, othr.dataIndex, othr.dataLength).asLongBuffer();
+            final ByteBuffer thisBB = ByteBuffer.wrap(this.buffer);
+            final ByteBuffer othrBB = ByteBuffer.wrap(othr.buffer);
 
             final int chunks = commonLen >>> 3;
             for (int k = 0; k < chunks; k++) {
-                long t = thisLongBuf.get(k);
-                long o = othrLongBuf.get(k);
+                long t = thisBB.getLong(this.dataIndex + (k << 3));
+                long o = othrBB.getLong(othr.dataIndex + (k << 3));
                 if (t != o) return Long.compareUnsigned(t, o);
             }
             final int base = chunks << 3;

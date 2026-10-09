@@ -67,10 +67,17 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     public Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
-        final long abc = bb.getLong() | bb.getLong() | bb.getLong();
-        final long abcd = bb.getLong() | abc;
-        if (abcd == 0L) return false;
-        if (abcd == 1L && abc == 0L) return true;
+        final int pos = bb.position();
+        final long abc = bb.getLong(pos) | bb.getLong(pos+8) | bb.getLong(pos+16);
+        final long abcd = bb.getLong(pos+24) | abc;
+        if (abcd == 0L) {
+            bb.position(pos + UNIT_LENGTH_BYTES);
+            return false;
+        }
+        if (abcd == 1L && abc == 0L) {
+            bb.position(pos + UNIT_LENGTH_BYTES);
+            return true;
+        }
         throw err(bb);
     }
 
