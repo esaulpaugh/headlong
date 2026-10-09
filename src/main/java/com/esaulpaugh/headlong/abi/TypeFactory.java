@@ -105,17 +105,18 @@ public final class TypeFactory {
                 ABIType<?> t = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? UnitType.getLegacy(rawType) : UnitType.get(rawType);
                 return t != null ? t : tryParseFixed(rawType.toString());
             }
-        } catch (IndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+        } catch (IndexOutOfBoundsException | ArithmeticException cause) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+            throw unrecognizedType(rawType, cause);
         }
         throw unrecognizedType(rawType);
     }
 
-    private static IllegalArgumentException unrecognizedType(CharSequenceView rawType) {
-        return unrecognizedType(rawType.toString());
+    private static IllegalArgumentException unrecognizedType(CharSequence rawType) {
+        return unrecognizedType(rawType, null);
     }
 
-    private static IllegalArgumentException unrecognizedType(String rawType) {
-        return new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
+    private static IllegalArgumentException unrecognizedType(CharSequence rawType, RuntimeException cause) {
+        return new IllegalArgumentException("unrecognized type: \"" + rawType + '"', cause);
     }
 
     private static boolean leadDigitValid(char c) {
@@ -258,8 +259,8 @@ public final class TypeFactory {
                     elements = Arrays.copyOf(elements, i << 1);
                 }
             }
-        } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException("@ index " + i + ", " + iae.getMessage(), iae);
+        } catch (IllegalArgumentException | ArithmeticException re) {
+            throw new IllegalArgumentException("@ index " + i + ", " + re.getMessage(), re);
         }
     }
 

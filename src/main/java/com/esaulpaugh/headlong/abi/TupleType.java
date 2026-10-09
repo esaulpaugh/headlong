@@ -54,12 +54,12 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
         final int[] elementHeadOffsets = new int[elementTypes.length];
-        int headLengthSum = 0;
+        long headLengthSum = 0L;
         for (int i = 0; i < elementTypes.length; headLengthSum += elementTypes[i++].headLength()) {
-            elementHeadOffsets[i] = headLengthSum;
+            elementHeadOffsets[i] = (int)headLengthSum;
         }
         this.elementHeadOffsets = elementHeadOffsets;
-        this.headLengthSum = headLengthSum;
+        this.headLengthSum = Math.toIntExact(headLengthSum);
         this.indexed = indexed;
         this.flags = flags;
     }

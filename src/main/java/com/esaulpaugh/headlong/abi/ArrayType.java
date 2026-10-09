@@ -60,8 +60,8 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private int staticArrayHeadLength() {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-        case TYPE_CODE_ARRAY: return length * elementType.asArrayType().staticArrayHeadLength();
-        case TYPE_CODE_TUPLE: return length * elementType.asTupleType().headLengthSum;
+        case TYPE_CODE_ARRAY: return Math.toIntExact(length * (long)elementType.asArrayType().staticArrayHeadLength());
+        case TYPE_CODE_TUPLE: return Math.toIntExact(length * (long)elementType.asTupleType().headLengthSum);
         default: return length * UNIT_LENGTH_BYTES;
         }
     }
@@ -88,7 +88,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         if (arrayClass != null) {
             return arrayClass;
         }
-        return createArray(clazz, 0)
+        return createArray(clazz, 0) // Array.newInstance
                 .getClass();
     }
 
@@ -393,12 +393,12 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
      * Abort early if the input is obviously too short. Best effort to fail fast before allocating memory for the array.
      */
     private void checkNoDecodePossible(final int remaining, final int arrayLen) {
-        final int minByteLen = !dynamic
+        final long minByteLen = !dynamic
                                     ? headLength
                                     : elementType.dynamic
-                                        ? arrayLen * OFFSET_LENGTH_BYTES
+                                        ? (long)arrayLen * OFFSET_LENGTH_BYTES
                                         : !(elementType instanceof ByteType)
-                                            ? arrayLen * elementType.headLength()
+                                            ? (long)arrayLen * elementType.headLength()
                                             : (flags & ABIType.FLAG_LEGACY_DECODE) != 0
                                                 ? arrayLen
                                                 : Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES);
