@@ -21,15 +21,21 @@ final class CharSequenceView implements CharSequence {
     private final CharSequence source;
     private final int start;
     private final int end;
+    private final int h;
 
     CharSequenceView(CharSequence source) {
         this(source, 0, source.length());
     }
 
     private CharSequenceView(CharSequence source, int start, int end) { // no bounds checking!!
+        int h = 0;
+        for (int i = start; i < end; i++) {
+            h = 129 * h + source.charAt(i); // 33 *
+        }
         this.source = source;
         this.start = start;
         this.end = end;
+        this.h = h;
     }
 
     @Override
@@ -71,11 +77,7 @@ final class CharSequenceView implements CharSequence {
 
     @Override
     public int hashCode() {
-        int h = 0;
-        for (int i = start; i < end; i++) {
-            h = 31 * h + source.charAt(i);
-        }
-        return h;
+        return this.h;
     }
 
     @Override

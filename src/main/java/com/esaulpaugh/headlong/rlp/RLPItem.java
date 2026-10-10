@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 import java.util.Arrays;
 
 /**

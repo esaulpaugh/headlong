@@ -206,8 +206,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return bi;
     }
 //======================================================================================================================
-    private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
-    private static final Map<CharSequenceView, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
+    private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(512);
+    private static final Map<CharSequenceView, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(512);
 
     /* called from TypeFactory */
     static ABIType<?> get(String rawType) {
