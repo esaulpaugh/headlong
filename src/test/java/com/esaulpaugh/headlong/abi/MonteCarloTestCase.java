@@ -314,13 +314,28 @@ public class MonteCarloTestCase {
         }
     }
 
+    private static void validateCanonical(String c) {
+        if (c.charAt(c.length() - 1) != ')') throw new AssertionError();
+        int i = c.indexOf('t');
+        while (i >= 0) {
+            char ch = c.charAt(i + 1);
+            if (ch == '[' || ch == ',' || ch == ')')
+                throw new AssertionError("canonicalization failed");
+            i = c.indexOf('t', i + 1);
+        }
+        i = c.indexOf('d');
+        while (i >= 0) {
+            char ch = c.charAt(i + 1);
+            if (ch == '[' || ch== ',' || ch == ')')
+                throw new AssertionError("canonicalization failed");
+            i = c.indexOf('d', i + 1);
+        }
+    }
+
     void runPacked() {
         final Tuple args = this.argsTuple;
         final TupleType<Tuple> tt = this.function.getInputs();
-        if (tt.canonicalType.contains("int[") || tt.canonicalType.contains("int,") || tt.canonicalType.contains("int)")
-            || tt.canonicalType.contains("xed[") || tt.canonicalType.contains("xed,") || tt.canonicalType.contains("xed)")) {
-            throw new AssertionError("canonicalization failed");
-        }
+        validateCanonical(tt.canonicalType);
         try {
             PackedDecoder.checkDynamics(tt);
             Tuple decoded = tt.decodePacked(tt.encodePacked(args).array());
