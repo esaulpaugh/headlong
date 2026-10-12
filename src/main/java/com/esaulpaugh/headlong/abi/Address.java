@@ -175,21 +175,21 @@ public final class Address {
     }
 
     @SuppressWarnings("deprecation")
-    private static String doChecksum(final byte[] addressBytes) {
+    private static String doChecksum(final byte[] ascii) {
         final Keccak keccak256 = new Keccak(256);
-        keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
+        keccak256.update(ascii, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final byte[] hash = keccak256.digest();
         for (int b = 0, c = PREFIX_LEN; b < ADDRESS_DATA_BYTES; b++) {
             final byte hashByte = hash[b];
             if ((hashByte >>> 4) >= 8) {
-                addressBytes[c] = UPPERCASE[addressBytes[c]];
+                ascii[c] = UPPERCASE[ascii[c]];
             }
             c++;
             if ((hashByte & 0xF) >= 8) {
-                addressBytes[c] = UPPERCASE[addressBytes[c]];
+                ascii[c] = UPPERCASE[ascii[c]];
             }
             c++;
         }
-        return new String(addressBytes, 0, 0, addressBytes.length);
+        return new String(ascii, 0);
     }
 }

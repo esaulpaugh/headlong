@@ -46,8 +46,7 @@ public final class FastBase64 {
 
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
-        final byte[] out = encodeToBytes(buffer, offset, len, flags);
-        return new String(out, 0, 0, out.length);
+        return new String(encodeToBytes(buffer, offset, len, flags), 0);
     }
 
     public static byte[] encodeToBytes(byte[] buffer, int offset, int len, int flags) {

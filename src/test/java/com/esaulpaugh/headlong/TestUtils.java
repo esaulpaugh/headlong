@@ -234,7 +234,7 @@ public final class TestUtils {
         for (int i = 0; i < len; i++) {
             bytes[i] = (byte) (r.nextInt(95) + 32);
         }
-        return new String(bytes, 0, 0, len);
+        return new String(bytes, 0);
     }
 
     public static String generateUtf8String(int len, Random r) {

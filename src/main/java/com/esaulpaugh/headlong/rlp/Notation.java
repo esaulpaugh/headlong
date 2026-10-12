@@ -142,10 +142,10 @@ public final class Notation {
 
     @SuppressWarnings("deprecation")
     private static String newLinePadding(int depth) {
-        final byte[] prefix = new byte[1 + (depth * 2)]; // 2 spaces per level
-        Arrays.fill(prefix, (byte) ' ');
-        prefix[0] = (byte) '\n';
-        return new String(prefix, 0, 0, prefix.length);
+        final byte[] ascii = new byte[1 + (depth * 2)]; // 2 spaces per level
+        Arrays.fill(ascii, (byte) ' ');
+        ascii[0] = (byte) '\n';
+        return new String(ascii, 0);
     }
 
     @Override
