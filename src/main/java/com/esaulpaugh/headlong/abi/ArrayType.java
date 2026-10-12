@@ -88,6 +88,13 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         if (arrayClass != null) {
             return arrayClass;
         }
+        int dimensions = 0;
+        Class<?> c = this.clazz;
+        while (c.isArray()) {
+            c = c.getComponentType();
+            dimensions++;
+        }
+        if (dimensions >= 7) throw new IllegalArgumentException("too many array dimensions");
         return createArray(clazz, 0) // Array.newInstance
                 .getClass();
     }
