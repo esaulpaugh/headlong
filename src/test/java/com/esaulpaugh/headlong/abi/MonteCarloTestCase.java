@@ -389,8 +389,8 @@ public class MonteCarloTestCase {
             sb.append(baseTypeString);
         }
 
-        boolean isElement = r.nextBoolean() && r.nextBoolean();
-        if(isElement) {
+        final boolean isElementType = (r.nextInt() & 0b11) == 0b11;
+        if (isElementType) {
             int arrayDepth = r.nextInt(limits.maxArrayDepth + 1);
             for (int i = 0; i < arrayDepth; i++) {
                 sb.append('[');
