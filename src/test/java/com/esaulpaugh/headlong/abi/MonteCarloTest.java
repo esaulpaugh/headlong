@@ -159,7 +159,6 @@ public class MonteCarloTest {
             testCase = null;
             try {
                 testCase = new MonteCarloTestCase(caseSeed = caseGen.nextLong(), limits, instance, k);
-//                if(testCase.function.getInputs().getCanonicalType().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);
 //                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
 //                log.append('#')

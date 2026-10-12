@@ -317,8 +317,9 @@ public class MonteCarloTestCase {
     void runPacked() {
         final Tuple args = this.argsTuple;
         final TupleType<Tuple> tt = this.function.getInputs();
-        if (tt.canonicalType.contains("int[")) {
-            throw new AssertionError("failed canonicalization!");
+        if (tt.canonicalType.contains("int[") || tt.canonicalType.contains("int,") || tt.canonicalType.contains("int)")
+            || tt.canonicalType.contains("xed[") || tt.canonicalType.contains("xed,") || tt.canonicalType.contains("xed)")) {
+            throw new AssertionError("canonicalization failed");
         }
         try {
             PackedDecoder.checkDynamics(tt);
