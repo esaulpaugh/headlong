@@ -206,7 +206,14 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             return BigInteger.ZERO;
         }
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
+        if (unsigned) {
+            BigInteger bi = new BigInteger(1, unitBuffer); // guaranteed positive (zero ruled out above)
+            if (bi.compareTo(max) > 0) {
+                throw nonNegative(bi.bitLength());
+            }
+            return bi;
+        }
+        BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
         return bi;
     }
