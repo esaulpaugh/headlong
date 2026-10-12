@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /** Represents a decimal type such as fixed or ufixed. */
@@ -79,6 +80,11 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
-        return new BigDecimal(decodeValid(bb, unitBuffer), scale);
+        return new BigDecimal(
+                bitLength < Long.SIZE
+                            ? BigInteger.valueOf(unsigned ? decodeUnsignedLong(bb) : decodeSignedLong(bb))
+                            : decodeValid(bb, unitBuffer),
+                scale
+        );
     }
 }

@@ -197,13 +197,18 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        int i = UNIT_LENGTH_BYTES;
-        do {} while (--i >= 0 && unitBuffer[i] == 0);
-        if (i < 0) return BigInteger.ZERO;
-        BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
-        validateBigInt(bi);
-        return bi;
+        final int pos = bb.position();
+        int idx = pos + Long.BYTES * 3;
+        do {
+            if (bb.getLong(idx) != 0L) {
+                bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+                BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
+                validateBigInt(bi);
+                return bi;
+            }
+        } while ((idx -= Long.BYTES) >= pos);
+        bb.position(pos + UNIT_LENGTH_BYTES);
+        return BigInteger.ZERO;
     }
 //======================================================================================================================
     private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(512);

@@ -30,7 +30,7 @@ final class CharSequenceView implements CharSequence {
     private CharSequenceView(CharSequence source, int start, int end) { // no bounds checking!!
         int h = 0;
         for (int i = start; i < end; i++) {
-            h = 129 * h + source.charAt(i); // 33 *
+            h = 129 * h + source.charAt(i);
         }
         this.source = source;
         this.start = start;
