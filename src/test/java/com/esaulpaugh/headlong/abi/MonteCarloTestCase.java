@@ -57,34 +57,34 @@ public class MonteCarloTestCase {
     private static final int DEFAULT_MAX_ARRAY_LENGTH = 3; // does not apply to static base types e.g. bytes1-32
 
     private static final int NUM_TUPLES_ADDED = 15; // 17
-    private static final int NUM_FIXED_ADDED = 40;
+    private static final int NUM_OTHER_FIXED_ADDED = 40;
 
     private static final String[] FIXED_TYPES = genFixedKeys();
 
     private static final String[] BASE_TYPES;
 
     private static final String TUPLE_KEY = new String();
-    private static final String FIXED_KEY = new String();
+    private static final String OTHER_FIXED_KEY = new String();
+
+    private static final String[] ORDERED_KEYS = {
+            "address", "bool", "bytes", "bytes1", "bytes10", "bytes11", "bytes12", "bytes13", "bytes14", "bytes15",
+            "bytes16", "bytes17", "bytes18", "bytes19", "bytes2", "bytes20", "bytes21", "bytes22", "bytes23",
+            "bytes24", "bytes25", "bytes26", "bytes27", "bytes28", "bytes29", "bytes3", "bytes30", "bytes31",
+            "bytes32", "bytes4", "bytes5", "bytes6", "bytes7", "bytes8", "bytes9", "fixed168x10", "fixed128x18",
+            "fixed128x18", "fixed168x10", "function", "int256", "int104", "int112", "int120", "int128", "int136",
+            "int144", "int152", "int16", "int160", "int168", "int176", "int184", "int192", "int200", "int208",
+            "int216", "int224", "int232", "int24", "int240", "int248", "int256", "int32", "int40", "int48", "int56",
+            "int64", "int72", "int8", "int80", "int88", "int96", "string", "ufixed128x18", "ufixed128x18", "uint256",
+            "uint104", "uint112", "uint120", "uint128", "uint136", "uint144", "uint152", "uint16", "uint160",
+            "uint168", "uint176", "uint184", "uint192", "uint200", "uint208", "uint216", "uint224", "uint232",
+            "uint24", "uint240", "uint248", "uint256", "uint32", "uint40", "uint48", "uint56", "uint64", "uint72",
+            "uint8", "uint80", "uint88", "uint96",
+    };
 
     static {
-        final String[] orderedKeys = {
-                "address", "bool", "bytes", "bytes1", "bytes10", "bytes11", "bytes12", "bytes13", "bytes14", "bytes15",
-                "bytes16", "bytes17", "bytes18", "bytes19", "bytes2", "bytes20", "bytes21", "bytes22", "bytes23",
-                "bytes24", "bytes25", "bytes26", "bytes27", "bytes28", "bytes29", "bytes3", "bytes30", "bytes31",
-                "bytes32", "bytes4", "bytes5", "bytes6", "bytes7", "bytes8", "bytes9", "fixed168x10", "fixed128x18",
-                "fixed128x18", "fixed168x10", "function", "int256", "int104", "int112", "int120", "int128", "int136",
-                "int144", "int152", "int16", "int160", "int168", "int176", "int184", "int192", "int200", "int208",
-                "int216", "int224", "int232", "int24", "int240", "int248", "int256", "int32", "int40", "int48", "int56",
-                "int64", "int72", "int8", "int80", "int88", "int96", "string", "ufixed128x18", "ufixed128x18", "uint256",
-                "uint104", "uint112", "uint120", "uint128", "uint136", "uint144", "uint152", "uint16", "uint160",
-                "uint168", "uint176", "uint184", "uint192", "uint200", "uint208", "uint216", "uint224", "uint232",
-                "uint24", "uint240", "uint248", "uint256", "uint32", "uint40", "uint48", "uint56", "uint64", "uint72",
-                "uint8", "uint80", "uint88", "uint96",
-        };
+        assertEquals(109 /*TypeFactory.mapSize()*/, ORDERED_KEYS.length);
 
-        assertEquals(109 /*TypeFactory.mapSize()*/, orderedKeys.length);
-
-        for (String key : orderedKeys) {
+        for (String key : ORDERED_KEYS) {
             ABIType<?> type = TypeFactory.create(key);
             ABIType<?> baseType = ArrayType.baseType(type);
             if (baseType != ByteType.INSTANCE) {
@@ -93,16 +93,16 @@ public class MonteCarloTestCase {
             assertEquals(key, type.canonicalType);
         }
 
-        final String[] arr = new String[orderedKeys.length + NUM_TUPLES_ADDED + NUM_FIXED_ADDED];
+        final String[] arr = new String[ORDERED_KEYS.length + NUM_TUPLES_ADDED + NUM_OTHER_FIXED_ADDED];
         int i = 0;
-        for (String key : orderedKeys) {
+        for (String key : ORDERED_KEYS) {
             arr[i++] = key;
         }
         for (int j = 0; j < NUM_TUPLES_ADDED; j++) {
             arr[i++] = TUPLE_KEY;
         }
-        for (int j = 0; j < NUM_FIXED_ADDED; j++) {
-            arr[i++] = FIXED_KEY;
+        for (int j = 0; j < NUM_OTHER_FIXED_ADDED; j++) {
+            arr[i++] = OTHER_FIXED_KEY;
         }
         BASE_TYPES = arr;
     }
@@ -135,7 +135,7 @@ public class MonteCarloTestCase {
         instance.setSeed(seed);
 
         StringBuilder sb = new StringBuilder(128);
-        generateTupleTypeString(BASE_TYPES, instance, 0, sb);
+        generateTupleTypeString(instance, 0, sb);
         this.rawInputsStr = sb.toString();
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(instance), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         TupleType<?> inputs = function.getInputs();
@@ -348,7 +348,7 @@ public class MonteCarloTestCase {
         assertEquals(args, deserial);
     }
 
-    private void generateTupleTypeString(String[] baseTypes, Random r, int tupleDepth, StringBuilder sb) {
+    private void generateTupleTypeString(Random r, int tupleDepth, StringBuilder sb) {
         int len = r.nextInt(1 + limits.maxTupleLength);
         if (len == 0) {
             sb.append("()");
@@ -356,7 +356,7 @@ public class MonteCarloTestCase {
         }
         sb.append('(');
         do {
-            generateType(baseTypes, r, tupleDepth, sb);
+            generateType(r, tupleDepth, sb);
             if (--len == 0) {
                 break;
             }
@@ -365,25 +365,29 @@ public class MonteCarloTestCase {
         sb.append(')');
     }
 
-    private void generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth, StringBuilder sb) {
-        String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
+    private static void appendDecanonicalized(String baseTypeString, StringBuilder sb) {
+        switch (baseTypeString) {
+        case "int256": sb.append("int"); break;
+        case "uint256": sb.append("uint"); break;
+        case "fixed128x18": sb.append("fixed"); break;
+        case "ufixed128x18": sb.append("ufixed"); break;
+        default: sb.append(baseTypeString);
+        }
+    }
+
+    private void generateType(Random r, final int tupleDepth, StringBuilder sb) {
+        final String baseTypeString = BASE_TYPES[r.nextInt(BASE_TYPES.length)];
 
         if (baseTypeString == TUPLE_KEY) {
             if (tupleDepth < limits.maxTupleDepth) {
-                generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1, sb);
+                generateTupleTypeString(r, tupleDepth + 1, sb);
             } else {
-                sb.append(r.nextBoolean() ? "uint256" : "uint");
+                appendDecanonicalized(ORDERED_KEYS[r.nextInt(ORDERED_KEYS.length)], sb);
             }
-        } else if (baseTypeString == FIXED_KEY) {
+        } else if (baseTypeString == OTHER_FIXED_KEY) {
             sb.append(FIXED_TYPES[r.nextInt(FIXED_TYPES.length)]);
         } else if (r.nextBoolean()) {
-            switch (baseTypeString) {
-            case "int256": sb.append("int"); break;
-            case "uint256": sb.append("uint"); break;
-            case "fixed128x18": sb.append("fixed"); break;
-            case "ufixed128x18": sb.append("ufixed"); break;
-            default: sb.append(baseTypeString);
-            }
+            appendDecanonicalized(baseTypeString, sb);
         } else {
             sb.append(baseTypeString);
         }
