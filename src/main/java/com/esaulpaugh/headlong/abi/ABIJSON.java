@@ -364,7 +364,7 @@ public final class ABIJSON {
             String type = null;
             TupleType<?> components = null;
             String internalType = null;
-            Boolean indexed = null;
+            boolean indexed = false;
             reader.beginObject();
             int seen = 0;
             while (reader.peek() != JsonToken.END_OBJECT) {
@@ -387,7 +387,7 @@ public final class ABIJSON {
             if (internalType != null) {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
-            if (indexed == Boolean.TRUE) {
+            if (indexed) {
                 indexedManifest[i] = true;
             }
 
