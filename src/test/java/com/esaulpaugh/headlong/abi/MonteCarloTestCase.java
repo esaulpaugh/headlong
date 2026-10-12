@@ -138,7 +138,10 @@ public class MonteCarloTestCase {
         generateTupleTypeString(BASE_TYPES, instance, 0, sb);
         this.rawInputsStr = sb.toString();
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(instance), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
-        this.argsTuple = generateTuple(function.getInputs().elementTypes, instance);
+        TupleType<?> inputs = function.getInputs();
+        this.argsTuple = generateTuple(inputs.elementTypes, instance);
+        if (inputs.canonicalType.length() < rawInputsStr.length()) throw new AssertionError();
+        validateCanonical(inputs.canonicalType);
         testDeepCopy(argsTuple);
     }
 
@@ -314,30 +317,10 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static void validateCanonical(String c) {
-        if (c.charAt(c.length() - 1) != ')') throw new AssertionError();
-        int i = c.indexOf('t');
-        while (i >= 0) {
-            char ch = c.charAt(i + 1);
-            if (ch == '[' || ch == ',' || ch == ')')
-                throw new AssertionError("canonicalization failed");
-            i = c.indexOf('t', i + 1);
-        }
-        i = c.indexOf('d');
-        while (i >= 0) {
-            char ch = c.charAt(i + 1);
-            if (ch == '[' || ch== ',' || ch == ')')
-                throw new AssertionError("canonicalization failed");
-            i = c.indexOf('d', i + 1);
-        }
-    }
-
     void runPacked() {
         final Tuple args = this.argsTuple;
         final TupleType<Tuple> tt = this.function.getInputs();
-        validateCanonical(tt.canonicalType);
         try {
-            PackedDecoder.checkDynamics(tt);
             Tuple decoded = tt.decodePacked(tt.encodePacked(args).array());
             if (!decoded.equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
@@ -590,6 +573,24 @@ public class MonteCarloTestCase {
         }
         Arrays.sort(fixedKeys);
         return fixedKeys;
+    }
+
+    private static void validateCanonical(String c) {
+        if (c.charAt(c.length() - 1) != ')') throw new AssertionError();
+        int i = c.indexOf('t');
+        while (i >= 0) {
+            char ch = c.charAt(i + 1);
+            if (ch == '[' || ch == ',' || ch == ')')
+                throw new AssertionError("canonicalization failed");
+            i = c.indexOf('t', i + 1);
+        }
+        i = c.indexOf('d');
+        while (i >= 0) {
+            char ch = c.charAt(i + 1);
+            if (ch == '[' || ch== ',' || ch == ')')
+                throw new AssertionError("canonicalization failed");
+            i = c.indexOf('d', i + 1);
+        }
     }
 
     static class Limits {
