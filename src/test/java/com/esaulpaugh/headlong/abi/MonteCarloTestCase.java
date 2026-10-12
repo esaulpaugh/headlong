@@ -377,15 +377,15 @@ public class MonteCarloTestCase {
             }
         } else if (baseTypeString == FIXED_KEY) {
             sb.append(FIXED_TYPES[r.nextInt(FIXED_TYPES.length)]);
-        } else {
-            if (r.nextBoolean()) {
-                switch (baseTypeString) {
-                case "int256": sb.append("int"); return;
-                case "uint256": sb.append("uint"); return;
-                case "fixed128x18": sb.append("fixed"); return;
-                case "ufixed128x18": sb.append("ufixed"); return;
-                }
+        } else if (r.nextBoolean()) {
+            switch (baseTypeString) {
+            case "int256": sb.append("int"); break;
+            case "uint256": sb.append("uint"); break;
+            case "fixed128x18": sb.append("fixed"); break;
+            case "ufixed128x18": sb.append("ufixed"); break;
+            default: sb.append(baseTypeString);
             }
+        } else {
             sb.append(baseTypeString);
         }
 
