@@ -94,9 +94,9 @@ final class CharSequenceView implements CharSequence {
     }
 
     private static long fourCharLong(CharSequence cs, int offset) {
-        return (long)cs.charAt(offset) << 48
-                | (long)cs.charAt(offset + 1) << 32
-                | (long)cs.charAt(offset + 2) << 16
+        return (long)cs.charAt(offset) << Character.SIZE * 3
+                | (long)cs.charAt(offset + 1) << Character.SIZE * 2
+                | (long)cs.charAt(offset + 2) << Character.SIZE
                 | cs.charAt(offset + 3);
     }
 }

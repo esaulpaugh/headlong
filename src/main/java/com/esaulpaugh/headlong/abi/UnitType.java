@@ -150,9 +150,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         throw err(bb);
     }
 
-    final IllegalArgumentException err(ByteBuffer bb) {
-        decodeValid(bb, ABIType.newUnitBuffer());
-        throw new AssertionError();
+    final Error err(ByteBuffer bb) {
+        decodeValid(bb, ABIType.newUnitBuffer()); // throws IAE
+        return new AssertionError(); // unreachable
     }
 
     final int validatePrimitive(long longVal) {
@@ -198,17 +198,17 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
         final int pos = bb.position();
-        int idx = pos + Long.BYTES * 3;
-        do {
-            if (bb.getLong(idx) != 0L) {
-                bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-                BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
-                validateBigInt(bi);
-                return bi;
-            }
-        } while ((idx -= Long.BYTES) >= pos);
-        bb.position(pos + UNIT_LENGTH_BYTES);
-        return BigInteger.ZERO;
+        if (bb.getLong(pos + Long.BYTES * 3) == 0L
+                && bb.getLong(pos + Long.BYTES * 2) == 0L
+                && bb.getLong(pos + Long.BYTES) == 0L
+                && bb.getLong(pos) == 0L) {
+            bb.position(pos + UNIT_LENGTH_BYTES);
+            return BigInteger.ZERO;
+        }
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
+        validateBigInt(bi);
+        return bi;
     }
 //======================================================================================================================
     private static final Map<CharSequenceView, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(512);
