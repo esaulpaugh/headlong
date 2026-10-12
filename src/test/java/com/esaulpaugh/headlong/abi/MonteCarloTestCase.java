@@ -439,7 +439,7 @@ public class MonteCarloTestCase {
     }
 
     static Address generateAddress(Random r) {
-        return new Address(new BigInteger(r.nextBoolean() ? ADDRESS_BIT_LEN : ADDRESS_BIT_LEN - r.nextInt(ADDRESS_BIT_LEN), r));
+        return new Address(new BigInteger(r.nextBoolean() ? ADDRESS_BIT_LEN : ADDRESS_BIT_LEN - r.nextInt(ADDRESS_BIT_LEN + 1), r));
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, Random r) {
