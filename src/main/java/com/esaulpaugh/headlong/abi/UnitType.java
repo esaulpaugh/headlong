@@ -160,7 +160,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             throw negative(Integers.bitLen(~longVal));
         }
         if (longVal > maxLong) {
-            throw nonNegative(Integers.bitLen(longVal));
+            throw positive(Integers.bitLen(longVal));
         }
         return UNIT_LENGTH_BYTES;
     }
@@ -170,30 +170,30 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             throw negative(bigIntVal.bitLength());
         }
         if (bigIntVal.compareTo(max) > 0) {
-            throw nonNegative(bigIntVal.bitLength());
+            throw positive(bigIntVal.bitLength());
         }
         return UNIT_LENGTH_BYTES;
     }
 
-    private IllegalArgumentException negative(int actual) {
+    private Error negative(int actual) {
         if (unsigned) {
-            return new IllegalArgumentException("signed value given for unsigned type");
+            throw new IllegalArgumentException("signed value given for unsigned type");
         }
         if (actual >= bitLength) {
-            return new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
+            throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
         }
-        throw new AssertionError();
+        return new AssertionError();
     }
 
-    private IllegalArgumentException nonNegative(int actual) {
+    private Error positive(int actual) {
         if (unsigned) {
             if (actual > bitLength) {
-                return new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
+                throw new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
             }
         } else if (actual >= bitLength) {
-            return new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
+            throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
         }
-        throw new AssertionError();
+        return new AssertionError();
     }
 
     final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
@@ -209,7 +209,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         if (unsigned) {
             BigInteger bi = new BigInteger(1, unitBuffer); // guaranteed positive (zero ruled out above)
             if (bi.compareTo(max) > 0) {
-                throw nonNegative(bi.bitLength());
+                throw positive(bi.bitLength());
             }
             return bi;
         }
