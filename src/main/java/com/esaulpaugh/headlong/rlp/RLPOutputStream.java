@@ -59,7 +59,8 @@ public final class RLPOutputStream extends OutputStream {
         this.out = Objects.requireNonNull(out);
         this.internalBuf = new byte[bufferLen];
         this.bb = ByteBuffer.wrap(internalBuf);
-        this.bufferedItemLimit = bufferLen - (1 + Long.BYTES); // allow room for RLP item header
+        int bufferLenMinusOne = bufferLen - 1;
+        this.bufferedItemLimit = bufferLenMinusOne - Integers.len(bufferLenMinusOne); // allow room for worst-case RLP item header
     }
 
     /**
@@ -103,7 +104,7 @@ public final class RLPOutputStream extends OutputStream {
 
     public void writeSequence(Iterable<?> rawObjects) throws IOException {
         final int encodedLen = RLPEncoder.sumEncodedLen(rawObjects);
-        if (encodedLen <= bufferedItemLimit) {
+        if (encodedLen <= internalBuf.length) {
             bb.rewind();
             RLPEncoder.putSequence(rawObjects, bb);
             out.write(internalBuf, 0, bb.position());
