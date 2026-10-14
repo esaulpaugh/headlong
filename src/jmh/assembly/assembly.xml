@@ -157,13 +157,13 @@
                     <include>org/bouncycastle/util/Strings$1.class</include>
                 </includes>
                 <excludes>
-                    <exclude>org/openjdk/jmh/PerfAsm.class</exclude>
-                    <exclude>org/openjdk/jmh/generators/**</exclude>
-                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat$1.class</exclude>
-                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat.class</exclude>
-                    <exclude>org/openjdk/jmh/results/format/LaTeXResultFormat.class</exclude>
-                    <exclude>org/openjdk/jmh/results/format/XSVResultFormat.class</exclude>
-                    <exclude>org/openjdk/jmh/runner/format/SilentFormat.class</exclude>
+<!--                    <exclude>org/openjdk/jmh/PerfAsm.class</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/generators/**</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat$1.class</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat.class</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/results/format/LaTeXResultFormat.class</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/results/format/XSVResultFormat.class</exclude>-->
+<!--                    <exclude>org/openjdk/jmh/runner/format/SilentFormat.class</exclude>-->
                 </excludes>
             </unpackOptions>
         </dependencySet>
