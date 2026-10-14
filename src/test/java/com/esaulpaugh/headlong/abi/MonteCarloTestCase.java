@@ -581,19 +581,11 @@ public class MonteCarloTestCase {
 
     private static void validateCanonical(String c) {
         if (c.charAt(c.length() - 1) != ')') throw new AssertionError();
-        int i = c.indexOf('t');
-        while (i >= 0) {
-            char ch = c.charAt(i + 1);
-            if (ch == '[' || ch == ',' || ch == ')')
-                throw new AssertionError("canonicalization failed");
-            i = c.indexOf('t', i + 1);
+        for (int i = c.indexOf('t'); i >= 0; i = c.indexOf('t', i + 1)) {
+            switch (c.charAt(i + 1)) {case ')': case ',': case '[': throw new AssertionError("canonicalization failed");}
         }
-        i = c.indexOf('d');
-        while (i >= 0) {
-            char ch = c.charAt(i + 1);
-            if (ch == '[' || ch== ',' || ch == ')')
-                throw new AssertionError("canonicalization failed");
-            i = c.indexOf('d', i + 1);
+        for (int i = c.indexOf('d'); i >= 0; i = c.indexOf('d', i + 1)) {
+            switch (c.charAt(i + 1)) {case ')': case ',': case '[': throw new AssertionError("canonicalization failed");}
         }
     }
 
