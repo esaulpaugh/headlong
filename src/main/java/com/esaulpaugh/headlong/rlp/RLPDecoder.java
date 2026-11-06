@@ -55,7 +55,7 @@ public final class RLPDecoder {
     private static final int FLAG_LENIENT = 1;
     private static final int FLAG_INTERNAL = 2;
 
-    private final int flags;
+    final int flags;
     public final boolean lenient;
 
     private RLPDecoder(boolean lenient) {
@@ -314,7 +314,7 @@ public final class RLPDecoder {
         return (T) _wrap(buffer, index, containerEnd, flags);
     }
 
-    private RLPItem _wrap(byte[] buffer, int index, int containerEnd, int flags) {
+    RLPItem _wrap(byte[] buffer, int index, int containerEnd, int flags) {
         byte lead = buffer[index];
         switch (DataType.ordinal(lead)) {
         case ORDINAL_SINGLE_BYTE: return newSingleByte(buffer, index, containerEnd, flags);
