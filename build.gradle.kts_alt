@@ -92,7 +92,7 @@ val bcVersion = "1.86"
 val jmhVersion = "1.37"
 
 dependencies {
-    implementation("com.google.code.gson:gson:[2.1,2.14.0]") {
+    implementation("com.google.code.gson:gson:[2.1,2.15.0]") {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
 
@@ -150,7 +150,7 @@ tasks.withType<AbstractArchiveTask> {
 
 // ------------------ Populate Maven Local Task ------------------
 val artifactsToPublish = listOf(
-    "com.google.code.gson:gson:2.14.0",
+    "com.google.code.gson:gson:2.15.0",
     "org.junit.platform:junit-platform-console-standalone:1.11.4",
     "org.junit.jupiter:junit-jupiter-api:5.11.4",
     "org.bouncycastle:bcprov-jdk14:1.86",
