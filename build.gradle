@@ -179,7 +179,7 @@ wrapper {
 }
 
 final def artifactsToPublish = [
-        "com.google.code.gson:gson:2.14.0",
+        "com.google.code.gson:gson:2.15.0",
         "org.junit.platform:junit-platform-console-standalone:1.11.4",
         "org.junit.jupiter:junit-jupiter-api:5.11.4",
         "org.bouncycastle:bcprov-jdk14:1.86",
