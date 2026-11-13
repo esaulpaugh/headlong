@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -184,8 +185,8 @@ public class RLPStreamTest {
             count++;
         }
 
-        System.out.println("count = " + count);
-        System.out.println("decoded len = " + decoded.toByteArray().length);
+        assertEquals(3, count);
+        assertEquals(15, decoded.size());
 
         // read objects
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(decoded.toByteArray()));
@@ -275,7 +276,7 @@ public class RLPStreamTest {
     @Test
     public void testInterfaces() {
         try (Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(new ByteArrayInputStream(new byte[0])))) {
-            stream.forEach(System.out::println);
+            stream.forEach(Assertions::assertNotNull);
         }
         for (RLPItem item : (Iterable<RLPItem>) () -> RLP_STRICT.sequenceIterator(new ByteArrayInputStream(new byte[3]))) {
             assertNotNull(item);
@@ -336,7 +337,12 @@ public class RLPStreamTest {
 
                 senderThread.join();
             } catch (Exception ex) {
-                senderThread.interrupt();
+                try {
+                    senderThread.interrupt();
+                    senderThread.join();
+                } catch (Exception ex2) {
+                    ex.addSuppressed(ex2);
+                }
                 throw ex;
             }
             return null;
