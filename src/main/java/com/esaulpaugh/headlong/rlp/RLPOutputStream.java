@@ -119,7 +119,7 @@ public final class RLPOutputStream extends OutputStream {
 
     public void writeList(Iterable<?> rawElements) throws IOException {
         final int dataLen = RLPEncoder.sumEncodedLen(rawElements);
-        if (dataLen <= bufferedItemLimit) {
+        if (RLPEncoder.itemLen(dataLen) <= internalBuf.length) {
             bb.rewind();
             RLPEncoder.encodeList(dataLen, rawElements, bb);
             out.write(internalBuf, 0, bb.position());
