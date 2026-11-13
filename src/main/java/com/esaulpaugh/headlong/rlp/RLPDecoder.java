@@ -47,10 +47,10 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** Decodes RLP-formatted data. */
-public final class RLPDecoder {
+public enum RLPDecoder {
 
-    public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);
-    public static final RLPDecoder RLP_LENIENT = new RLPDecoder(true);
+    RLP_STRICT(false),
+    RLP_LENIENT(true);
 
     private static final int FLAG_LENIENT = 1;
     private static final int FLAG_INTERNAL = 2;
@@ -58,7 +58,7 @@ public final class RLPDecoder {
     final int flags;
     public final boolean lenient;
 
-    private RLPDecoder(boolean lenient) {
+    RLPDecoder(boolean lenient) {
         this.lenient = lenient;
         this.flags = lenient ? FLAG_LENIENT : 0;
     }
