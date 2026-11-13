@@ -131,7 +131,7 @@ public class RLPStreamTest {
 
     @Test
     public void testRLPOutputStream() throws Throwable {
-        assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
+        assertThrown(NullPointerException.class, () -> new RLPOutputStream(null));
         try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
             ros.write(0xc0);
             ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
@@ -153,7 +153,7 @@ public class RLPStreamTest {
 
         assertThrown(IllegalArgumentException.class, "bufferLen too large: 131073 > 131072", () -> new RLPOutputStream(null, 131_073));
 
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 65536)) {
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 129)) {
             ros.writeList(objects);
             assertEquals(Notation.forObjects((Object) objects), Notation.forEncoding(baos.toByteArray()));
             assertEquals("ce880573490923738490c0c3827761", baos.toString());
