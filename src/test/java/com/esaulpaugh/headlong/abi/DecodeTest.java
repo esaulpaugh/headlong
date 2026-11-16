@@ -1205,7 +1205,32 @@ public class DecodeTest {
     }
 
     @Test
-    public void testSelectIndicesVsDecodeIndices() {
+    public void testSelectIndicesRandom() {
+        final TupleType<Tuple> tt = TupleType.parse("(int8,int16,int32,int40,int48,int56,int64,int,bool,uint8,uint16,uint32,uint40,uint48,uint56,uint64,uint,address,bytes,bytes32,function,string,int128,uint240,decimal)");
+
+        final Random rand = TestUtils.seededRandom();
+        final int minIndices = 3;
+        final int[] selectedIndices = new int[minIndices + rand.nextInt(tt.size() + 1 - minIndices)];
+        for (int i = 0; i < selectedIndices.length; i++) {
+            selectedIndices[i] = rand.nextInt(tt.size());
+        }
+
+        final TupleType<Tuple> ttSelect = tt.select(selectedIndices);
+
+        final int[] uniqueSorted = Arrays.stream(selectedIndices)
+                                                .sorted()
+                                                .distinct()
+                                                .toArray();
+
+        assertEquals(ttSelect.size(), uniqueSorted.length);
+
+        for (int i = 0; i < uniqueSorted.length; i++) {
+            assertEquals(tt.get(uniqueSorted[i]), ttSelect.get(i));
+        }
+    }
+
+    @Test
+    public void testSelectIndices() {
         final TupleType<Quadruple<BigInteger, String, Boolean, Long>> tt = TupleType.parse("(int,string,bool,int64)");
         final Quadruple<BigInteger, String, Boolean, Long> t = Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L);
 
