@@ -776,8 +776,7 @@ public class TupleTest {
         assertEquals("[[a, null]]", new Tuple((Object) new String[]{"a", null}).toString());
         assertEquals("[[[], [null]]]", new Tuple((Object) new Object[]{new Object[0], new Object[]{null}}).toString());
         assertEquals("[[], [], [], []]", new Tuple(new int[0], new boolean[0], new long[0], new byte[0]).toString());
-        assertEquals("[[2.1, -1.0], [1.5, 2.0], [a, b], [1, 2]]",
-                new Tuple(new float[]{2.1f, -1.0f}, new double[]{1.5, 2.0}, new char[]{'a', 'b'}, new short[]{1, 2}).toString());
+        assertThrown(IllegalArgumentException.class, () -> new Tuple(new float[]{2.1f, -1.0f}, new double[]{1.5, 2.0}, new char[]{'a', 'b'}, new short[]{1, 2}).toString());
         {
             final Tuple t = new Tuple(
                     new int[]{0, -1, 2, 5, 99, 100, 101},

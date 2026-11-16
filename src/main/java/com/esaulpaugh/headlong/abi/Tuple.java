@@ -176,17 +176,41 @@ public class Tuple implements Iterable<Object> {
 
     @Override
     public final String toString() {
-        if (isEmpty()) return "[]";
-        return Arrays.deepToString(copy(new Object[elements.length], i -> {
-            Object element = elements[i];
-            if (element == null) return "_";
-            String str = element.toString();
-            return element instanceof String
-                        ? '"' + str + '"'
-                        : "_".equals(str)
-                            ? "\\_"
-                            : element;
-        }));
+        if (elements.length == 0) {
+            return "[]"; // interned
+        }
+        final StringBuilder sb = new StringBuilder(14 * elements.length).append('[');
+        for (int i = 0; i < elements.length; i++, sb.append(", ")) {
+            final Object element = elements[i];
+            if (element == null) {
+                sb.append("_");
+            } else if (element instanceof String) {
+                sb.append('"').append(element).append('"');
+            } else if (element.getClass().isArray()) {
+                if (element instanceof Object[]) {
+                    sb.append(Arrays.deepToString((Object[]) element));
+                } else if (element instanceof byte[]) {
+                    sb.append(Arrays.toString((byte[]) element));
+                } else if (element instanceof int[]) {
+                    sb.append(Arrays.toString((int[]) element));
+                } else if (element instanceof long[]) {
+                    sb.append(Arrays.toString((long[]) element));
+                } else if (element instanceof boolean[]) {
+                    sb.append(Arrays.toString((boolean[]) element));
+                } else {
+                    throw new IllegalArgumentException(); // float[], double[], short[], char[]
+                }
+            } else {
+                String s = element.toString();
+                if ("_".equals(s)) {
+                    sb.append("\\_");
+                } else {
+                    sb.append(s);
+                }
+            }
+        }
+        sb.setLength(sb.length() - 2);
+        return sb.append(']').toString();
     }
 
     private static Object[] copy(Object[] copy, IntFunction<Object> extractor) {
