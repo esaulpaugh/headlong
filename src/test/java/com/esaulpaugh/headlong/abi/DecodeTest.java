@@ -1203,4 +1203,66 @@ public class DecodeTest {
                 () -> BooleanType.INSTANCE.decode(ByteBuffer.wrap(FastHex.decode("0000000000000000000000000000000000000000000000010000000000000000")), newUnitBuffer())
         );
     }
+
+    @Test
+    public void testSelectIndicesVsDecodeIndices() {
+        final TupleType<Quadruple<BigInteger, String, Boolean, Long>> tt = TupleType.parse("(int,string,bool,int64)");
+        final Quadruple<BigInteger, String, Boolean, Long> t = Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L);
+
+        ByteBuffer bb = tt.encode(t);
+
+        final int[] indices = { 0, 2 };
+
+        final Quadruple<BigInteger, ?, Boolean, ?> sparseDec = tt.decode(bb, indices);
+        assertEquals(BigInteger.valueOf(550L), sparseDec.get0());
+        assertEquals(true, sparseDec.get2());
+
+//        final Pair<BigInteger, Boolean> tSelect = t.select(indices);
+//
+//        assertEquals(BigInteger.valueOf(550L), tSelect.get0());
+//        assertEquals(true, tSelect.get1());
+//
+//        assertEquals(sparseDec.get0(), tSelect.get0());
+//        assertEquals(sparseDec.get2(), tSelect.get1());
+//
+//        assertEquals(t.get0(), tSelect.get0());
+//        assertEquals(t.get2(), tSelect.get1());
+//
+        final TupleType<Pair<BigInteger, Boolean>> ttSelect = tt.select(indices);
+
+        assertEquals(TypeFactory.create("int"), ttSelect.get(0));
+        assertEquals(TypeFactory.create("bool"), ttSelect.get(1));
+
+        assertEquals(tt.get(0), ttSelect.get(0));
+        assertEquals(tt.get(2), ttSelect.get(1));
+//
+//        ByteBuffer bb2 = ttSelect.encode(tSelect);
+//        final Pair<BigInteger, Boolean> selectDec = ttSelect.decode(bb2);
+//        assertEquals(BigInteger.valueOf(550L), selectDec.get0());
+//        assertEquals(true, selectDec.get1());
+    }
+
+//    public <J extends Tuple> J select(int[] indices) {
+//        boolean[] manifest = new boolean[size()];
+//        for (int index : indices) {
+//            manifest[index] = true;
+//        }
+//        return select(manifest, false);
+//    }
+//
+//    public <J extends Tuple> J select(final boolean[] manifest, final boolean negate) {
+//        if (manifest.length != elements.length) {
+//            throw new IllegalArgumentException("expected manifest length " + elements.length + " but found length " + manifest.length);
+//        }
+//        int c = 0;
+//        for (int i = 0; i < elements.length; i++) if (negate ^ manifest[i]) c++;
+//        final Object[] selected = new Object[c];
+//        c = 0;
+//        for (int i = 0; i < elements.length; i++) {
+//            if (negate ^ manifest[i]) {
+//                selected[c++] = elements[i];
+//            }
+//        }
+//        return Tuple.from(selected);
+//    }
 }
