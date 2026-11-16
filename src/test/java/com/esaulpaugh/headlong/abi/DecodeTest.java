@@ -39,7 +39,14 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
 import static com.esaulpaugh.headlong.abi.ABIType.newUnitBuffer;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
 
@@ -1150,8 +1157,8 @@ public class DecodeTest {
     private static void testType(BigIntegerType writer, UnitType<?> ut, Random r, byte[] buffer) throws Throwable {
         final BigInteger min = ut.minValue();
         final BigInteger max = ut.maxValue();
-        final BigInteger val = TestUtils.uniformBigInteger(r, true, max.bitLength());
-        final long randL = TestUtils.uniformLong(r, true, Math.min(63, max.bitLength()));
+        final BigInteger val = TestUtils.wildBigInteger(r, true, max.bitLength());
+        final long randL = TestUtils.wildLong(r, true, Math.min(63, max.bitLength()));
 
         ByteBuffer a = writer.encode(min.subtract(BigInteger.ONE));
         ByteBuffer b = writer.encode(min);
