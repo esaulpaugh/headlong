@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -38,14 +39,7 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
 import static com.esaulpaugh.headlong.abi.ABIType.newUnitBuffer;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DecodeTest {
 
@@ -1156,21 +1150,24 @@ public class DecodeTest {
     private static void testType(BigIntegerType writer, UnitType<?> ut, Random r, byte[] buffer) throws Throwable {
         final BigInteger min = ut.minValue();
         final BigInteger max = ut.maxValue();
-        final int rand = r.nextInt(Math.max(128, max.intValue()));
+        final BigInteger val = TestUtils.uniformBigInteger(r, true, max.bitLength());
+        final long randL = TestUtils.uniformLong(r, true, Math.min(63, max.bitLength()));
 
         ByteBuffer a = writer.encode(min.subtract(BigInteger.ONE));
         ByteBuffer b = writer.encode(min);
         ByteBuffer c = writer.encode(max);
         ByteBuffer d = writer.encode(max.add(BigInteger.ONE));
         ByteBuffer z = writer.encode(BigInteger.ZERO);
-        ByteBuffer x = writer.encode(BigInteger.valueOf(rand));
+        ByteBuffer y = writer.encode(val);
+        ByteBuffer x = writer.encode(BigInteger.valueOf(randL));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> ut.decode(a, buffer));
+        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> ut.decode(a, buffer));
         assertEquals(min.toString(), ut.decode(b, buffer).toString());
         assertEquals(max.toString(), ut.decode(c, buffer).toString());
-        TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> ut.decode(d, buffer));
+        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> ut.decode(d, buffer));
         assertEquals("0", ut.decode(z, buffer).toString());
-        assertEquals(String.valueOf(rand), ut.decode(x, buffer).toString());
+        assertEquals(String.valueOf(val), ut.decode(y, buffer).toString());
+        assertEquals(String.valueOf(randL), ut.decode(x, buffer).toString());
     }
 
     private static void testIterative(BigIntegerType int256, BigIntegerType uint256, byte[] encoding) {
