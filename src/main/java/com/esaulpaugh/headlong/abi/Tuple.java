@@ -180,7 +180,7 @@ public class Tuple implements Iterable<Object> {
             return "[]"; // interned
         }
         final StringBuilder sb = new StringBuilder(14 * elements.length).append('[');
-        for (int i = 0; i < elements.length; i++, sb.append(", ")) {
+        for (int i = 0; true; sb.append(", ")) {
             final Object element = elements[i];
             if (element == null) {
                 sb.append("_");
@@ -208,9 +208,10 @@ public class Tuple implements Iterable<Object> {
                     sb.append(s);
                 }
             }
+            if (++i == elements.length) {
+                return sb.append(']').toString();
+            }
         }
-        sb.setLength(sb.length() - 2);
-        return sb.append(']').toString();
     }
 
     private static Object[] copy(Object[] copy, IntFunction<Object> extractor) {
