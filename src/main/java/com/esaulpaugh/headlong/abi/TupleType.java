@@ -353,9 +353,17 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * @param end exclusive end index
      * @return the sliced {@link TupleType}
      */
-    public TupleType<J> slice(int start, int end) {
+    public <T extends Tuple> TupleType<T> slice(int start, int end) {
         final boolean[] manifest = new boolean[elementTypes.length];
         Arrays.fill(manifest, start, end, true);
+        return select(manifest);
+    }
+
+    public <T extends Tuple> TupleType<T> select(int[] indices) {
+        boolean[] manifest = new boolean[size()];
+        for (int index : indices) {
+            manifest[index] = true;
+        }
         return select(manifest);
     }
 
@@ -366,7 +374,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * @param manifest  booleans specifying whether to include the respective elements
      * @return  the new {@link TupleType}
      */
-    public TupleType<J> select(boolean... manifest) {
+    public <T extends Tuple> TupleType<T> select(boolean... manifest) {
         return selectElements(manifest, false);
     }
 
@@ -377,19 +385,19 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * @param manifest  booleans specifying whether to exclude the respective elements
      * @return  the new {@link TupleType}
      */
-    public TupleType<J> exclude(boolean... manifest) {
+    public <T extends Tuple> TupleType<T> exclude(boolean... manifest) {
         return selectElements(manifest, true);
     }
 
     @SuppressWarnings("unchecked")
-    private TupleType<J> selectElements(final boolean[] manifest, final boolean negate) {
+    private <T extends Tuple> TupleType<T> selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
         if (manifest.length != size) {
             throw new IllegalArgumentException("expected manifest length " + size + " but found length " + manifest.length);
         }
         int c = 0;
         for (boolean b : manifest) if (negate ^ b) c++;
-        if (c == 0) return (TupleType<J>) TupleType.empty(this.flags);
+        if (c == 0) return (TupleType<T>) TupleType.empty(this.flags);
         boolean dynamic = false;
         final ABIType<?>[] selected = new ABIType<?>[c];
         final String[] selectedNames = elementNames == null ? null : new String[c];
