@@ -1198,13 +1198,13 @@ public class ABIJSONTest {
             final byte[] arr = new byte[160];
             Arrays.fill(arr, 0, arr.length / 2, (byte) '(');
             Arrays.fill(arr, arr.length / 2, arr.length, (byte) ')');
-            Function.parse(new String(arr, 0, 0, arr.length));
+            Function.parse(new String(arr, 0));
         }
 
         final byte[] arr2 = new byte[162];
         Arrays.fill(arr2, 0, arr2.length / 2, (byte)'(');
         Arrays.fill(arr2, arr2.length / 2, arr2.length, (byte)')');
-        assertThrown(IllegalArgumentException.class, "exceeds nesting limit of 79", () -> Function.parse(new String(arr2, 0, 0, arr2.length)));
+        assertThrown(IllegalArgumentException.class, "exceeds nesting limit of 79", () -> Function.parse(new String(arr2, 0)));
     }
 
     @Test

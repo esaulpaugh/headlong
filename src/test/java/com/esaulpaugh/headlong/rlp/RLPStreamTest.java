@@ -79,17 +79,17 @@ public class RLPStreamTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (RLPOutputStream ros = new RLPOutputStream(baos)) {
-            ros.write(Integer.MAX_VALUE);
-            ros.write(Integer.MIN_VALUE);
+            ros.writeInt(Integer.MAX_VALUE);
+            ros.writeInt(Integer.MIN_VALUE);
             ros.writeSequence((Object[])sequence);
             for (byte[] e : sequence) ros.write(e);
             for (byte[] e : sequence) ros.write(e, 0, e.length);
-            ros.write(127);
-            ros.write(0);
+            ros.writeInt(127);
+            ros.writeInt(0);
             ros.writeList(Collections.singletonList(new byte[]{-1}));
-            ros.write(Short.MAX_VALUE);
+            ros.writeInt(Short.MAX_VALUE);
             ros.writeSequence(new byte[] { 1, 0 }, new Object[] { new byte[] { 1, 1 } }, Strings.EMPTY_BYTE_ARRAY);
-            ros.write(Short.MIN_VALUE);
+            ros.writeInt(Short.MIN_VALUE);
         }
 
         Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(new ByteArrayInputStream(baos.toByteArray()));
@@ -134,7 +134,7 @@ public class RLPStreamTest {
     public void testRLPOutputStream() throws Throwable {
         assertThrown(NullPointerException.class, () -> new RLPOutputStream(null));
         try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
-            ros.write(0xc0);
+            ros.writeInt(0xc0);
             ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
             ros.writeSequence(new byte[] { 0x01 }, new byte[] { 0x02 });
             ros.writeSequence(Collections.singletonList(new byte[] { 0x03 }));
@@ -158,7 +158,7 @@ public class RLPStreamTest {
             ros.writeList(objects);
             assertEquals(Notation.forObjects((Object) objects), Notation.forEncoding(baos.toByteArray()));
             assertEquals("ce880573490923738490c0c3827761", baos.toString());
-            assertEquals("ce880573490923738490c0c3827761", ros.toString());
+            assertEquals("RLPOutputStream{out=ce880573490923738490c0c3827761}", ros.toString());
         }
     }
 
