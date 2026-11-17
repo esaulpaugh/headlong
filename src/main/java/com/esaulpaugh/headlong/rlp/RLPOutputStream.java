@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
@@ -63,20 +64,21 @@ public final class RLPOutputStream extends OutputStream {
         this.bufferedItemLimit = bufferLenMinusOne - Integers.len(bufferLenMinusOne); // allow room for worst-case RLP item header
     }
 
+    @Override
+    public void write(int b) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Writes the RLP encoding of the given integer to the underlying {@link OutputStream}.
-     * <p>
-     * NOTE: This violates the general method contract in that it may write <em>multiple</em> bytes to the underlying stream,
-     * depending on the integer being encoded.
      *
-     * @param b the integer to write as RLP bytes
+     * @param val the integer to write as RLP bytes
      */
-    @Override
-    public void write(int b) throws IOException {
-        if (b >= 0 && b < 128) {
-            out.write(b);
+    public void writeInt(int val) throws IOException {
+        if (val >= 0 && val < 128) {
+            out.write(val);
         } else {
-            write(Integers.toBytes(b));
+            write(Integers.toBytes(val));
         }
     }
 
