@@ -136,7 +136,7 @@ public final class RLPOutputStream extends OutputStream {
 
     @Override
     public String toString() {
-        return out.toString();
+        return RLPOutputStream.class.getSimpleName() + "{out=" + out + '}';
     }
 
     @Override
