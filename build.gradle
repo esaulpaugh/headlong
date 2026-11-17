@@ -30,7 +30,7 @@ compileJava {
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -108,7 +108,7 @@ repositories {
 ext {
     junitVersion = "5.11.4"
     junitPlatformVersion = "1.11.4"
-    bcVersion = "1.86"
+    bcVersion = "1.87"
     jmhVersion = "1.37"
 }
 
@@ -163,7 +163,7 @@ wrapper {
     distributionUrl = "https://services.gradle.org/distributions/gradle-8.14.7-bin.zip"
 
     doLast {
-        def propsFile = file('gradle/wrapper/gradle-wrapper.properties')
+        def propsFile = file("gradle/wrapper/gradle-wrapper.properties")
         if (propsFile.exists()) {
             propsFile.text =
                             "distributionBase=GRADLE_USER_HOME\n" +
@@ -182,7 +182,7 @@ final def artifactsToPublish = [
         "com.google.code.gson:gson:2.15.0",
         "org.junit.platform:junit-platform-console-standalone:1.11.4",
         "org.junit.jupiter:junit-jupiter-api:5.11.4",
-        "org.bouncycastle:bcprov-jdk14:1.86",
+        "org.bouncycastle:bcprov-jdk14:1.87",
         "org.openjdk.jmh:jmh-core:1.37",
         "org.openjdk.jmh:jmh-generator-annprocess:1.37"
 ]
@@ -229,8 +229,8 @@ task populateM2 {
             def (group, name, ver) = gav.split(":")
 
             def dep = dependencies.create("${group}:${name}:${ver}") {
-                if (group == 'com.google.code.gson' && name == 'gson') {
-                    exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+                if (group == "com.google.code.gson" && name == "gson") {
+                    exclude group: "com.google.errorprone", module: "error_prone_annotations"
                 }
             }
 

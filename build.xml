@@ -32,7 +32,7 @@
   <property name="junit.jupiter.version" value="5.11.4" />
   <property name="junit.standalone.version" value="1.11.4" />
   <property name="opentest4j.version" value="1.3.0" />
-  <property name="bcprov.version" value="1.86" />
+  <property name="bcprov.version" value="1.87" />
 
   <!-- Maven Repository Paths -->
   <property name="maven.repo" value="${user.home}/.m2/repository" />
@@ -42,7 +42,7 @@
   <!-- Library Paths -->
   <!-- Gson -->
   <property name="maven.gson" value="${maven.repo}/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
-  <property name="gradle.gson" value="${gradle.repo}/com.google.code.gson/gson/${gson.version}/efc0e34ede4e3204eaefb84a00e55e8c86634382/gson-${gson.version}.jar" />
+  <property name="gradle.gson" value="${gradle.repo}/com.google.code.gson/gson/${gson.version}/3c8f3903bd90f774de74f126be756bbc1408abcb/gson-${gson.version}.jar" />
 
   <!-- JUnit -->
   <property name="maven.junit-api" value="${maven.repo}/org/junit/jupiter/junit-jupiter-api/${junit.jupiter.version}/junit-jupiter-api-${junit.jupiter.version}.jar" />
@@ -54,7 +54,7 @@
 
   <!-- Bouncy Castle -->
   <property name="maven.bcprov" value="${maven.repo}/org/bouncycastle/bcprov-jdk14/${bcprov.version}/bcprov-jdk14-${bcprov.version}.jar" />
-  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/56bbea5a677c10c695999d8e7636d2358b7b5f5b/bcprov-jdk14-${bcprov.version}.jar" />
+  <property name="gradle.bcprov" value="${gradle.repo}/org.bouncycastle/bcprov-jdk14/${bcprov.version}/d80b86798ae495e1abe61ba4d3a805139efc392e/bcprov-jdk14-${bcprov.version}.jar" />
 
   <!-- Standalone -->
   <property name="maven.standalone" value="${maven.repo}/org/junit/platform/junit-platform-console-standalone/${junit.standalone.version}/junit-platform-console-standalone-${junit.standalone.version}.jar" />
