@@ -146,8 +146,8 @@ test {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    if (gradleMajorVersion >= 7) getMainClass().set("org.openjdk.jmh.Main")
-    else main = "org.openjdk.jmh.Main"
+    if (gradleMajorVersion < 7)  main = "org.openjdk.jmh.Main"
+    else getMainClass().set("org.openjdk.jmh.Main")
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
 
@@ -157,8 +157,18 @@ classes.finalizedBy(jmhClasses)
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
-    fileMode = 0644
-    dirMode = 0755
+    if (gradleMajorVersion < 9) {
+        fileMode = 0644
+        dirMode = 0755
+    } else {
+        filePermissions {
+            unix(0644)
+        }
+
+        dirPermissions {
+            unix(0755)
+        }
+    }
 }
 // ./gradlew wrapper --gradle-version 8.14.7 --distribution-type bin --gradle-distribution-sha256-sum 903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856 --no-configuration-cache
 wrapper {
