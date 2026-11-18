@@ -311,9 +311,9 @@ public class RLPEncoderTest {
         RLPEncoder.putString(new byte[] { -127 }, two);
         assertEquals("8181", TestUtils.encode(two));
 
-        byte[] dest = new byte[6];
+        byte[] dest = new byte[7];
         int idx = RLPEncoder.putSequence(Collections.singletonList(new byte[]{0, 1, 2}), dest, 2);
-        assertArrayEquals(new byte[] { 0, 0, (byte) 0x83, 0, 1, 2 }, dest);
-        assertEquals(dest.length, idx);
+        assertArrayEquals(new byte[] { 0, 0, (byte) 0x83, 0, 1, 2, 0 }, dest);
+        assertEquals(6, idx);
     }
 }
