@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -31,36 +30,10 @@ import java.util.Objects;
  */
 public final class RLPOutputStream extends OutputStream {
 
-    private static final int MIN_BUFFER_LEN = 128;
-    private static final int MAX_BUFFER_LEN = 131_072;
-
     private final OutputStream out;
-    private final byte[] internalBuf;
-    private final ByteBuffer bb;
-    private final int bufferedItemLimit;
 
     public RLPOutputStream(OutputStream out) {
-        this(out, 1_152);
-    }
-
-    /**
-     * Creates an RLPOutputStream with a custom buffer size.
-     *
-     * @param out   the OutputStream to wrap
-     * @param bufferLen the size of this instance's internal buffer
-     */
-    public RLPOutputStream(OutputStream out, int bufferLen) {
-        if (bufferLen < MIN_BUFFER_LEN) {
-            throw new IllegalArgumentException("bufferLen too small: " + bufferLen + " < " + MIN_BUFFER_LEN);
-        }
-        if (bufferLen > MAX_BUFFER_LEN) {
-            throw new IllegalArgumentException("bufferLen too large: " + bufferLen + " > " + MAX_BUFFER_LEN);
-        }
         this.out = Objects.requireNonNull(out);
-        this.internalBuf = new byte[bufferLen];
-        this.bb = ByteBuffer.wrap(internalBuf);
-        int bufferLenMinusOne = bufferLen - 1;
-        this.bufferedItemLimit = bufferLenMinusOne - Integers.len(bufferLenMinusOne); // allow room for worst-case RLP item header
     }
 
     @Override
@@ -88,15 +61,7 @@ public final class RLPOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] buffer, int offset, int len) throws IOException {
-        if (len <= bufferedItemLimit) {
-            bb.rewind();
-            RLPEncoder.putString(buffer, offset, len, bb);
-            out.write(internalBuf, 0, bb.position());
-        } else {
-            final ByteBuffer temp = ByteBuffer.allocate(RLPEncoder.itemLen(len));
-            RLPEncoder.putString(buffer, offset, len, temp);
-            out.write(temp.array(), 0, temp.position()); // itemLen(len) could be oversized by 1 for single-byte items, so use position()
-        }
+        RLPEncoder.putString(buffer, offset, len, out);
     }
 
     public void writeSequence(Object... rawObjects) throws IOException {
@@ -104,14 +69,7 @@ public final class RLPOutputStream extends OutputStream {
     }
 
     public void writeSequence(Iterable<?> rawObjects) throws IOException {
-        final int encodedLen = RLPEncoder.sumEncodedLen(rawObjects);
-        if (encodedLen <= internalBuf.length) {
-            bb.rewind();
-            RLPEncoder.putSequence(rawObjects, bb);
-            out.write(internalBuf, 0, bb.position());
-        } else {
-            writeOut(RLPEncoder.sequence(rawObjects));
-        }
+        RLPEncoder.putSequence(rawObjects, out);
     }
 
     public void writeList(Object... rawElements) throws IOException {
@@ -120,17 +78,7 @@ public final class RLPOutputStream extends OutputStream {
 
     public void writeList(Iterable<?> rawElements) throws IOException {
         final int dataLen = RLPEncoder.sumEncodedLen(rawElements);
-        if (dataLen <= bufferedItemLimit) {
-            bb.rewind();
-            RLPEncoder.encodeList(dataLen, rawElements, bb);
-            out.write(internalBuf, 0, bb.position());
-        } else {
-            writeOut(RLPEncoder.list(rawElements));
-        }
-    }
-
-    private void writeOut(byte[] rlp) throws IOException {
-        out.write(rlp, 0, rlp.length);
+        RLPEncoder.encodeList(dataLen, rawElements, out);
     }
 
     @Override

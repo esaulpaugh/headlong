@@ -17,6 +17,8 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.util.Integers;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -113,9 +115,35 @@ public final class RLPEncoder {
         }
     }
 
+    private static void encodeItem(Object raw, OutputStream dest) throws IOException {
+        if (raw instanceof byte[]) {
+            byte[] bytes = (byte[]) raw;
+            putString(bytes, 0, bytes.length, dest);
+        } else if (raw instanceof Iterable<?>) {
+            Iterable<?> elements = (Iterable<?>) raw;
+            encodeList(sumEncodedLen(elements), elements, dest);
+        } else if (raw instanceof Object[]) {
+            Iterable<?> elements = Arrays.asList((Object[]) raw);
+            encodeList(sumEncodedLen(elements), elements, dest);
+        } else {
+            throw new IllegalArgumentException("unsupported object type. expected instanceof byte[], Iterable, or Object[]");
+        }
+    }
+
     static void encodeList(int dataLen, Iterable<?> elements, ByteBuffer bb) {
         insertListPrefix(dataLen, bb);
         putSequence(elements, bb);
+    }
+
+    static void encodeList(int dataLen, Iterable<?> elements, OutputStream dest) throws IOException {
+        if (isShort(dataLen)) {
+            dest.write(LIST_SHORT_OFFSET + dataLen);
+        } else {
+            final int len = Integers.len(dataLen);
+            dest.write(LIST_LONG_OFFSET + len);
+            Integers.putLong(dataLen, len, dest);
+        }
+        putSequence(elements, dest);
     }
 // ---------------------------------------------------------------------------------------------------------------------
     /**
@@ -163,6 +191,22 @@ public final class RLPEncoder {
         dest.put(byteString, offset, length);
     }
 
+    static void putString(byte[] byteString, int offset, int length, OutputStream dest) throws IOException {
+        if (length == 1) {
+            if (!DataType.isSingleByte(byteString[offset])) {
+                dest.write(STRING_SHORT_OFFSET + 1);
+            }
+        } else if (isShort(length)) {
+            dest.write(STRING_SHORT_OFFSET + length);
+        } else {
+            final int len = Integers.len(length);
+            dest.write(STRING_LONG_OFFSET + len);
+            byte[] lengthBytes = Integers.toBytes(length);
+            dest.write(lengthBytes, lengthBytes.length - len, len);
+        }
+        dest.write(byteString, offset, length);
+    }
+
     public static byte[] sequence(Object... objects) {
         return sequence(Arrays.asList(objects));
     }
@@ -203,6 +247,12 @@ public final class RLPEncoder {
      * @param dest    the destination for the sequence of RLP encodings
      */
     public static void putSequence(Iterable<?> objects, ByteBuffer dest) {
+        for (Object raw : objects) {
+            encodeItem(raw, dest);
+        }
+    }
+
+    static void putSequence(Iterable<?> objects, OutputStream dest) throws IOException {
         for (Object raw : objects) {
             encodeItem(raw, dest);
         }

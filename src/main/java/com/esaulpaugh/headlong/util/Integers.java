@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.util;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -183,6 +185,21 @@ public final class Integers {
         case 3: o.put((byte) (val >>> 16));
         case 2: o.put((byte) (val >>> 8));
         case 1: o.put((byte) val);
+        case 0: return len;
+        default: throw outOfRangeException(len);
+        }
+    }
+
+    public static int putLong(long val, int len, OutputStream o) throws IOException {
+        switch (len) { /* cases 8 through 1 fall through */
+        case 8: o.write((int) (val >>> 56));
+        case 7: o.write((int) (val >>> 48));
+        case 6: o.write((int) (val >>> 40));
+        case 5: o.write((int) (val >>> 32));
+        case 4: o.write((int) (val >>> 24));
+        case 3: o.write((int) (val >>> 16));
+        case 2: o.write((int) (val >>> 8));
+        case 1: o.write((int) val);
         case 0: return len;
         default: throw outOfRangeException(len);
         }
