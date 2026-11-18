@@ -147,14 +147,11 @@ public class RLPStreamTest {
                 new HashSet<byte[]>(),
                 new Object[] { new byte[] { 0x77, 0x61 } }
         };
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 128)) {
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
             ros.writeSequence(objects);
             assertEquals(Notation.forObjects(objects), Notation.forEncoding(baos.toByteArray()));
         }
-
-        assertThrown(IllegalArgumentException.class, "bufferLen too large: 131073 > 131072", () -> new RLPOutputStream(null, 131_073));
-
-        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos, 129)) {
+        try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
             ros.writeList(objects);
             assertEquals(Notation.forObjects((Object) objects), Notation.forEncoding(baos.toByteArray()));
             assertEquals("ce880573490923738490c0c3827761", baos.toString());
@@ -215,7 +212,7 @@ public class RLPStreamTest {
         final RLPString y = RLP_STRICT.wrapString(encoding);
         {
             final Baos b = new Baos();
-            final RLPOutputStream rlpOut = new RLPOutputStream(b, 128);
+            final RLPOutputStream rlpOut = new RLPOutputStream(b);
             y.copyData(rlpOut);
             assertArrayEquals(encoding, b.toByteArray());
         }
