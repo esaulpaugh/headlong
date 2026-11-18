@@ -54,8 +54,8 @@ public final class RLPEncoder {
 
     /** Doesn't work for single-byte items. */
     static int itemLen(int dataLen) {
-        return (isShort(dataLen) ? 1 : 1 + Integers.len(dataLen))
-                + dataLen;
+        if (isShort(dataLen)) return 1 + dataLen;
+        return Math.addExact(1 + Integers.len(dataLen), dataLen);
     }
 
     static void insertListPrefix(int dataLen, ByteBuffer bb) {
