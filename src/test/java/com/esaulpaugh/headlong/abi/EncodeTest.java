@@ -666,8 +666,8 @@ public class EncodeTest {
         final BigDecimalType fakeDecimal = new BigDecimalType("decimal", 168, 10, false, BigDecimalType.CODE);
 
         assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> fakeDecimal.validate(decimalMin.subtract(O_0000000001)));
-        decimal.validate(decimalMin.unscaledValue());
-        decimal.validate(decimalMax.unscaledValue());
+        fakeDecimal.validate(decimalMin);
+        fakeDecimal.validate(decimalMax);
         assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> fakeDecimal.validate(decimalMax.add(O_0000000001)));
     }
 
