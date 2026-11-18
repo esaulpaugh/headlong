@@ -477,7 +477,7 @@ public final class ABIJSON {
         return reader;
     }
 
-    private static final class NonSyncWriter extends CharArrayWriter {
+    static final class NonSyncWriter extends CharArrayWriter {
 
         NonSyncWriter(int initialLen) {
             super(initialLen);
