@@ -419,11 +419,13 @@ public class TupleTest {
     public void testSubtupleType() throws Throwable {
         TupleType<?> tt = TupleType.parse("(bytes3,uint16[],string)");
 
+        TupleType<Single<ArrayType<ByteType, Byte, byte[]>>> ttSelect = tt.select(true, false, false);
+
         assertEquals(TupleType.EMPTY, tt.select(false, false, false));
         assertEquals(TupleType.of("string"), tt.select(false, false, true));
         assertEquals(TupleType.of("uint16[]"), tt.select(false, true, false));
         assertEquals(TupleType.of("uint16[]", "string"), tt.select(false, true, true));
-        assertEquals(TupleType.of("bytes3"), tt.select(true, false, false));
+        assertEquals(TupleType.of("bytes3"), ttSelect);
         assertEquals(TupleType.of("bytes3", "string"), tt.select(true, false, true));
         assertEquals(TupleType.of("bytes3", "uint16[]"), tt.select(true, true, false));
         assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.select(true, true, true));
@@ -714,7 +716,9 @@ public class TupleTest {
         final Triple<byte[], String, Long> z = n.get2();
 
         final Tuple t0 = Tuple.from();
-        final Tuple t1 = Tuple.from((Object)"".getBytes());
+        @SuppressWarnings("unchecked")
+        final Single<byte[]> t1 = (Single<byte[]>) Tuple.from((Object)"".getBytes());
+        final Tuple t1_ = Tuple.from((Object)"".getBytes());
         final Tuple t2 = Tuple.from(new byte[] {0}, new String("75"));
         final Tuple t3 = Tuple.from(new byte[2], new String("75"), 75L);
         final Tuple t4 = Tuple.from(q.elements);
@@ -727,6 +731,7 @@ public class TupleTest {
         testEquals(s, t1);
         testEquals(p, t2);
         testEquals(t, t3);
+        testEquals(t1, t1_);
 
         @SuppressWarnings("unchecked")
         Quadruple<byte[], Object, Number, Throwable> t4quad = (Quadruple<byte[], Object, Number, Throwable>) t4;

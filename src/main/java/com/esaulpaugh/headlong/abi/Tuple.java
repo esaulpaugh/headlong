@@ -80,7 +80,7 @@ public class Tuple implements Iterable<Object> {
         return new Sextuple<>(requireNoNulls(new Object[] { a, b, c, d, e, f }));
     }
 
-    public static <J extends Tuple> J from(Object... elements) {
+    public static Tuple from(Object... elements) {
         return create(copy(new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
