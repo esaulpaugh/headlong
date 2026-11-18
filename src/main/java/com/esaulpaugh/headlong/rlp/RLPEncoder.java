@@ -201,8 +201,7 @@ public final class RLPEncoder {
         } else {
             final int len = Integers.len(length);
             dest.write(STRING_LONG_OFFSET + len);
-            byte[] lengthBytes = Integers.toBytes(length);
-            dest.write(lengthBytes, lengthBytes.length - len, len);
+            Integers.putLong(length, len, dest);
         }
         dest.write(byteString, offset, length);
     }
