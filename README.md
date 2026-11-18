@@ -32,7 +32,7 @@ Tuple complexNums = Single.of(new Tuple[] { Tuple.of(new BigDecimal("0.009000000
 ByteBuffer bazCall = baz.encodeCall(bazArgs);
 ByteBuffer bazCall2 = baz.encodeCallWithArgs(69L, true);
 
-System.out.println("baz call hex:\n" + Strings.encode(bazCall) + "\n"); // hexadecimal encoding (without 0x prefix)
+System.out.println("baz call hex:\n" + Strings.encode(bazCall.array()) + "\n"); // hexadecimal encoding (without 0x prefix)
 
 Tuple recoveredArgs = baz.decodeCall(bazCall2); // decode the encoding back to the original args
 
