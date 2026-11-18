@@ -643,14 +643,23 @@ public class EncodeTest {
     private static final double DELTA = 0.000000000000000001d;
     private static final BigDecimal O_0000000001 = new BigDecimal("0.0000000001");
     private static final BigDecimal O_000000000000000001 = new BigDecimal("0.000000000000000001");
+    private static final BigDecimal DECIMAL_DIVISOR = new BigDecimal(BigInteger.valueOf(10L).pow(10), 0);
 
     @Test
     public void testDecimalMinMax() throws Throwable {
         final BigIntegerType decimal = TypeFactory.create("decimal");
         assertEquals(decimal, TypeFactory.create("int168"));
 
-        final BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
-        final BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
+        assertEquals(new BigInteger("-187072209578355573530071658587684226515959365500928"), decimal.minValue());
+        assertEquals(new BigInteger("187072209578355573530071658587684226515959365500927"), decimal.maxValue());
+
+        final BigDecimal decimalMin = new BigDecimal(decimal.minValue(), 10);
+        final BigDecimal decimalMax = new BigDecimal(decimal.maxValue(), 10);
+
+        assertEquals(new BigDecimal(decimal.minValue()).divide(DECIMAL_DIVISOR), decimalMin);
+        assertEquals(new BigDecimal("-18707220957835557353007165858768422651595.9365500928"), decimalMin);
+        assertEquals(new BigDecimal(decimal.maxValue()).divide(DECIMAL_DIVISOR), decimalMax);
+        assertEquals(new BigDecimal( "18707220957835557353007165858768422651595.9365500927"), decimalMax);
 
         assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.unscaledValue().subtract(BigInteger.ONE)));
         decimal.validate(decimalMin.unscaledValue());
