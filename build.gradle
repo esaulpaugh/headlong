@@ -157,6 +157,8 @@ classes.finalizedBy(jmhClasses)
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+    fileMode = 0644
+    dirMode = 0755
 }
 // ./gradlew wrapper --gradle-version 8.14.7 --distribution-type bin --gradle-distribution-sha256-sum 903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856 --no-configuration-cache
 wrapper {

@@ -1,3 +1,6 @@
 *.bat text eol=crlf
 *.sh text eol=lf
 * text=auto
+*.json eol=lf
+*.java eol=lf
+*.gradle eol=lf
