@@ -116,11 +116,16 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         return new Record(signer, seq, pairSet.toArray(KVP.EMPTY_ARRAY));
     }
 
+    private static final int MAX_ENR_STR_LEN = ENR_PREFIX.length() + (MAX_RECORD_LEN * 4 / 3);
+
     public static Record parse(String enrString, Verifier verifier) throws SignatureException {
-        if (enrString.startsWith(ENR_PREFIX)) {
-            return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE), verifier);
+        if (enrString.length() <= MAX_ENR_STR_LEN) {
+            if (enrString.startsWith(ENR_PREFIX)) {
+                return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE), verifier);
+            }
+            throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
         }
-        throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
+        throw new IllegalArgumentException("exceeds max len");
     }
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
