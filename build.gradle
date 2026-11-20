@@ -169,9 +169,9 @@ tasks.withType(AbstractArchiveTask) {
         }
     }
 }
-// ./gradlew wrapper --gradle-version 8.14.7 --distribution-type bin --gradle-distribution-sha256-sum 903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856 --no-configuration-cache
+// ./gradlew wrapper --gradle-version 8.14.8 --distribution-type bin --gradle-distribution-sha256-sum 94da89692fc3ca6d2d0ce6bb48548762ea0f1897ba444286f5c7f3759c7af651 --no-configuration-cache
 wrapper {
-    distributionUrl = "https://services.gradle.org/distributions/gradle-8.14.7-bin.zip"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-8.14.8-bin.zip"
 
     doLast {
         def propsFile = file("gradle/wrapper/gradle-wrapper.properties")
@@ -179,8 +179,8 @@ wrapper {
             propsFile.text =
                             "distributionBase=GRADLE_USER_HOME\n" +
                             "distributionPath=wrapper/dists\n" +
-                            "distributionSha256Sum=903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856\n" +
-                            "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14.7-bin.zip\n" +
+                            "distributionSha256Sum=94da89692fc3ca6d2d0ce6bb48548762ea0f1897ba444286f5c7f3759c7af651\n" +
+                            "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14.8-bin.zip\n" +
                             "networkTimeout=10000\n" +
                             "validateDistributionUrl=true\n" +
                             "zipStoreBase=GRADLE_USER_HOME\n" +
